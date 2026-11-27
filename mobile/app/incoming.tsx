@@ -14,16 +14,15 @@ import { useAgentSession } from '../src/voice/AgentSession';
 const LOGO = require('../assets/aoun-icon.png');
 
 export default function Incoming() {
-  const { t, lang } = useT();
+  const { t, locale } = useT();
   const insets = useSafeAreaInsets();
   const session = useAgentSession();
   const [now, setNow] = useState(new Date());
   useEffect(() => { const i = setInterval(() => setNow(new Date()), 15000); return () => clearInterval(i); }, []);
   useEffect(() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); }, []);
 
-  const locale = lang === 'en' ? 'en-GB' : 'ar-SA';
   const date = now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
-  const time = now.toLocaleTimeString(lang === 'en' ? 'en-GB' : 'ar-SA-u-nu-latn', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s?[صمAPMapm.]+$/, '');
+  const time = now.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s?[صمAPMapm.]+$/, '');
 
   const accept = () => {
     void session.start('booking-call');
