@@ -1,0 +1,66 @@
+# عون — تطبيق الجوال
+
+Native React Native app (Expo) with the same design as the prototype, and the live ElevenLabs agents:
+the booking call (رُفيدة / رفيد) and the in-app assistant («يا رفيدة»).
+
+## Structure
+
+```
+app/                     screens (expo-router: the file name is the route)
+  incoming.tsx           Aoun's incoming call
+  call.tsx               the call with the booking agent
+  (tabs)/home.tsx        home: appointment card, my care
+  (tabs)/notebook.tsx    health notebook: screenings, results, preferences
+  plan.tsx family.tsx map.tsx settings.tsx soon.tsx
+src/
+  agents/                one file per agent + index.ts (the registry)
+  tools/                 client tools the agents can run on the phone
+  voice/AgentSession.tsx one live agent at a time, shared by every screen
+  api.ts                 the Aoun server (demo session, location, plan)
+  store.ts i18n.ts theme.ts data/ ui/
+```
+
+## Add a new agent
+
+1. Create the agent in ElevenLabs (public, no secret key in the app).
+2. Add `src/agents/<name>.ts`:
+   ```ts
+   export const nurseLine: AgentDef = {
+     key: 'nurse-line',
+     mode: 'call',                     // 'call' = call screen, 'assistant' = inside the app
+     personas: { f: { name: 'رُفيدة', agentId: 'agent_…', avatar: require('../../assets/avatars/rufaida.png') },
+                 m: { name: 'رفيد',  agentId: 'agent_…', avatar: require('../../assets/avatars/rafeed.png') } },
+     clientTools: ['open_screen', 'read_screen'],   // any names from src/tools
+     serverSession: false,             // true if it uses the server's webhook tools
+   };
+   ```
+3. List it in `src/agents/index.ts`.
+4. Start it from any screen: `useAgentSession().start('nurse-line')`.
+
+A new client tool is one function in `src/tools/` (it receives the agent's parameters and can mute the mic,
+end the session or hand over to another agent). Then add the same tool to the agent in ElevenLabs.
+
+## Run it on a phone
+
+The voice agents use native WebRTC, so the app needs a development build (Expo Go is not enough).
+No Mac is needed: Expo builds it in the cloud.
+
+```
+cd mobile
+npm install
+npx eas-cli login
+npx eas-cli device:create                                # iPhone only: register your phone
+npx eas-cli build -p ios --profile development           # or: -p android
+npx expo start --dev-client --tunnel                      # then open the installed app and scan the QR
+```
+
+- iPhone builds need an Apple Developer account. Android builds are free (`--profile preview` gives an APK).
+- `npm run typecheck` checks the code.
+
+## Privacy
+
+- No API keys in the app.
+- Nothing personal is sent to the agents.
+- `read_screen` reads with the phone's own voice.
+- Location is sent once to the Aoun server, which keeps only the distance.
+- Only settings and the booked plan are saved on the phone. Calls are not saved.
