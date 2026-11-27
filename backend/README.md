@@ -42,8 +42,11 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
 - **Messages.** A private thread with the person's doctor.
 - **Encrypted at rest.** Notes, messages, files, record titles and summaries, and medicine instructions use the same
   Fernet key as phone numbers. Patient and doctor tokens are stored only as SHA-256 hashes.
-- **Doctor sign-in.** `AOUN_DOCTOR_CODE` sets the code. In demo mode it defaults to `aoun-demo-2026` and the page shows it;
-  set a real code before any real use.
+- **Doctor sign-in.** Each doctor signs in with their doctor ID (D01–D12) and password. Set each password as a PBKDF2 hash in
+  `AOUN_DOCTOR_PASSWORDS` (JSON, e.g. `{"D03": "<hash>"}`; make a hash with
+  `python -c 'from app.doctor import hash_password; print(hash_password("..."))'`). Doctors without their own hash use
+  `AOUN_DOCTOR_CODE`; in demo mode that defaults to `aoun-demo-2026` and the page shows it. Five wrong tries lock an ID for 15 minutes.
+- **Portal.** Arabic and English, a notifications panel (new bookings, patient messages, visits in the next 24 hours).
 
 ## The call, step by step
 

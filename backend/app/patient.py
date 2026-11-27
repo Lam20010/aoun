@@ -154,7 +154,8 @@ def full_record(db, vault, resident_id: str) -> dict:
         d = catalog.doctor(n["doctor_id"])
         notes.append({"id": n["id"], "body": vault.decrypt(n["body_enc"]), "created_at": n["created_at"],
                       "doctor": {"id": d["id"], "name_ar": d["name_ar"], "name_en": d["name_en"]}})
-    referrals = [{"kind": r["kind"], "created_at": r["created_at"], "doctor": catalog.doctor(r["doctor_id"])["name_ar"]}
+    referrals = [{"kind": r["kind"], "created_at": r["created_at"], "doctor": catalog.doctor(r["doctor_id"])["name_ar"],
+                  "doctor_en": catalog.doctor(r["doctor_id"])["name_en"]}
                  for r in db.all("SELECT * FROM referrals WHERE resident_id = ? ORDER BY created_at DESC", resident_id)]
     return {"records": records, "files": [f for f in files if not f["record_id"]], "notes": notes, "referrals": referrals}
 

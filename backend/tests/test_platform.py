@@ -185,3 +185,33 @@ def test_booking_text_in_each_language(c):
     assert "confirmed" in booking_text(slot, "en") and "Dr." in booking_text(slot, "en")
     for lang in ("ur", "hi", "bn", "fil", "id"):
         assert "Aoun" in booking_text(slot, lang) or "عون" in booking_text(slot, lang) or "औन" in booking_text(slot, lang) or "আউন" in booking_text(slot, lang)
+
+
+def test_doctor_notifications_show_bookings_and_messages_only_for_their_patients(c):
+    h = patient(c)
+    plan = book_first(c, h)
+    did = plan["slot"]["doctor"]["id"]
+    c.post("/patient/messages", headers=h, json={"body": "متى أصوم قبل الفحص؟"})
+    items = c.get("/doctor/api/notifications", headers=doctor(c, did)).json()["items"]
+    kinds = {i["kind"] for i in items}
+    assert {"booking", "message"} <= kinds
+    assert all(i["patient"] for i in items)
+    other = "D02" if did != "D02" else "D01"
+    assert c.get("/doctor/api/notifications", headers=doctor(c, other)).json()["items"] == []
+
+
+def test_doctor_signs_in_with_id_and_password_and_wrong_tries_lock(c):
+    ok = c.post("/doctor/api/login", json={"doctor_id": "d03", "password": "aoun-demo-2026"})
+    assert ok.status_code == 200 and ok.json()["token"]
+    assert c.post("/doctor/api/login", json={"doctor_id": "D99", "password": "aoun-demo-2026"}).json()["detail"] == "wrong_id_or_password"
+    for _ in range(5):
+        assert c.post("/doctor/api/login", json={"doctor_id": "D04", "password": "nope-nope"}).status_code == 401
+    assert c.post("/doctor/api/login", json={"doctor_id": "D04", "password": "aoun-demo-2026"}).status_code == 429
+
+
+def test_doctor_own_password_hash(c, monkeypatch):
+    import json
+    from app.doctor import hash_password
+    monkeypatch.setenv("AOUN_DOCTOR_PASSWORDS", json.dumps({"D05": hash_password("Reem-Strong-Pass-1")}))
+    assert c.post("/doctor/api/login", json={"doctor_id": "D05", "password": "aoun-demo-2026"}).status_code == 401
+    assert c.post("/doctor/api/login", json={"doctor_id": "D05", "password": "Reem-Strong-Pass-1"}).status_code == 200

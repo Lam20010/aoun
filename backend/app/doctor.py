@@ -33,8 +33,9 @@ class Strict(BaseModel):
 
 
 class LoginIn(Strict):
-    doctor_id: str = Field(pattern=r"^D[0-9]{2}$")
-    code: str = Field(min_length=4, max_length=100)
+    doctor_id: str = Field(min_length=1, max_length=10)
+    password: str | None = Field(default=None, min_length=4, max_length=200)
+    code: str | None = Field(default=None, min_length=4, max_length=200)  # older clients
 
 
 class Value(Strict):
@@ -80,6 +81,38 @@ class ReferralIn(Strict):
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _password_ok(request: Request, doctor_id: str, password: str) -> bool:
+    """Each doctor's own password (PBKDF2 hashes in AOUN_DOCTOR_PASSWORDS), else the shared code."""
+    import hashlib
+    import json
+    import os
+    try:
+        hashes = json.loads(os.environ.get("AOUN_DOCTOR_PASSWORDS", "") or "{}")
+    except ValueError:
+        hashes = {}
+    stored = hashes.get(doctor_id)
+    if stored:
+        try:
+            _, iters, salt, digest = stored.split("$")
+            got = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), int(iters)).hex()
+        except ValueError:
+            return False
+        return hmac.compare_digest(got, digest)
+    code = _code(request)
+    return bool(code) and hmac.compare_digest(password.encode(), code.encode())
+
+
+def hash_password(password: str, iters: int = 200_000) -> str:
+    """Make a value for AOUN_DOCTOR_PASSWORDS: python -c 'from app.doctor import hash_password; print(hash_password("..."))'"""
+    import hashlib
+    import secrets
+    salt = secrets.token_bytes(16)
+    return f"pbkdf2_sha256${iters}${salt.hex()}${hashlib.pbkdf2_hmac('sha256', password.encode(), salt, iters).hex()}"
+
+
+_FAILS: dict[str, list[float]] = {}
 
 
 def _code(request: Request) -> str:
@@ -153,16 +186,26 @@ def portal():
 def config(request: Request):
     demo = request.app.state.settings.demo_mode
     return {"demo": demo, "demo_code": DEMO_DOCTOR_CODE if demo and not __import__("os").environ.get("AOUN_DOCTOR_CODE") else None,
-            "doctors": [{k: catalog.doctor(d[0])[k] for k in ("id", "name_ar", "name_en", "specialty_ar", "clinic_ar")}
-                        | {"facility_ar": catalog.facility(d[1])["name_ar"]} for d in catalog.DOCTORS]}
+            "doctors": [{k: catalog.doctor(d[0])[k] for k in ("id", "name_ar", "name_en", "specialty_ar", "specialty_en", "clinic_ar", "clinic_en")}
+                        | {"facility_ar": catalog.facility(d[1])["name_ar"], "facility_en": catalog.facility(d[1])["name_en"]}
+                        for d in catalog.DOCTORS]}
 
 
 @router.post("/doctor/api/login")
 def login(body: LoginIn, request: Request):
-    code = _code(request)
-    if not code or not hmac.compare_digest(body.code.encode(), code.encode()):
-        raise HTTPException(401, "unauthorized")
-    catalog.doctor(body.doctor_id)
+    import time
+    did = body.doctor_id.strip().upper()
+    now = time.time()
+    fails = [t for t in _FAILS.get(did, []) if now - t < 900]
+    if len(fails) >= 5:  # five wrong tries lock the account for 15 minutes
+        raise HTTPException(429, "too_many_attempts")
+    known = any(d[0] == did for d in catalog.DOCTORS)
+    password = body.password or body.code or ""
+    if not known or not _password_ok(request, did, password):
+        _FAILS[did] = fails + [now]
+        raise HTTPException(401, "wrong_id_or_password")  # same answer for an unknown ID
+    _FAILS.pop(did, None)
+    body = body.model_copy(update={"doctor_id": did})
     token = secrets_token() + secrets_token()
     with request.app.state.db.tx() as c:
         c.execute("DELETE FROM doctor_sessions WHERE expires_at < ?", (_now().isoformat(),))
@@ -194,8 +237,35 @@ def me(request: Request, doc=Depends(current_doctor)):
             "appointments": [{"patient": r["id"], "alias": _alias(r), "start": r["start_local"], "kind": r["kind"],
                               "status": r["bstatus"], "screening": r["screening"],
                               "screening_ar": catalog.SCREENINGS.get(r["screening"], {}).get("ar", r["screening"]),
+                              "screening_en": catalog.SCREENINGS.get(r["screening"], {}).get("en", r["screening"]),
                               "age_band": r["age_band"], "language": r["language"], "messages": unread.get(r["id"], 0)}
                              for r in rows]}
+
+
+@router.get("/doctor/api/notifications")
+def notifications(request: Request, doc=Depends(current_doctor)):
+    """What the doctor should know: new bookings, patient messages, and visits in the next 24 hours."""
+    db, vault = request.app.state.db, request.app.state.vault
+    now = _now()
+    out = []
+    for r in db.all("""SELECT b.confirmed_at, b.status, sl.start_local, c.screening, r.* FROM bookings b
+                       JOIN slots sl ON sl.id = b.slot_id JOIN cases c ON c.id = b.case_id JOIN residents r ON r.id = c.resident_id
+                       WHERE sl.doctor_id = ? AND b.status IN ('confirmed','attended')
+                       ORDER BY b.confirmed_at DESC LIMIT 20""", doc["id"]):
+        base = {"patient": r["id"], "alias": _alias(r), "start": r["start_local"],
+                "screening_ar": catalog.SCREENINGS.get(r["screening"], {}).get("ar", r["screening"]),
+                "screening_en": catalog.SCREENINGS.get(r["screening"], {}).get("en", r["screening"])}
+        out.append({"kind": "booking", "at": r["confirmed_at"], **base})
+        start = datetime.fromisoformat(r["start_local"])
+        if r["status"] == "confirmed" and now <= start <= now + timedelta(hours=24):
+            out.append({"kind": "soon", "at": now.isoformat(), **base})
+    for m in db.all("""SELECT m.created_at, m.body_enc, r.* FROM messages m JOIN residents r ON r.id = m.resident_id
+                       WHERE m.doctor_id = ? AND m.sender = 'patient' ORDER BY m.created_at DESC LIMIT 20""", doc["id"]):
+        body = vault.decrypt(m["body_enc"])
+        out.append({"kind": "message", "at": m["created_at"], "patient": m["id"], "alias": _alias(m),
+                    "preview": body[:80] + ("…" if len(body) > 80 else "")})
+    out.sort(key=lambda x: x["at"], reverse=True)
+    return {"items": out[:30]}
 
 
 @router.get("/doctor/api/patients/{rid}")
@@ -210,8 +280,10 @@ def patient(rid: str, request: Request, doc=Depends(current_doctor)):
     msgs = [{"id": m["id"], "sender": m["sender"], "body": vault.decrypt(m["body_enc"]), "created_at": m["created_at"]}
             for m in db.all("SELECT * FROM messages WHERE resident_id = ? AND doctor_id = ? ORDER BY created_at", rid, doc["id"])]
     return {"patient": {"id": r["id"], "alias": _alias(r), "age_band": r["age_band"], "gender": r["gender"],
-                        "district_ar": catalog.DISTRICTS[r["district"]][0], "language": r["language"],
+                        "district_ar": catalog.DISTRICTS[r["district"]][0], "district_en": catalog.DISTRICTS[r["district"]][1],
+                        "language": r["language"],
                         "family_history": [catalog.FAMILY_HISTORY[x][0] for x in ((fam["codes"] if fam else "") or "").split(",") if x],
+                        "family_history_en": [catalog.FAMILY_HISTORY[x][1] for x in ((fam["codes"] if fam else "") or "").split(",") if x],
                         "prefs": [x for x in ((prefs["prefs"] if prefs else "") or "").split(",") if x]},
             **full_record(db, vault, rid), "meds": meds_view(db, vault, rid), "messages": msgs}
 
