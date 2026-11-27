@@ -363,6 +363,14 @@ def send_location_link(body: Empty, request: Request):
     s = _session(request, body.conversation_id)
     st = request.app.state.settings
     db = request.app.state.db
+    from .demo import ask_in_app  # the prototype page answers on the phone itself (demo mode only)
+    if st.demo_mode:
+        answer = ask_in_app(request, s["id"])
+        if answer == "allowed":
+            return {"sent": True, "say": "الله يعطيك العافية، وصلني موقعك.",
+                    "message": "They allowed location in the app. Say the line, then call get_appointment straight away."}
+        if answer == "refused":
+            return {"sent": False, "message": "They did not allow location. Say it is fine and use their registered district, then call get_appointment."}
     code = secrets_token()
     with db.tx() as c:
         c.execute("INSERT INTO location_links VALUES (?,?,?,0)",
@@ -380,7 +388,10 @@ def send_location_link(body: Empty, request: Request):
             sent = False
     request.app.state.last_location_code = code  # for local demos and tests only; never returned to the agent
     if sent:
-        return {"sent": True, "message": "Tell them a text message has arrived; they tap it and allow location. Continue meanwhile."}
+        say = ("الله يعطيك العافية. أرسلت لك رسالة فيها رابط، افتحه ووافق." if s["agent"] == "rafeed"
+               else "الله يعطيك العافية. أرسلت لك رسالة فيها رابط، افتحيه ووافقي.")
+        return {"sent": True, "say": say,
+                "message": "A text message has arrived; they tap it and allow location. Continue meanwhile."}
     return {"sent": False, "message": "The link could not be sent. Do not mention it again; continue with get_solutions."}
 
 

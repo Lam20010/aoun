@@ -295,3 +295,72 @@ def test_demo_claim_only_in_demo_mode(client, tmp_path):
     client.app.state.settings = client.app.state.settings.__class__(**{**client.app.state.settings.__dict__, "demo_mode": True})
     assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_1"}, headers=TOOL).status_code == 200
     assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_2"}, headers=TOOL).status_code == 403
+
+
+# ---------- the live prototype page (demo mode only) ----------
+
+@pytest.fixture()
+def demo_client(tmp_path):
+    s = Settings(tool_key=TOOL["X-Aoun-Key"], admin_key=ADMIN["X-Admin-Key"], webhook_secret=WEBHOOK_SECRET,
+                 phone_enc_key=Fernet.generate_key().decode(), db_path=str(tmp_path / "d.db"),
+                 elevenlabs_api_key="", phone_number_id="", agent_rafeed="a1", agent_rufaida="a2",
+                 token_ttl_minutes=60, demo_now="2026-11-26T09:00:00+03:00", demo_mode=True)
+    return TestClient(create_app(s))
+
+
+def test_demo_routes_do_not_exist_without_demo_mode(client):
+    assert client.get("/app").status_code == 404
+    assert client.post("/demo/start", json={}).status_code == 404
+
+
+def test_demo_rejects_unknown_key(demo_client):
+    assert demo_client.get("/demo/status", params={"k": "x" * 30}).status_code == 403
+    assert demo_client.get("/demo/plan", params={"k": "x" * 30}).status_code == 403
+
+
+def test_demo_page_location_in_app_keeps_only_distance(demo_client):
+    d = demo_client.post("/demo/start", json={"voice": "m"}).json()
+    assert d["agent_id"] == "a1"
+    k = d["k"]
+    assert demo_client.post("/demo/bind", json={"k": k, "conversation_id": "conv_demo_page_1"}).json()["ok"]
+    out = {}
+    t = threading.Thread(target=lambda: out.update(demo_client.post(
+        "/tools/send_location_link", json={"conversation_id": "conv_demo_page_1"}, headers=TOOL).json()))
+    t.start()
+    for _ in range(50):
+        if demo_client.get("/demo/status", params={"k": k}).json()["location"] == "asked":
+            break
+        time.sleep(0.1)
+    r = demo_client.post("/demo/location", json={"k": k, "allow": True, "lat": 24.7361, "lon": 46.8331})
+    assert r.status_code == 200
+    t.join(10)
+    assert out["sent"] is True and "say" in out
+    db = demo_client.app.state.db
+    row = db.one("SELECT distance_km FROM call_sessions WHERE conv_hash IS NOT NULL ORDER BY created_at DESC LIMIT 1")
+    assert row["distance_km"] is not None and row["distance_km"] < 1
+    # the coordinates are not stored anywhere
+    dump = "\n".join(db.conn.iterdump())
+    assert "24.7361" not in dump and "46.8331" not in dump
+    plan = demo_client.get("/demo/plan", params={"k": k}).json()
+    assert plan["confirmed"] is False and plan["slot"]["center"] == "مركز صحي النسيم"
+
+
+def test_demo_page_refusal_is_respected(demo_client):
+    k = demo_client.post("/demo/start", json={}).json()["k"]
+    demo_client.post("/demo/bind", json={"k": k, "conversation_id": "conv_demo_page_2"})
+    out = {}
+    t = threading.Thread(target=lambda: out.update(demo_client.post(
+        "/tools/send_location_link", json={"conversation_id": "conv_demo_page_2"}, headers=TOOL).json()))
+    t.start()
+    for _ in range(50):
+        if demo_client.get("/demo/status", params={"k": k}).json()["location"] == "asked":
+            break
+        time.sleep(0.1)
+    demo_client.post("/demo/location", json={"k": k, "allow": False})
+    t.join(10)
+    assert out["sent"] is False
+
+
+def test_demo_assets_block_path_tricks(demo_client):
+    assert demo_client.get("/app/assets/..%2Fdemo.py").status_code == 404
+    assert demo_client.get("/app/assets/2fead806ca15d60ced69c62384b06c14.png").status_code == 200
