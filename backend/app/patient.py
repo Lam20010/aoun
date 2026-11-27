@@ -16,6 +16,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from . import catalog
+from .translate import localize
 from .security import hash_token, new_id, secrets_token
 from .tools import RIYADH, _ride_view, band, label_ar, time_ar
 
@@ -367,8 +368,8 @@ def messages(request: Request, p=Depends(current_patient)):
     doctors = sorted(my_doctors(db, p["id"]))
     out = []
     for m in db.all("SELECT * FROM messages WHERE resident_id = ? ORDER BY created_at", p["id"]):
-        out.append({"id": m["id"], "sender": m["sender"], "doctor_id": m["doctor_id"], "body": vault.decrypt(m["body_enc"]),
-                    "created_at": m["created_at"]})
+        out.append(localize({"id": m["id"], "sender": m["sender"], "doctor_id": m["doctor_id"],
+                             "body": vault.decrypt(m["body_enc"]), "created_at": m["created_at"]}, p["language"]))
     return {"doctors": [{k: catalog.doctor(d)[k] for k in ("id", "name_ar", "name_en", "specialty_ar", "specialty_en")}
                         for d in doctors], "messages": out}
 

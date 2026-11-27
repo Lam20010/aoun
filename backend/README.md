@@ -47,6 +47,9 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
   `python -c 'from app.doctor import hash_password; print(hash_password("..."))'`). Doctors without their own hash use
   `AOUN_DOCTOR_CODE`; in demo mode that defaults to `aoun-demo-2026` and the page shows it. Five wrong tries lock an ID for 15 minutes.
 - **Portal.** Arabic and English, a notifications panel (new bookings, patient messages, visits in the next 24 hours).
+- **Messages in each reader's language.** With `ANTHROPIC_API_KEY` set on the server, a message written in another language
+  is shown translated (doctor: Arabic or English; patient: their app language), with "show original". Translations stay in memory
+  only. Without the key, messages show as written.
 
 ## The call, step by step
 

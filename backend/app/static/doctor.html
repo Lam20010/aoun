@@ -181,6 +181,8 @@ label{display:block;font-size:var(--fs-sm);font-weight:500;color:var(--soft);mar
 .msg.me{align-self:flex-start;background:var(--dark);color:#fff}
 .msg.them{align-self:flex-end}
 .msg small{display:block;opacity:.7;font-size:var(--fs-xs)}
+.trbtn{border:0;background:none;padding:0;margin-top:2px;font-size:var(--fs-xs);font-weight:600;color:var(--teal)}
+.msg.me .trbtn{color:var(--mint)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:var(--fs-sm);background:#fff}
@@ -237,7 +239,6 @@ h4{margin:22px 0 8px;font-size:var(--fs-lg);font-weight:600}
       <div class="pw"><input id="code" type="password" autocomplete="current-password" dir="ltr" required><button type="button" id="pwShow" data-t="show"></button></div>
       <div class="lerr hide" id="loginErr" role="alert"></div>
       <button class="btn" id="loginBtn" type="submit" style="width:100%;justify-content:center;margin-top:18px;padding:11px 14px" data-t="signIn"></button>
-      <div class="hint hide" id="demoHint"></div>
       <div class="lfoot" data-t="loginFoot"></div>
     </form>
   </div>
@@ -328,7 +329,7 @@ const T = {
     eGenetic:'النتائج الجينية ما تنحفظ. أرسل إحالة لاستشارة وراثية.', eType:'PDF أو صورة فقط', eNotYours:'هذا المراجع مو محجوز عندك',
     hospital:'مستشفى', private_clinic:'عيادة خاصة', lab:'مختبر', phc:'مركز صحي',
     normal:'طبيعي', borderline:'حدّي', high:'مرتفع', low:'منخفض', positive:'إيجابي', negative:'سلبي',
-    female_doctor:'طبيبة', wheelchair_center:'يدعم الكرسي المتحرك', home_test:'فحص منزلي', companion_reminders:'مرافق يستلم التذكير', now:'الآن', minAgo:'قبل {n} د', hrAgo:'قبل {n} س',
+    translatedLbl:'مترجمة', showOriginal:'عرض الأصل', showTranslation:'عرض الترجمة', female_doctor:'طبيبة', wheelchair_center:'يدعم الكرسي المتحرك', home_test:'فحص منزلي', companion_reminders:'مرافق يستلم التذكير', now:'الآن', minAgo:'قبل {n} د', hrAgo:'قبل {n} س',
   },
   en: {
     aoun:'Aoun', portal:'Doctor portal', ministry:'Aoun · Ministry of Health', loginNote:'Sign in with your Aoun doctor ID and password.', doctorId:'Doctor ID', password:'Password', signIn:'Sign in', signInTitle:'Sign in', show:'Show', hide:'Hide',
@@ -356,7 +357,7 @@ const T = {
     eGenetic:'Genetic results are not stored. Send a genetic counselling referral.', eType:'PDF or image only', eNotYours:'This patient is not booked with you',
     hospital:'Hospital', private_clinic:'Private clinic', lab:'Lab', phc:'Health center',
     normal:'Normal', borderline:'Borderline', high:'High', low:'Low', positive:'Positive', negative:'Negative',
-    female_doctor:'Female doctor', wheelchair_center:'Wheelchair access', home_test:'Home test', companion_reminders:'Companion gets reminders', now:'now', minAgo:'{n} min ago', hrAgo:'{n} h ago',
+    translatedLbl:'Translated', showOriginal:'Show original', showTranslation:'Show translation', female_doctor:'Female doctor', wheelchair_center:'Wheelchair access', home_test:'Home test', companion_reminders:'Companion gets reminders', now:'now', minAgo:'{n} min ago', hrAgo:'{n} h ago',
   },
 };
 let lang = ls.get('aoun_dr_lang') === 'en' ? 'en' : 'ar';
@@ -377,7 +378,7 @@ const icon = (n) => `<svg class="ico"><use href="#i-${n}"/></svg>`;
 const avatar = (alias, i) => { const [b,f] = AVC[i % AVC.length]; return `<span class="av" style="background:${b};color:${f}">${esc(String(alias).split('#').pop().slice(0,2))}</span>`; };
 
 let token = ss.get('aoun_dr');
-let CAT = null, ME = null, CFG = null, current = null, tab = 'record', D = null, NOTI = [];
+let CAT = null, ME = null, CFG = null, current = null, tab = 'record', D = null, NOTI = [], ORIG = {};
 
 function applyLang(){
   document.documentElement.lang = lang; document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
@@ -390,7 +391,7 @@ function applyLang(){
 }
 function redraw(){
   if (!$('login').classList.contains('hide') && CFG) fillDoctors();
-  if (ME) { drawShell(); if (D) render(D); drawNoti(); }
+  if (ME) { drawShell(); if (current) open(current, true); loadNoti(); }
 }
 
 function toast(x){const e=$('toast');e.textContent=x;e.classList.remove('hide');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.add('hide'),2600)}
@@ -403,9 +404,6 @@ async function api(path, opts={}){
 }
 
 function fillDoctors(){
-  if (CFG && CFG.demo_code){ $('demoHint').classList.remove('hide');
-    $('demoHint').innerHTML = esc(t('demo',{id:'D03',pw:CFG.demo_code})) + ` <button type="button" class="btn ghost small" id="useDemo" style="margin-top:8px">${t('useDemo')}</button>`;
-    $('useDemo').onclick = () => { $('docId').value = 'D03'; $('code').value = CFG.demo_code; }; }
   $('pwShow').textContent = $('code').type === 'password' ? t('show') : t('hide');
 }
 async function showLogin(){
@@ -453,7 +451,7 @@ function drawNoti(){
     </button>`; }).join('') : `<div class="empty">${t('noNotifications')}</div>`;
   document.querySelectorAll('#nItems [data-i]').forEach(b => b.onclick = () => { const n = NOTI[+b.dataset.i]; closePanel(); open(n.patient, false, n.kind==='message'?'chat':'record'); });
 }
-async function loadNoti(){ try { NOTI = (await api('/notifications')).items || []; drawNoti(); } catch(e){} }
+async function loadNoti(){ try { NOTI = (await api('/notifications?lang='+lang)).items || []; drawNoti(); } catch(e){} }
 function closePanel(){ $('panel').classList.add('hide'); $('bell').setAttribute('aria-expanded','false'); }
 $('bell').onclick = (e) => { e.stopPropagation(); const p=$('panel'); p.classList.toggle('hide'); $('bell').setAttribute('aria-expanded', String(!p.classList.contains('hide'))); };
 $('readAll').onclick = () => { if (NOTI.length) ls.set(seenKey(), NOTI[0].at > new Date().toISOString() ? NOTI[0].at : new Date().toISOString()); drawNoti(); };
@@ -497,7 +495,7 @@ function drawShell(){
 async function open(pid, keepTab, toTab){
   current = pid; if(!keepTab) tab = toTab || 'record';
   document.querySelectorAll('.appt').forEach(b=>b.classList.toggle('on', b.dataset.p===pid));
-  D = await api('/patients/'+pid);
+  D = await api('/patients/'+pid+'?lang='+lang);
   render(D);
   if (toTab) $('work').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -633,9 +631,10 @@ function paneMeds(d){
 
 function paneChat(d){
   $('pane').innerHTML = `
-    <div class="msgs" id="msgs">${d.messages.length? d.messages.map(m=>`<div dir="auto" class="msg ${m.sender==='doctor'?'me':'them'}">${esc(m.body)}<small class="num">${dt(m.created_at)}</small></div>`).join('') : `<div class="empty">${t('startChat')}</div>`}</div>
+    <div class="msgs" id="msgs">${d.messages.length? d.messages.map(m=>{ const tr = m.translated && !ORIG[m.id]; return `<div class="msg ${m.sender==='doctor'?'me':'them'}"><div dir="auto">${esc(tr?m.translated:m.body)}</div><small class="num">${dt(m.created_at)}</small>${m.translated?`<button class="trbtn" data-orig="${m.id}">${tr?t('translatedLbl')+' · '+t('showOriginal'):t('showTranslation')}</button>`:''}</div>`; }).join('') : `<div class="empty">${t('startChat')}</div>`}</div>
     <div class="row" style="margin-top:12px"><input id="msg" maxlength="1000" placeholder="${esc(t('typeMsg'))}" aria-label="${esc(t('typeMsg'))}" style="flex:1"><button class="btn" id="send">${t('send')}</button></div>`;
   const box=$('msgs'); box.scrollTop=box.scrollHeight;
+  document.querySelectorAll('[data-orig]').forEach(b=>b.onclick=()=>{ ORIG[b.dataset.orig]=!ORIG[b.dataset.orig]; paneChat(d); });
   const send = async()=>{ const b=$('msg').value.trim(); if(!b) return; await api(`/patients/${current}/messages`,{method:'POST',body:JSON.stringify({body:b})}); open(current,true); };
   $('send').onclick=send; $('msg').onkeydown=(e)=>{ if(e.key==='Enter') send(); };
 }

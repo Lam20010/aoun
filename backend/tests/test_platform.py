@@ -215,3 +215,29 @@ def test_doctor_own_password_hash(c, monkeypatch):
     monkeypatch.setenv("AOUN_DOCTOR_PASSWORDS", json.dumps({"D05": hash_password("Reem-Strong-Pass-1")}))
     assert c.post("/doctor/api/login", json={"doctor_id": "D05", "password": "aoun-demo-2026"}).status_code == 401
     assert c.post("/doctor/api/login", json={"doctor_id": "D05", "password": "Reem-Strong-Pass-1"}).status_code == 200
+
+
+def test_messages_are_shown_in_the_reader_language(c, monkeypatch):
+    from app import translate
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
+    monkeypatch.setattr(translate, "translate", lambda text, target: f"[{target}] {text}")
+    h = patient(c, "en")
+    plan = book_first(c, h)
+    me = c.get("/patient/me", headers=h).json()["patient"]
+    dh = doctor(c, plan["slot"]["doctor"]["id"])
+    c.post("/patient/messages", headers=h, json={"body": "Should I fast before the test?"})
+    c.post(f"/doctor/api/patients/{me}/messages", headers=dh, json={"body": "نعم، صيام ٨ ساعات"})
+    dm = c.get(f"/doctor/api/patients/{me}?lang=ar", headers=dh).json()["messages"]
+    assert dm[0]["lang"] == "en" and dm[0]["translated"].startswith("[ar]") and "translated" not in dm[1]
+    pm = c.get("/patient/messages", headers=h).json()["messages"]
+    assert "translated" not in pm[0] and pm[1]["translated"].startswith("[en]")
+    note = c.get("/doctor/api/notifications?lang=ar", headers=dh).json()["items"]
+    assert any(i["kind"] == "message" and i["preview"].startswith("[ar]") for i in note)
+
+
+def test_no_translation_without_a_key(c, monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    h = patient(c, "en")
+    book_first(c, h)
+    c.post("/patient/messages", headers=h, json={"body": "Hello"})
+    assert "translated" not in c.get("/patient/messages", headers=h).json()["messages"][0]

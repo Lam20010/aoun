@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from . import catalog
+from .translate import localize
 from .patient import full_record, meds_view, serve_file
 from .security import hash_token, new_id, secrets_token
 
@@ -243,7 +244,7 @@ def me(request: Request, doc=Depends(current_doctor)):
 
 
 @router.get("/doctor/api/notifications")
-def notifications(request: Request, doc=Depends(current_doctor)):
+def notifications(request: Request, lang: str | None = None, doc=Depends(current_doctor)):
     """What the doctor should know: new bookings, patient messages, and visits in the next 24 hours."""
     db, vault = request.app.state.db, request.app.state.vault
     now = _now()
@@ -262,14 +263,15 @@ def notifications(request: Request, doc=Depends(current_doctor)):
     for m in db.all("""SELECT m.created_at, m.body_enc, r.* FROM messages m JOIN residents r ON r.id = m.resident_id
                        WHERE m.doctor_id = ? AND m.sender = 'patient' ORDER BY m.created_at DESC LIMIT 20""", doc["id"]):
         body = vault.decrypt(m["body_enc"])
+        tr = localize({"body": body}, lang if lang in ("ar", "en") else None).get("translated") or body
         out.append({"kind": "message", "at": m["created_at"], "patient": m["id"], "alias": _alias(m),
-                    "preview": body[:80] + ("…" if len(body) > 80 else "")})
+                    "preview": tr[:80] + ("…" if len(tr) > 80 else "")})
     out.sort(key=lambda x: x["at"], reverse=True)
     return {"items": out[:30]}
 
 
 @router.get("/doctor/api/patients/{rid}")
-def patient(rid: str, request: Request, doc=Depends(current_doctor)):
+def patient(rid: str, request: Request, lang: str | None = None, doc=Depends(current_doctor)):
     r = _my_patient(request, doc, rid)
     db, vault = request.app.state.db, request.app.state.vault
     with db.tx() as c:
@@ -277,7 +279,8 @@ def patient(rid: str, request: Request, doc=Depends(current_doctor)):
     fam = db.one("SELECT codes FROM family_history WHERE resident_id = ?", rid)
     prefs = db.one("""SELECT p.prefs FROM call_plans p JOIN call_sessions s ON s.id = p.call_id JOIN cases c ON c.id = s.case_id
                       WHERE c.resident_id = ? ORDER BY s.created_at DESC LIMIT 1""", rid)
-    msgs = [{"id": m["id"], "sender": m["sender"], "body": vault.decrypt(m["body_enc"]), "created_at": m["created_at"]}
+    want = lang if lang in ("ar", "en") else None
+    msgs = [localize({"id": m["id"], "sender": m["sender"], "body": vault.decrypt(m["body_enc"]), "created_at": m["created_at"]}, want)
             for m in db.all("SELECT * FROM messages WHERE resident_id = ? AND doctor_id = ? ORDER BY created_at", rid, doc["id"])]
     return {"patient": {"id": r["id"], "alias": _alias(r), "age_band": r["age_band"], "gender": r["gender"],
                         "district_ar": catalog.DISTRICTS[r["district"]][0], "district_en": catalog.DISTRICTS[r["district"]][1],

@@ -28,7 +28,7 @@ export interface Med {
   start_date: string; with_food: boolean; instructions_ar: string; instructions_en: string; active: boolean;
   facility_ar: string; facility_en: string; doctor: { name_ar: string; name_en: string } | null;
 }
-export interface Msg { id: string; sender: 'doctor' | 'patient'; doctor_id: string; body: string; created_at: string }
+export interface Msg { id: string; sender: 'doctor' | 'patient'; doctor_id: string; body: string; created_at: string; lang?: string; translated?: string }
 export interface Catalog {
   family_history: { key: string; ar: string; en: string }[];
   symptoms: { key: string; ar: string; en: string; screening: string; urgency: 'soon' | 'urgent' | 'emergency' }[];
