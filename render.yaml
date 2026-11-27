@@ -1,0 +1,23 @@
+# One-click deploy on Render: New + > Blueprint > pick this repo.
+services:
+  - type: web
+    name: aoun-voice-tools
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: AOUN_TOOL_KEY
+        generateValue: true
+      - key: AOUN_ADMIN_KEY
+        generateValue: true
+      - key: AOUN_PHONE_ENC_KEY
+        generateValue: true
+      - key: AOUN_WEBHOOK_SECRET
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_PHONE_NUMBER_ID
+        sync: false
