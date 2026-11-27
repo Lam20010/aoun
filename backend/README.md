@@ -78,3 +78,18 @@ curl -X POST "$URL/admin/calls" -H "X-Admin-Key: $AOUN_ADMIN_KEY" \
 ```
 
 Then, within 15 minutes, start a test conversation with Rafeed or Rufaida (needs `AOUN_DEMO_MODE=1`). That conversation is bound to case `C01`. Demo cases: `C01`, `C02`, `C03` can be called; `C04` declined contact; `C05` is not due.
+
+## Try the prototype with the real agents (demo mode)
+
+With `AOUN_DEMO_MODE=1`, open `/app` on the server (e.g. https://aoun-voice-tools.onrender.com/app) in
+Chrome and allow the microphone:
+
+- Tap **رد** on the incoming call: the real call agent (رُفيدة, or رفيد if the assistant voice is male)
+  talks to you. When it asks for your location, the phone's prompt appears on the page; only the
+  distance to the nearest center is kept. The booking you make shows on the plan card and the app.
+- Open the **عون** app icon, sign in, allow the mic: the in-app assistant listens and can open screens,
+  change the text size or language, show the plan on the map, read the notebook aloud on the phone,
+  and start the booking call again.
+
+The resident in this demo is invented. `tools/build_app.py` rebuilds `app/static/aoun-app.html` from the
+exported prototype page and `tools/live.js`.

@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from . import admin, location, ministry, tools, webhooks
+from . import admin, demo, location, ministry, tools, webhooks
 from .config import Settings, load_settings
 from .db import Database, seed_demo
 from .security import PhoneVault
@@ -29,7 +29,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
         response = await call_next(request)
-        response.headers["Cache-Control"] = "no-store"
+        if not request.url.path.startswith("/app/assets/"):
+            response.headers["Cache-Control"] = "no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         path = request.url.path
@@ -53,5 +54,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(webhooks.router)
     app.include_router(ministry.router)
     app.include_router(location.router)
+    app.include_router(demo.router)
     return app
 
