@@ -27,6 +27,7 @@ class Settings:
     twilio_sid: str = ""       # optional: SMS for the location link
     twilio_token: str = ""
     twilio_from: str = ""
+    demo_mode: bool = False    # lets a dashboard/web test conversation claim the newest unbound demo session
 
     @property
     def sms_ready(self) -> bool:
@@ -50,4 +51,5 @@ def load_settings() -> Settings:
         twilio_sid=os.environ.get("TWILIO_ACCOUNT_SID", ""),
         twilio_token=os.environ.get("TWILIO_AUTH_TOKEN", ""),
         twilio_from=os.environ.get("TWILIO_FROM_NUMBER", ""),
+        demo_mode=os.environ.get("AOUN_DEMO_MODE", "0") == "1",
     )

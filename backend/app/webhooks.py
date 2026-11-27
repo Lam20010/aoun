@@ -24,16 +24,15 @@ async def post_call(request: Request):
         raise HTTPException(status_code=400, detail="bad_json")
 
     data = payload.get("data") or {}
-    dyn = ((data.get("conversation_initiation_client_data") or {}).get("dynamic_variables") or {})
-    token = dyn.get("call_token")
-    if not isinstance(token, str):
+    conv = data.get("conversation_id")
+    if not isinstance(conv, str):
         return {"ok": True}  # nothing to link; drop it
 
     outcome_if_none = "no_answer" if payload.get("type") == "call_initiation_failure" else "ended"
     db = request.app.state.db
     with db.tx() as c:
         c.execute("""UPDATE call_sessions SET status = 'ended', outcome = COALESCE(outcome, ?)
-                     WHERE token_hash = ?""", (outcome_if_none, hash_token(token)))
+                     WHERE conv_hash = ?""", (outcome_if_none, hash_token(conv)))
     # Deliberately discard everything else in the payload.
-    del payload, data, dyn
+    del payload, data
     return {"ok": True}

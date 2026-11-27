@@ -26,10 +26,16 @@ def client(tmp_path):
     return TestClient(create_app(s))
 
 
+_n = [0]
+
+
 def start(client, case="C01"):
-    r = client.post("/admin/calls", json={"case_id": case}, headers=ADMIN)
+    """Open a call session bound to a fresh conversation id, as a real outbound call would be."""
+    _n[0] += 1
+    conv = f"conv_test_{case}_{_n[0]:04d}"
+    r = client.post("/admin/calls", json={"case_id": case, "conversation_id": conv}, headers=ADMIN)
     assert r.status_code == 200, r.text
-    return r.json()["call_token"]
+    return conv
 
 
 def text(resp):
@@ -40,8 +46,8 @@ def text(resp):
 
 def test_tools_reject_missing_or_wrong_key(client):
     tok = start(client)
-    assert client.post("/tools/get_appointment", json={"call_token": tok}).status_code == 401
-    assert client.post("/tools/get_appointment", json={"call_token": tok},
+    assert client.post("/tools/get_appointment", json={"conversation_id": tok}).status_code == 401
+    assert client.post("/tools/get_appointment", json={"conversation_id": tok},
                        headers={"X-Aoun-Key": "wrong"}).status_code == 401
 
 
@@ -51,7 +57,7 @@ def test_admin_rejects_tool_key(client):
 
 
 def test_unknown_token_is_rejected(client):
-    r = client.post("/tools/get_appointment", json={"call_token": "ct_" + "x" * 40}, headers=TOOL)
+    r = client.post("/tools/get_appointment", json={"conversation_id": "ct_" + "x" * 40}, headers=TOOL)
     assert r.status_code == 403
 
 
@@ -72,7 +78,7 @@ def test_declined_and_not_due_cases_cannot_be_called(client):
 # ---------- conversation flow ----------
 
 def tool(client, name, tok, **kw):
-    return client.post(f"/tools/{name}", json={"call_token": tok, **kw}, headers=TOOL)
+    return client.post(f"/tools/{name}", json={"conversation_id": tok, **kw}, headers=TOOL)
 
 
 def test_held_appointment_is_read_and_confirmed(client):
@@ -173,26 +179,26 @@ def test_transport_after_booking(client):
 
 def test_reason_must_be_from_the_list(client):
     tok = start(client)
-    bad = client.post("/tools/record_barrier", json={"call_token": tok, "reason": "my name is Noura and ..."}, headers=TOOL)
+    bad = client.post("/tools/record_barrier", json={"conversation_id": tok, "reason": "my name is Noura and ..."}, headers=TOOL)
     assert bad.status_code == 422 and "Noura" not in text(bad)
-    ok = client.post("/tools/record_barrier", json={"call_token": tok, "reason": "work_hours"}, headers=TOOL)
+    ok = client.post("/tools/record_barrier", json={"conversation_id": tok, "reason": "work_hours"}, headers=TOOL)
     assert ok.status_code == 200
 
 
 def test_extra_fields_are_rejected(client):
     tok = start(client)
-    r = client.post("/tools/get_appointment", json={"call_token": tok, "national_id": "1012345678"}, headers=TOOL)
+    r = client.post("/tools/get_appointment", json={"conversation_id": tok, "national_id": "1012345678"}, headers=TOOL)
     assert r.status_code == 422 and "1012345678" not in text(r)
 
 
 # ---------- privacy of responses ----------
 
 def test_no_pii_in_tool_or_admin_responses(client):
-    r = client.post("/admin/calls", json={"case_id": "C01"}, headers=ADMIN)
-    tok = r.json()["call_token"]
+    r = client.post("/admin/calls", json={"case_id": "C01", "conversation_id": "conv_pii_check_01"}, headers=ADMIN)
+    tok = "conv_pii_check_01"
     bodies = [text(r), text(client.get("/admin/due_queue", headers=ADMIN))]
-    bodies.append(text(client.post("/tools/get_appointment", json={"call_token": tok}, headers=TOOL)))
-    bodies.append(text(client.post("/tools/get_solutions", json={"call_token": tok, "reason": "other"}, headers=TOOL)))
+    bodies.append(text(client.post("/tools/get_appointment", json={"conversation_id": tok}, headers=TOOL)))
+    bodies.append(text(client.post("/tools/get_solutions", json={"conversation_id": tok, "reason": "other"}, headers=TOOL)))
     for b in bodies:
         for p in PHONES:
             assert p not in b and p[1:] not in b
@@ -216,7 +222,7 @@ def test_opt_out_blocks_future_calls_and_releases_hold(client):
     db = client.app.state.db
     slot = db.one("SELECT slot_id FROM holds")["slot_id"]
     before = db.one("SELECT remaining FROM slots WHERE id=?", slot)["remaining"]
-    assert client.post("/tools/opt_out", json={"call_token": tok}, headers=TOOL).status_code == 200
+    assert client.post("/tools/opt_out", json={"conversation_id": tok}, headers=TOOL).status_code == 200
     assert db.one("SELECT remaining FROM slots WHERE id=?", slot)["remaining"] == before + 1
     assert client.post("/admin/calls", json={"case_id": "C03"}, headers=ADMIN).status_code == 409
 
@@ -232,7 +238,7 @@ def sign(body: bytes, secret=WEBHOOK_SECRET, ts=None):
 def test_webhook_requires_valid_signature_and_ends_call(client):
     tok = start(client)
     body = json.dumps({"type": "post_call_transcription", "data": {
-        "conversation_initiation_client_data": {"dynamic_variables": {"call_token": tok}},
+        "conversation_id": tok,
         "transcript": [{"role": "user", "message": "رقم هويتي 1012345678"}]}}).encode()
     assert client.post("/webhooks/elevenlabs/post-call", content=body).status_code == 401
     assert client.post("/webhooks/elevenlabs/post-call", content=body,
@@ -244,7 +250,7 @@ def test_webhook_requires_valid_signature_and_ends_call(client):
     # transcript was not stored anywhere, and the token no longer works
     dump = "\n".join(client.app.state.db.conn.iterdump())
     assert "1012345678" not in dump
-    assert client.post("/tools/get_appointment", json={"call_token": tok}, headers=TOOL).status_code == 403
+    assert client.post("/tools/get_appointment", json={"conversation_id": tok}, headers=TOOL).status_code == 403
 
 
 # ---------- ministry ----------
@@ -252,3 +258,13 @@ def test_webhook_requires_valid_signature_and_ends_call(client):
 def test_small_groups_are_suppressed(client):
     k = client.get("/ministry/kpis", headers=ADMIN).json()
     assert k["districts"] and all(d["suppressed"] for d in k["districts"])
+
+
+def test_demo_claim_only_in_demo_mode(client, tmp_path):
+    # Demo mode off (fixture): an unknown conversation cannot claim a session.
+    client.post("/admin/calls", json={"case_id": "C01"}, headers=ADMIN)
+    assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_1"}, headers=TOOL).status_code == 403
+    # Demo mode on: the newest unbound session is claimed once, and a second conversation cannot take it.
+    client.app.state.settings = client.app.state.settings.__class__(**{**client.app.state.settings.__dict__, "demo_mode": True})
+    assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_1"}, headers=TOOL).status_code == 200
+    assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_2"}, headers=TOOL).status_code == 403

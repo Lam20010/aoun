@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS location_links (
 
 CREATE TABLE IF NOT EXISTS call_sessions (
     id TEXT PRIMARY KEY,
-    token_hash TEXT NOT NULL UNIQUE,     -- SHA-256 of the call token; the token itself is never stored
+    conv_hash TEXT UNIQUE,               -- SHA-256 of the ElevenLabs conversation id this call is bound to
     case_id TEXT NOT NULL REFERENCES cases(id),
     agent TEXT NOT NULL,
     language TEXT NOT NULL,

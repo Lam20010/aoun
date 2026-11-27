@@ -10,8 +10,8 @@
   8. opt_out                 never call again
 
 Design rules:
-- Every request needs the shared tool key (X-Aoun-Key) AND a live call token.
-- The call token comes from the conversation's dynamic variables, never from the language model.
+- Every request needs the shared tool key (X-Aoun-Key) AND a conversation bound to a call the server started.
+- The conversation id is filled in by ElevenLabs itself (system__conversation_id), never by the language model.
 - Inputs are fixed choices wherever possible, so nothing a caller says is stored as text.
 - Responses carry only what the agent needs to say: no names, IDs, phone numbers or conditions.
 """
@@ -29,6 +29,7 @@ RIYADH = timezone(timedelta(hours=3))
 MAX_TOOL_CALLS_PER_CALL = 40
 MAX_OPTIONS = 3
 LOCATION_LINK_MINUTES = 30
+DEMO_CLAIM_MINUTES = 15
 
 router = APIRouter(prefix="/tools", dependencies=[Depends(require_tool_key)])
 
@@ -41,7 +42,7 @@ AR_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو",
 
 class Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    call_token: str = Field(min_length=10, max_length=80)
+    conversation_id: str = Field(min_length=6, max_length=100, pattern=r"^[A-Za-z0-9_\-]+$")
 
 
 class Empty(Strict):
@@ -119,11 +120,23 @@ def km(lat1, lon1, lat2, lon2) -> float:
     return 2 * r * math.asin(math.sqrt(a))
 
 
-def _session(request: Request, token: str):
-    """Resolve the live call session. Every problem returns the same 403,
-    so a caller cannot learn whether a token ever existed."""
+def _session(request: Request, conversation_id: str):
+    """Resolve the live call session bound to this ElevenLabs conversation.
+
+    Real calls are bound when the server places them. In demo mode only, a test conversation
+    (dashboard or web page) may claim the newest unbound session opened by staff in the last
+    15 minutes. Every problem returns the same 403."""
     db = request.app.state.db
-    row = db.one("SELECT * FROM call_sessions WHERE token_hash = ?", hash_token(token))
+    ch = hash_token(conversation_id)
+    row = db.one("SELECT * FROM call_sessions WHERE conv_hash = ?", ch)
+    if row is None and request.app.state.settings.demo_mode:
+        cutoff = (_now_utc() - timedelta(minutes=DEMO_CLAIM_MINUTES)).isoformat()
+        with db.tx() as c:
+            cand = c.execute("""SELECT id FROM call_sessions WHERE conv_hash IS NULL AND status = 'active'
+                                AND created_at >= ? ORDER BY created_at DESC LIMIT 1""", (cutoff,)).fetchone()
+            if cand:
+                c.execute("UPDATE call_sessions SET conv_hash = ? WHERE id = ?", (ch, cand["id"]))
+        row = db.one("SELECT * FROM call_sessions WHERE conv_hash = ?", ch)
     if (row is None or row["status"] != "active"
             or datetime.fromisoformat(row["expires_at"]) < _now_utc()
             or row["tool_calls"] >= MAX_TOOL_CALLS_PER_CALL):
@@ -188,7 +201,7 @@ SOLUTIONS = {
 
 @router.post("/get_appointment")
 def get_appointment(body: Empty, request: Request):
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     db = request.app.state.db
     h = db.one("""SELECT h.status, sl.* FROM holds h JOIN slots sl ON sl.id = h.slot_id
                   WHERE h.call_id = ?""", s["id"])
@@ -200,7 +213,7 @@ def get_appointment(body: Empty, request: Request):
 
 @router.post("/confirm_booking")
 def confirm_booking(body: ConfirmIn, request: Request):
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     db = request.app.state.db
     with db.tx() as c:
         if c.execute("SELECT 1 FROM bookings WHERE case_id = ? AND status = 'confirmed'",
@@ -239,7 +252,7 @@ def confirm_booking(body: ConfirmIn, request: Request):
 
 @router.post("/record_barrier")
 def record_barrier(body: RecordBarrierIn, request: Request):
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     db = request.app.state.db
     case = _case(db, s["case_id"])
     with db.tx() as c:
@@ -254,7 +267,7 @@ def record_barrier(body: RecordBarrierIn, request: Request):
 def send_location_link(body: Empty, request: Request):
     """Text a one-time link. Opening it asks the phone for permission; the server keeps only the
     distance to the nearest center and discards the coordinates."""
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     st = request.app.state.settings
     db = request.app.state.db
     code = secrets_token()
@@ -280,7 +293,7 @@ def send_location_link(body: Empty, request: Request):
 
 @router.post("/get_solutions")
 def get_solutions(body: SolutionsIn, request: Request):
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     db = request.app.state.db
     case = _case(db, s["case_id"])
     if not case["contact_permission"]:
@@ -332,7 +345,7 @@ def get_solutions(body: SolutionsIn, request: Request):
 
 @router.post("/request_transport")
 def request_transport(body: TransportIn, request: Request):
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     db = request.app.state.db
     with db.tx() as c:
         b = c.execute("""SELECT b.id, sl.transport, sl.kind FROM bookings b JOIN slots sl ON sl.id = b.slot_id
@@ -352,7 +365,7 @@ def request_transport(body: TransportIn, request: Request):
 
 @router.post("/request_nurse_callback")
 def request_nurse_callback(body: NurseCallbackIn, request: Request):
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     db = request.app.state.db
     with db.tx() as c:
         c.execute("INSERT INTO tasks VALUES (?,?,?,?,?,?)",
@@ -364,7 +377,7 @@ def request_nurse_callback(body: NurseCallbackIn, request: Request):
 
 @router.post("/opt_out")
 def opt_out(body: Empty, request: Request):
-    s = _session(request, body.call_token)
+    s = _session(request, body.conversation_id)
     db = request.app.state.db
     with db.tx() as c:
         c.execute("""UPDATE residents SET contact_permission = 0

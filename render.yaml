@@ -29,3 +29,5 @@ services:
         sync: false
       - key: TWILIO_FROM_NUMBER
         sync: false
+      - key: AOUN_DEMO_MODE
+        value: "1"   # lets a dashboard/web test conversation use a session opened in the last 15 minutes

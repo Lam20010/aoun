@@ -33,8 +33,9 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
 
 ## How privacy and security work
 
-- **ElevenLabs never learns who it is talking to.** Each call gets a random one-time `call_token`; that token is the only thing passed to the agent. The database stores only its SHA-256 hash.
-- **The token comes from the conversation, not the model.** In ElevenLabs, `call_token` is set as a dynamic variable on every tool, so the language model never sees or changes it.
+- **ElevenLabs never learns who it is talking to.** Each call is bound on the server to the ElevenLabs conversation id; nothing about the person is passed to the agent. The database stores only the id's SHA-256 hash.
+- **The id comes from ElevenLabs, not the model.** Every tool sends `system__conversation_id`, which ElevenLabs fills in itself, so the language model never sees or changes it.
+- **Only calls the server started work.** Real calls are bound when placed. In demo mode, a dashboard or web test conversation can claim the newest session staff opened in the last 15 minutes, once.
 - **Two keys.** Tools need `X-Aoun-Key`; staff routes need a different `X-Admin-Key`. Both are compared in constant time.
 - **Only the held appointment or options offered in this call can be booked.** Confirming twice returns the same booking; two calls racing for the last place give one booking and one "slot taken".
 - **Fixed choices, not free text.** Refusal reasons, times and nurse topics are enums. Unknown fields are rejected, and error messages never echo what was sent.
@@ -65,11 +66,11 @@ python -m pytest -q     # 19 security and flow tests
 
 **Before a demo:** the free plan sleeps after 15 minutes idle and the first request then takes about a minute, which is longer than a tool call waits. Open `/health` a minute before you start, or use a paid instance. The free plan also resets the SQLite file on every deploy, which is fine for demo data. For real data, hosting moves to a provider inside Saudi Arabia.
 
-## Try a call in the ElevenLabs dashboard
+## Try a call from the ElevenLabs page
 
 ```bash
 curl -X POST "$URL/admin/calls" -H "X-Admin-Key: $AOUN_ADMIN_KEY" \
      -H "content-type: application/json" -d '{"case_id":"C01"}'
 ```
 
-Copy `call_token` from the reply into the agent's test dynamic variables, then talk to it. Demo cases: `C01`, `C02`, `C03` can be called; `C04` declined contact; `C05` is not due.
+Then, within 15 minutes, start a test conversation with Rafeed or Rufaida (needs `AOUN_DEMO_MODE=1`). That conversation is bound to case `C01`. Demo cases: `C01`, `C02`, `C03` can be called; `C04` declined contact; `C05` is not due.
