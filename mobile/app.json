@@ -7,23 +7,60 @@
     "icon": "./assets/aoun-icon.png",
     "userInterfaceStyle": "light",
     "backgroundColor": "#0F2E30",
-    "splash": { "image": "./assets/aoun-icon.png", "resizeMode": "contain", "backgroundColor": "#0F2E30" },
+    "splash": {
+      "image": "./assets/aoun-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F2E30"
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "sa.aoun.demo",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "عون يستخدم المايك عشان تكلّمين رُفيدة بصوتك. ما يُحفظ صوتك.",
         "NSLocationWhenInUseUsageDescription": "عون يستخدم موقعك مرة وحدة عشان يرتّب لك أقرب مكان. ما تُحفظ إحداثياتك.",
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "sa.aoun.demo",
-      "adaptiveIcon": { "backgroundColor": "#FFFFFF", "foregroundImage": "./assets/aoun-icon.png" },
-      "permissions": ["RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/aoun-icon.png"
+      },
+      "permissions": [
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "BLUETOOTH_CONNECT",
+        "INTERNET"
+      ]
     },
     "plugins": [
-      ["expo-audio", { "microphonePermission": "عون يستخدم المايك عشان تكلّمين رُفيدة بصوتك. ما يُحفظ صوتك." }]
-    ]
+      "expo-router",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "عون يستخدم المايك عشان تكلّمين رُفيدة بصوتك. ما يُحفظ صوتك."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "عون يستخدم موقعك مرة وحدة عشان يرتّب لك أقرب مكان. ما تُحفظ إحداثياتك."
+        }
+      ],
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc",
+      "expo-dev-client"
+    ],
+    "scheme": "aoun",
+    "newArchEnabled": true,
+    "extra": {
+      "apiBase": "https://aoun-voice-tools.onrender.com"
+    }
   }
 }
