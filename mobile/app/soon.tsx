@@ -7,7 +7,8 @@ import { useT, type Key } from '../src/i18n';
 export default function Soon() {
   const { t } = useT();
   const { k } = useLocalSearchParams<{ k?: string }>();
-  const title = ({ game: 'game', needle: 'needle', tips: 'tips' } as Record<string, Key>)[k ?? ''] ?? 'soon';
+  const titles: Record<string, Key> = { game: 'game', needle: 'needle', tips: 'tips' };
+  const title = titles[k ?? ''] ?? 'soon';
   return (
     <Screen title={t(title)}>
       <Card><Txt size={16} weight="700">{t('soon')}</Txt><Txt size={14}>{t('soonBody')}</Txt></Card>

@@ -7,13 +7,13 @@ import { Icon, ICON } from '../src/ui/Icon';
 import { Circle, Row, Txt } from '../src/ui/kit';
 import { Orb } from '../src/ui/Orb';
 import { C, GRAD } from '../src/theme';
-import { useT } from '../src/i18n';
+import { useT, when } from '../src/i18n';
 import { useApp } from '../src/store';
-import { planRows, WHEN } from '../src/data/plan';
+import { planRows } from '../src/data/plan';
 import { useAgentSession } from '../src/voice/AgentSession';
 
 export default function Call() {
-  const { t, rtl } = useT();
+  const { t, rtl, lang, locale, pick } = useT();
   const insets = useSafeAreaInsets();
   const session = useAgentSession();
   const lines = useApp((s) => s.lines);
@@ -31,7 +31,7 @@ export default function Call() {
   // When the agent ends the call (or it drops), go back to the app.
   useEffect(() => {
     if (session.endedCount === startEnded.current) return;
-    const done = useApp.getState().plan.confirmed;
+    const done = !!useApp.getState().plan?.confirmed;
     const id = setTimeout(() => router.replace('/home'), done ? 2200 : 900);
     return () => clearTimeout(id);
   }, [session.endedCount]);
@@ -58,18 +58,18 @@ export default function Call() {
           ) : (
             <Image source={require('../assets/aoun-icon.png')} style={{ width: 40, height: 40, tintColor: C.white }} />
           )}
-          <Txt size={30} weight="700" color={C.white} center>{revealed && persona ? persona.name : t('aoun')}</Txt>
+          <Txt size={30} weight="700" color={C.white} center>{revealed && persona ? t(voice === 'f' ? 'female' : 'male') : t('aoun')}</Txt>
         </View>
 
-        {session.planShown || plan.confirmed ? (
+        {(session.planShown || plan?.confirmed) && plan?.slot ? (
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 18 }}>
             <View style={s.planCard}>
               <Row style={{ justifyContent: 'space-between' }}>
                 <Txt size={13} weight="700" color={C.teal}>{plan.confirmed ? '✓ ' + t('confirmed') : t('planTitle')}</Txt>
               </Row>
-              <Txt size={24} weight="800">{WHEN[plan.when].label}</Txt>
-              {planRows(plan).map((r, i) => (
-                <Row key={i} gap={8}><Icon d={r.icon} size={17} color={C.inkSoft} /><Txt size={15} color={r.accent ? C.teal : C.ink} weight={r.accent ? '700' : '400'}>{r.text}</Txt></Row>
+              <Txt size={24} weight="800">{when(plan.slot.iso, locale)}</Txt>
+              {planRows(plan, t, pick, lang).map((r, i) => (
+                <Row key={i} gap={8}><Icon d={r.icon} size={17} color={C.inkSoft} /><Txt size={15} color={r.accent ? C.teal : C.ink} weight={r.accent ? '700' : '400'} style={{ flex: 1 }}>{r.text}</Txt></Row>
               ))}
             </View>
             {!!lastA && <Txt size={17} weight="600" color={C.white} center style={{ marginTop: 18 }}>{lastA}</Txt>}

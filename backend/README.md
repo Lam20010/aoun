@@ -21,6 +21,29 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
 | `GET /ministry/kpis` | Ministry dashboard | District counts; groups under 50 are hidden |
 | `POST /webhooks/elevenlabs/post-call` | ElevenLabs | Marks the call ended; everything else in the payload is discarded |
 | `GET/POST /l/{code}` | Resident's phone | One-time location page; only the distance to the nearest center is kept |
+| `/patient/*` | The Aoun app | The person's plan, open times with doctor and clinic, booking and moving, health record from every facility, files, doctor notes, medicines, messages, family history, access log, language |
+| `GET /f/{code}` | The Aoun app | One-time link (5 minutes) to open one report file |
+| `GET /doctor` and `/doctor/api/*` | Screening doctor | Doctor portal: today's appointments, the patient's full record, add results, notes, files (PDF/PNG/JPEG, 5 MB), medicines and vitamins with times, messages, referrals |
+
+## The app and the doctor portal
+
+- **Booking with a doctor.** Every center has clinics and fictional doctors (`app/catalog.py`). Open times come from
+  the screening's own times plus general center times for 21 days, each with a doctor and room. Booking or moving
+  frees the old place in the same transaction. The call agent now says the doctor and clinic and the booking text
+  (SMS, if Twilio is set) goes out in the language the person spoke (Arabic, English, Urdu, Hindi, Bengali, Filipino, Indonesian).
+- **One record, many places.** Each person has past results and reports from different hospitals, clinics and labs
+  (`app/history.py`, synthetic), kept with the person. Aoun results are added to the same record.
+- **Who can see it.** A doctor sees a person only if that person has a confirmed or attended booking with them.
+  Every opening and every change is written to an access log the person sees in the app.
+- **Results.** The doctor enters values; the server works out normal / borderline / high from fixed ranges.
+  **Genetic results are never stored** (sickle cell, thalassaemia, G6PD…): the server refuses them, and the doctor sends a
+  genetic-counselling referral instead.
+- **Medicines and vitamins.** Name, dose, times (HH:MM), days and food; the app schedules daily reminders on the phone.
+- **Messages.** A private thread with the person's doctor.
+- **Encrypted at rest.** Notes, messages, files, record titles and summaries, and medicine instructions use the same
+  Fernet key as phone numbers. Patient and doctor tokens are stored only as SHA-256 hashes.
+- **Doctor sign-in.** `AOUN_DOCTOR_CODE` sets the code. In demo mode it defaults to `aoun-demo-2026` and the page shows it;
+  set a real code before any real use.
 
 ## The call, step by step
 

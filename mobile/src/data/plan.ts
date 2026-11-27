@@ -1,47 +1,61 @@
-// Turns the plan into the rows shown on the home card, the call and the notebook.
-import type { Plan } from '../store';
+// The rows shown for a plan (home card, plan screen, call), in the app language.
+import { Linking, Platform } from 'react-native';
+import { when, type Key, type Lang } from '../i18n';
+import type { Plan, Slot } from '../types';
 import { ICON } from '../ui/Icon';
 
-export const WHEN: Record<Plan['when'], { label: string; day: number }> = {
-  thu: { label: 'الخميس 4:30 العصر', day: 4 },
-  thu5: { label: 'الخميس 5:00 العصر', day: 4 },
-  sun: { label: 'الأحد 8:30 الصبح', day: 0 },
-  wed: { label: 'الأربعاء 7:00 المسا', day: 3 },
-  sat: { label: 'السبت 10:00 الصبح', day: 6 },
-};
-export const PLACE = { center: 'مركز صحي النسيم', mobile: 'العيادة المتنقلة عند جامع الحي', home: 'في بيتك، الفريق يجيك' };
+export interface Row { icon: string; text: string; accent?: boolean }
+type T = (k: Key, v?: Record<string, string | number>) => string;
+type Pick = (o: Record<string, unknown> | null | undefined, base: string) => string;
 
-export function rideLabel(p: Plan): string {
-  const at = p.rideAt === '330' ? '3:30' : '4:00';
-  return { '': '', car: 'طلب التوصيل · تمرّك ' + at, fam: 'سيارة عائلية · تمرّك ' + at, wheel: 'سيارة مجهّزة للكرسي · تمرّك ' + at, metro: 'المترو من محطة الحي · تذكرة درب' }[p.ride];
+export function placeName(s: Slot, t: T, lang: Lang): string {
+  if (s.kind === 'home_visit') return t('homeVisit');
+  if (s.kind === 'mobile_clinic') return t('mobileClinic');
+  return lang === 'ar' ? s.center_ar : s.center_en ?? s.center_ar;
 }
 
-export interface Row { icon: string; text: string; accent?: boolean }
-
-export function planRows(p: Plan): Row[] {
+export function planRows(p: Plan, t: T, pick: Pick, lang: Lang): Row[] {
+  if (!p.slot) return [];
+  const s = p.slot;
   const rows: Row[] = [
-    { icon: ICON.doc, text: 'فحص السكر التراكمي' },
-    { icon: ICON.pin, text: PLACE[p.place] },
+    { icon: ICON.doc, text: lang === 'ar' ? p.screening_ar : p.screening_en },
+    { icon: ICON.pin, text: placeName(s, t, lang) + (s.kind === 'center' ? (lang === 'ar' ? ' · حي ' + s.district_ar : '') : '') },
   ];
-  if (p.ride && p.place !== 'home') rows.push({ icon: ICON.car, text: rideLabel(p), accent: true });
-  if (p.companion) rows.push({ icon: ICON.people, text: 'مرافق من العائلة يوصله التذكير' });
-  if (p.prefs.length) rows.push({ icon: ICON.check, text: 'تفضيلاتك: ' + p.prefs.join('، ') });
+  if (s.doctor) rows.push({ icon: ICON.people, text: pick(s.doctor as never, 'name') + ' · ' + pick(s.doctor as never, 'clinic') });
+  if (p.ride && s.kind !== 'home_visit') {
+    rows.push({ icon: ICON.car, accent: true, text: p.ride.mode === 'metro' ? t('rideMetro') : t('rideCar', { t: pickupTime(s.iso, p.ride.pickup_minutes ?? 30, lang) }) });
+  }
+  if (p.prefs.includes('companion_reminders')) rows.push({ icon: ICON.people, text: t('companionOn') });
+  const prefs = p.prefs.filter((x) => x === 'female_doctor' || x === 'wheelchair_center').map((x) => t(x === 'female_doctor' ? 'femaleStaff' : 'wheelchair'));
+  if (prefs.length) rows.push({ icon: ICON.check, text: t('prefs') + ': ' + prefs.join('، ') });
   return rows;
 }
 
-export const TESTS = (p: Plan) => [
-  { name: 'السكر التراكمي', status: p.confirmed ? 'موعد مؤكد' : 'مستحق', icon: ICON.drop, tone: 'mint' as const, highlight: true },
-  { name: 'ضغط الدم', status: 'تم', icon: ICON.heart, tone: 'lime' as const },
-  { name: 'الكوليسترول', status: 'مستحق', icon: ICON.chart, tone: 'soft' as const },
-  { name: 'هشاشة العظام', status: 'مستحق', icon: ICON.clock, tone: 'soft' as const },
-  { name: 'فحص النظر', status: 'موصى به', icon: ICON.plus, tone: 'soft' as const },
-];
+export function pickupTime(iso: string, minutes: number, lang: Lang): string {
+  const d = new Date(new Date(iso).getTime() - minutes * 60000);
+  return d.toLocaleTimeString(lang === 'ar' ? 'ar-SA-u-nu-latn' : 'en-GB', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Riyadh' });
+}
 
-export const STEPS = (p: Plan) => [
-  ['تم الحجز', 'من مكالمة عون'],
-  ['التذكير', 'قبلها بيوم' + (p.companion ? ' · وللمرافق' : '')],
-  [p.place === 'home' ? 'الفريق في الطريق' : 'المشوار', p.place === 'home' ? 'يوصلك البيت' : p.ride === 'metro' ? 'المسار بالمترو جاهز' : p.ride ? 'السيارة تمرّك قبل بنص ساعة' : 'المسار على الخريطة'],
-  ['الفحص', WHEN[p.when].label],
-  ['الطبيب يراجع النتيجة', 'خلال يومين'],
-  ['النتيجة والخطة الجاية', 'لك أنتِ بس'],
-];
+export function slotWhen(s: Slot, locale: string) {
+  return when(s.iso, locale);
+}
+
+// ---------- getting there ----------
+// Google Maps URLs: https://developers.google.com/maps/documentation/urls/get-started
+// Uber universal link: https://developer.uber.com/docs/deep-linking
+// Darb (Royal Commission for Riyadh City) has no public deep link, so it opens its store page.
+
+export function googleDirections(s: Slot, mode: 'driving' | 'transit' | 'walking' = 'driving') {
+  return Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${s.lat}%2C${s.lon}&travelmode=${mode}`);
+}
+
+export function uberTo(s: Slot, name: string) {
+  const q = `action=setPickup&pickup=my_location&dropoff[latitude]=${s.lat}&dropoff[longitude]=${s.lon}&dropoff[nickname]=${encodeURIComponent(name)}`;
+  return Linking.openURL(`https://m.uber.com/ul/?${q}`);
+}
+
+export function openDarb() {
+  return Linking.openURL(Platform.OS === 'ios'
+    ? 'https://apps.apple.com/sa/app/id1549817739'
+    : 'https://play.google.com/store/apps/details?id=com.rcrc.riyadhjourneyplanner');
+}

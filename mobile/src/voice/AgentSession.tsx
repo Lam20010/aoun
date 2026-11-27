@@ -7,7 +7,8 @@ import * as Location from 'expo-location';
 import { requestRecordingPermissionsAsync } from 'expo-audio';
 import { ConversationProvider, useConversation } from '@elevenlabs/react-native';
 import { getAgent, type AgentDef } from '../agents';
-import { api, toPlan } from '../api';
+import { api, ensurePatient, refresh } from '../api';
+import { detectLang } from './detectLang';
 import { t } from '../i18n';
 import { useApp } from '../store';
 import { toolsFor } from '../tools';
@@ -87,9 +88,22 @@ function Inner({ children }: { children: ReactNode }) {
 
   const syncPlan = useCallback(async (k: string, afterConfirm: boolean) => {
     try {
-      const p = toPlan(await api.plan(k));
-      if (p) useApp.getState().setPlan(afterConfirm ? p : { ...p, confirmed: false });
+      const p = await api.callPlan(k);
+      const st = useApp.getState();
+      st.set({ plan: p });
+      // the confirmation and the app follow the language the person spoke in the call
+      if (afterConfirm && p.language && p.language !== st.lang) st.set({ lang: p.language as typeof st.lang });
+      if (afterConfirm) refresh().catch(() => {});
     } catch {}
+  }, []);
+
+  // Follow the language the person speaks, in the whole app.
+  const followLanguage = useCallback((text: string) => {
+    const l = detectLang(text);
+    const st = useApp.getState();
+    if (!l || l === st.lang) return;
+    st.set({ lang: l });
+    api.language(l).catch(() => {});
   }, []);
 
   // The booking call asks for the location through the server; the phone shows its own prompt.
@@ -140,6 +154,7 @@ function Inner({ children }: { children: ReactNode }) {
     try {
       const perm = await requestRecordingPermissionsAsync();
       if (!perm.granted) throw new Error('mic');
+      await ensurePatient();
       let k: string | undefined;
       if (def.serverSession) {
         k = (await api.start(voice, lang)).k;
@@ -149,7 +164,8 @@ function Inner({ children }: { children: ReactNode }) {
       const ctx = { setMicMuted: setMuted, endSession: stop, startAgent: (next: string) => { void start(next); } };
       convRef.current.startSession({
         agentId: persona.agentId,
-        overrides: { agent: { language: lang } },
+        // ElevenLabs takes the language codes it knows; Filipino is 'fil' there too, cast for the SDK type.
+        overrides: { agent: { language: lang as never } },
         clientTools: toolsFor(def.clientTools, ctx),
         onConnect: ({ conversationId }) => {
           if (my !== runId.current) return;
@@ -165,6 +181,7 @@ function Inner({ children }: { children: ReactNode }) {
           if (!text) return;
           const who = (m.role ?? m.source) === 'user' ? 'u' : 'a';
           addLine({ who, text });
+          if (who === 'u') followLanguage(text);
           if (who === 'a') {
             setLastReply(text);
             if (/أقرأ لك الخطة|read you the plan/i.test(text)) { setPlanShown(true); if (k) void syncPlan(k, false); }
@@ -182,7 +199,7 @@ function Inner({ children }: { children: ReactNode }) {
       console.warn('[agent] could not start', key, e);
       if (my === runId.current) { clearServer(); setStatus('error'); setActive(def); }
     }
-  }, [active, stop, finish, setMuted, syncPlan, watchLocation]);
+  }, [active, stop, finish, setMuted, syncPlan, watchLocation, followLanguage]);
 
   const send = useCallback((text: string) => {
     useApp.getState().addLine({ who: 'u', text });

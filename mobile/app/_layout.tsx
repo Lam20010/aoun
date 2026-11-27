@@ -4,15 +4,16 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AgentSessionProvider } from '../src/voice/AgentSession';
+import { refresh } from '../src/api';
 import { C } from '../src/theme';
 
-// Direction is handled per language inside the app (Arabic/Urdu right-to-left, English left-to-right),
+// Direction is handled per language inside the app (Arabic/Urdu right-to-left, others left-to-right),
 // so the system layout direction is kept fixed.
 I18nManager.allowRTL(false);
 I18nManager.forceRTL(false);
 
 export default function RootLayout() {
-  useEffect(() => {}, []);
+  useEffect(() => { refresh().catch(() => {}); }, []);
   return (
     <SafeAreaProvider>
       <AgentSessionProvider>

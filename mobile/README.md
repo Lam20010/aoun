@@ -9,14 +9,22 @@ the booking call (رُفيدة / رفيد) and the in-app assistant («يا رف
 app/                     screens (expo-router: the file name is the route)
   incoming.tsx           Aoun's incoming call
   call.tsx               the call with the booking agent
-  (tabs)/home.tsx        home: appointment card, my care
-  (tabs)/notebook.tsx    health notebook: screenings, results, preferences
-  plan.tsx family.tsx map.tsx settings.tsx soon.tsx
+  (tabs)/home.tsx        home: appointment card (time, center, doctor, clinic, trip), my care
+  (tabs)/notebook.tsx    health notebook: screenings due/done, results and doctor notes, preferences
+  (tabs)/meds.tsx        medicines and vitamins from the doctor, with reminders on the phone
+  plan.tsx               the whole visit: doctor and clinic, map, Google Maps, Uber, metro, Darb, steps, change/cancel
+  booking.tsx            open times by day and district, female-doctor filter, book or move
+  record.tsx             health record from every hospital, clinic and lab; files; referrals; who opened it
+  messages.tsx           private messages with the doctor
+  family.tsx             family history (fixed codes), recommended screenings, warning signs
+  map.tsx settings.tsx soon.tsx
 src/
   agents/                one file per agent + index.ts (the registry)
   tools/                 client tools the agents can run on the phone
   voice/AgentSession.tsx one live agent at a time, shared by every screen
-  api.ts                 the Aoun server (demo session, location, plan)
+  api.ts                 the Aoun server (patient token, plan, booking, record, medicines, messages)
+  notify.ts              local reminders: medicines at their times, the appointment the day before
+  ui/PlanMap.tsx         Apple Maps on iPhone, Google Maps on Android (needs GOOGLE_MAPS_API_KEY)
   store.ts i18n.ts theme.ts data/ ui/
 ```
 
@@ -57,6 +65,19 @@ npx expo start --dev-client --tunnel                      # then open the instal
 - iPhone builds need an Apple Developer account. Android builds are free (`--profile preview` gives an APK).
 - `npm run typecheck` checks the code.
 
+## Languages
+
+The app follows the language the person speaks (Arabic, English, Urdu, Hindi, Bengali, Filipino, Indonesian):
+in a call or with the assistant it switches as soon as they speak another language, and the plan, booking text and
+every screen follow. They can also pick it in settings. Arabic and Urdu read right to left.
+
+## Maps and getting there
+
+- iPhone: Apple Maps inside the app, no key needed.
+- Android: set `GOOGLE_MAPS_API_KEY` when building (`app.config.js` adds it); without it the app shows a drawn map.
+- Buttons open Google Maps directions (car, metro), Uber with the center already set as the drop-off, and the Darb app
+  (Darb has no public link to a route, so it opens the store page).
+
 ## Privacy
 
 - No API keys in the app.
@@ -64,3 +85,6 @@ npx expo start --dev-client --tunnel                      # then open the instal
 - `read_screen` reads with the phone's own voice.
 - Location is sent once to the Aoun server, which keeps only the distance.
 - Only settings and the booked plan are saved on the phone. Calls are not saved.
+- The phone keeps one random token for the person in secure storage; no name, ID or phone number is in the app.
+- Reminders are local notifications; nothing goes to a push server.
+- Report files open through a one-time link that works for 5 minutes.

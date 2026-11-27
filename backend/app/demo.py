@@ -44,7 +44,8 @@ class Strict(BaseModel):
 
 class StartIn(Strict):
     voice: str = Field(default="f", pattern=r"^[fm]$")
-    lang: str = Field(default="ar", pattern=r"^(ar|en|ur)$")
+    lang: str = Field(default="ar", pattern=r"^(ar|en|ur|hi|bn|fil|id)$")
+    p: str | None = Field(default=None, min_length=20, max_length=120)  # the app's patient token: call about this person
 
 
 class BindIn(Strict):
@@ -134,17 +135,27 @@ def demo_start(body: StartIn, request: Request):
     db = request.app.state.db
     st = request.app.state.settings
     vault = request.app.state.vault
-    rid = "R9" + secrets_token()[:6].upper().replace("-", "X").replace("_", "Y")
-    cid = "C9" + str(int(now_s * 1000))[-6:]
     now = datetime.now(timezone.utc)
     call_id = new_id("call")
     agent = "rafeed" if body.voice == "m" else "rufaida"
+    from .patient import open_case, resident_by_token
+    person = resident_by_token(db, body.p) if body.p else None
+    if body.p and person is None:
+        raise HTTPException(401, "unauthorized")
     with db.tx() as c:
-        # A fictional resident: no name, an invented number, the language picked on the page.
-        c.execute("INSERT INTO residents VALUES (?,?,?,?,?,?)",
-                  (rid, DEMO_DISTRICT, "45-54", body.lang, vault.encrypt("+966500000199"), 1))
-        c.execute("INSERT INTO cases (id,resident_id,screening,due,due_date,cohort_entry) VALUES (?,?,?,?,?,?)",
-                  (cid, rid, "diabetes", 1, "2026-10-20", "2026-10-20"))
+        if person is None:
+            # A fictional resident: no name, an invented number, the language picked on the page.
+            rid = "R9" + secrets_token()[:6].upper().replace("-", "X").replace("_", "Y")
+            cid = "C9" + str(int(now_s * 1000))[-6:]
+            c.execute("INSERT INTO residents (id,district,age_band,language,phone_enc,contact_permission) VALUES (?,?,?,?,?,?)",
+                      (rid, DEMO_DISTRICT, "45-54", body.lang, vault.encrypt("+966500000199"), 1))
+            c.execute("INSERT INTO cases (id,resident_id,screening,due,due_date,cohort_entry) VALUES (?,?,?,?,?,?)",
+                      (cid, rid, "diabetes", 1, "2026-10-20", "2026-10-20"))
+            district = DEMO_DISTRICT
+        else:
+            cid = open_case(db, person["id"])["id"]
+            district = person["district"]
+            c.execute("UPDATE residents SET language = ? WHERE id = ?", (body.lang, person["id"]))
         # Every demo starts from the same open times as the prototype.
         for suf, *_rest in _PATTERN:
             places = _rest[3]
@@ -153,7 +164,8 @@ def demo_start(body: StartIn, request: Request):
                      VALUES (?,?,?,?,?,?,?)""",
                   (call_id, None, cid, agent, body.lang, now.isoformat(), (now + timedelta(minutes=KEY_MINUTES)).isoformat()))
         demo_now = datetime.fromisoformat(st.demo_now) if st.demo_now else now.astimezone(RIYADH)
-        place_hold(c, call_id, cid, DEMO_DISTRICT, "diabetes", demo_now)
+        if not c.execute("SELECT 1 FROM bookings WHERE case_id = ? AND status = 'confirmed'", (cid,)).fetchone():
+            place_hold(c, call_id, cid, district, "diabetes", demo_now)
     k = secrets_token()
     request.app.state.demo_keys[hash_token(k)] = call_id
     reg[call_id] = {"created": now_s, "location": "idle"}
@@ -198,24 +210,10 @@ def demo_location(body: LocationIn, request: Request):
 def demo_plan(k: str, request: Request):
     call_id, _ = _by_key(request, k)
     db = request.app.state.db
-    s = db.one("SELECT case_id, outcome FROM call_sessions WHERE id = ?", call_id)
-    slot = db.one("""SELECT sl.* FROM bookings b JOIN slots sl ON sl.id = b.slot_id
-                     WHERE b.case_id = ? AND b.status = 'confirmed'""", s["case_id"])
-    confirmed = slot is not None
-    if slot is None:
-        slot = db.one("""SELECT sl.* FROM holds h JOIN slots sl ON sl.id = h.slot_id
-                         WHERE h.call_id = ? AND h.status = 'held'""", call_id)
-    plan = db.one("SELECT * FROM call_plans WHERE call_id = ?", call_id)
-    ride = _ride_view(plan, slot) if plan else None
-    if ride and ride["mode"] == "car":
-        ride["pickup_minutes"] = plan["pickup_minutes"] or 30
-    out = {"confirmed": confirmed, "slot": None, "ride": ride,
-           "prefs": [p for p in ((plan["prefs"] if plan else "") or "").split(",") if p]}
-    if slot is not None:
-        d = datetime.fromisoformat(slot["start_local"]).astimezone(RIYADH)
-        out["slot"] = {"center": slot["center"], "district": DISTRICT_AR.get(slot["district"], ""),
-                       "kind": slot["kind"], "when": label_ar(slot["start_local"]), "time": time_ar(d),
-                       "weekday": d.weekday(), "iso": slot["start_local"]}
+    from .patient import plan_for_case
+    s = db.one("SELECT case_id, language FROM call_sessions WHERE id = ?", call_id)
+    out = plan_for_case(db, s["case_id"], call_id)
+    out["language"] = s["language"]
     return out
 
 

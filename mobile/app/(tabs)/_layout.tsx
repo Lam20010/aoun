@@ -10,6 +10,7 @@ import { C } from '../../src/theme';
 const TABS: { name: string; label: Key; icon: string }[] = [
   { name: 'home', label: 'home', icon: ICON.home },
   { name: 'notebook', label: 'notebook', icon: ICON.book },
+  { name: 'meds', label: 'meds', icon: ICON.pill },
 ];
 
 function Bar({ state, navigateToTab }: BottomTabBarProps) {
@@ -38,6 +39,7 @@ export default function TabsLayout() {
     <Tabs tabBar={(p) => <Bar {...p} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: C.bg } }}>
       <Tabs.Screen name="home" />
       <Tabs.Screen name="notebook" />
+      <Tabs.Screen name="meds" />
     </Tabs>
   );
 }
@@ -45,5 +47,5 @@ export default function TabsLayout() {
 const s = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, bottom: 0, gap: 10, alignItems: 'stretch' },
   pill: { alignSelf: 'center', backgroundColor: C.white, borderRadius: 30, padding: 5, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, elevation: 4 },
-  item: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 24 },
+  item: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 24 },
 });

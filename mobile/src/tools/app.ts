@@ -2,13 +2,16 @@
 import * as Speech from 'expo-speech';
 import { router } from 'expo-router';
 import { useApp } from '../store';
-import type { Lang } from '../i18n';
+import { langInfo, type Lang } from '../i18n';
+import { api } from '../api';
 import type { Tool } from './types';
 
 const SCREENS: Record<string, string> = {
   home: '/home', notebook: '/notebook', results: '/notebook?seg=results', preferences: '/notebook?seg=prefs',
   family: '/family', settings: '/settings', map: '/map', game: '/soon?k=game', plan: '/plan',
+  booking: '/booking', record: '/record', medicines: '/meds', messages: '/messages',
 };
+const LANG_CODES: Lang[] = ['ar', 'en', 'ur', 'hi', 'bn', 'fil', 'id'];
 
 const speak = (text: string, language: string) =>
   new Promise<void>((done) => Speech.speak(text, { language, onDone: done, onStopped: done, onError: () => done() }));
@@ -26,7 +29,8 @@ export const appTools: Record<string, Tool> = {
     const lines = useApp.getState().screenText;
     if (!lines.length) return 'nothing to read on this screen';
     ctx.setMicMuted(true);
-    for (const line of lines) await speak(line, 'ar-SA');
+    const voice = langInfo(useApp.getState().lang).speech;
+    for (const line of lines) await speak(line, voice);
     ctx.setMicMuted(false);
     return 'done: the phone read the screen aloud';
   },
@@ -39,8 +43,9 @@ export const appTools: Record<string, Tool> = {
   },
 
   set_app_language: ({ language }) => {
-    if (!['ar', 'en', 'ur'].includes(String(language))) return 'unsupported';
+    if (!LANG_CODES.includes(language as Lang)) return 'unsupported';
     useApp.getState().set({ lang: language as Lang });
+    api.language(String(language)).catch(() => {});
     return 'done';
   },
 
