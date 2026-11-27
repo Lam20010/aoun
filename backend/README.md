@@ -9,10 +9,11 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
 |---|---|---|
 | `POST /tools/get_appointment` | Voice agent | Reads the appointment held for this person when the call started |
 | `POST /tools/confirm_booking` | Voice agent | Confirms the held appointment or a chosen alternative, once, in one transaction |
-| `POST /tools/record_barrier` | Voice agent | Saves the refusal reason as a fixed code (10 reasons) |
+| `POST /tools/record_barrier` | Voice agent | Saves the refusal reason as a fixed code (11 reasons) |
 | `POST /tools/send_location_link` | Voice agent | Texts a one-time link to share location (needs Twilio SMS settings) |
-| `POST /tools/get_solutions` | Voice agent | Options that remove the reason: evening, mobile clinic, ride, female staff, companion, nurse |
-| `POST /tools/request_transport` | Voice agent | A free ride or a Riyadh Metro plan for the booking |
+| `POST /tools/get_solutions` | Voice agent | Options that remove the reason: a trip, mobile clinic or home test, morning / evening / weekend, female doctor |
+| `POST /tools/request_transport` | Voice agent | A car (alone / family / wheelchair, pickup time) or the metro; held until the booking is confirmed |
+| `POST /tools/set_preferences` | Voice agent | Wheelchair-ready center, test at home, companion reminders, female doctor (fixed codes) |
 | `POST /tools/request_nurse_callback` | Voice agent | Schedules a nurse to call back |
 | `POST /tools/opt_out` | Voice agent | Stops all future contact |
 | `POST /admin/calls` | Staff / planner | Opens a call session; places the phone call when `dry_run` is false |
@@ -21,15 +22,18 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
 | `POST /webhooks/elevenlabs/post-call` | ElevenLabs | Marks the call ended; everything else in the payload is discarded |
 | `GET/POST /l/{code}` | Resident's phone | One-time location page; only the distance to the nearest center is kept |
 
-## The call, step by step
+## The call, step by step (same as the prototype)
 
-1. Greeting, then "is now a good time?"
-2. "We have held an appointment for you: <center, day, time>. Do you confirm?" (`get_appointment`)
-3. Yes → `confirm_booking` with `held`. No → ask once why → `record_barrier`.
-4. With consent, text a link to share location (`send_location_link`).
-5. `get_solutions` for their reason: evening/weekend times, a mobile clinic near home with a free ride or metro plan, female staff, a companion slot, a nurse call, or simply "it is free".
-6. Explain the plan, wait for a clear yes, then `confirm_booking` (+ `request_transport`).
-7. Thank them and say goodbye. The reason is now counted for their district on the Ministry dashboard.
+1. "السلام عليكم، معك عون من وزارة الصحة. عساك بخير وصحة؟" Then the agent introduces itself and reads the held appointment (`get_appointment`): "يوم الخميس الساعة أربع ونص العصر، في مركز صحي النسيم القريب منك. يناسبك هالوقت؟"
+2. Whatever they answer (yes, no, or "why the check-up?"), the agent asks to see their location (`send_location_link`), or falls back to their registered district.
+3. Yes → step 5. Why → "some conditions come quietly, with no symptoms..." → convinced, or asked for the reason. No → "وش اللي مصعّبها عليك؟" → `record_barrier` + `get_solutions`:
+   - no one to take them → a car (alone / family / wheelchair, pickup 30 or 60 minutes before) or the metro (`request_transport`, held until confirmed)
+   - far → the mobile clinic by the mosque, or a test at home
+   - the time → early morning, after Maghrib, or the weekend
+   - afraid → reassurance; a female doctor is added
+4. (The reason is now counted for their district on the Ministry dashboard.)
+5. "Anything to make your day easier?" a wheelchair-ready center, a test at home, a companion who gets reminders only, a female doctor (`set_preferences`). The companion is added in the app; the agent never asks for names or numbers.
+6. The agent reads the plan back line by line and asks "نأكّدها؟". Only after a clear yes: `confirm_booking`, which also books the trip. Then goodbye.
 
 ## How privacy and security work
 
@@ -55,7 +59,7 @@ pip install -r requirements.txt
 cp .env.example .env   # fill in the values, then:
 set -a; source .env; set +a
 uvicorn app.main:create_app --factory --port 8000
-python -m pytest -q     # 19 security and flow tests
+python -m pytest -q     # 22 security and flow tests
 ```
 
 ## Deploy on Render

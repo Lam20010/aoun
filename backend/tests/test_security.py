@@ -98,8 +98,8 @@ def test_refusal_gets_solutions_and_switching_releases_the_hold(client):
     before = db.one("SELECT remaining FROM slots WHERE id=?", held_slot)["remaining"]
     assert tool(client, "record_barrier", tok, reason="work_hours").status_code == 200
     sol = tool(client, "get_solutions", tok, reason="work_hours").json()
-    assert sol["options"] and all(o["choice"].startswith("of_") for o in sol["options"])
-    assert all(("المساء" in o["when"]) or ("الجمعة" in o["when"]) or ("السبت" in o["when"]) for o in sol["options"])
+    assert [o["time_band"] for o in sol["options"]] == ["morning", "evening", "weekend"]
+    assert all(o["choice"].startswith("of_") for o in sol["options"])
     r = tool(client, "confirm_booking", tok, choice=sol["options"][0]["choice"])
     assert r.status_code == 200
     assert db.one("SELECT remaining FROM slots WHERE id=?", held_slot)["remaining"] == before + 1
@@ -116,7 +116,12 @@ def test_each_reason_gets_a_fitting_plan(client):
     cost = tool(client, "get_solutions", tok, reason="cost_concern").json()
     assert [o["choice"] for o in cost["options"]] == ["held"] and "free" in cost["plan"]
     fear = tool(client, "get_solutions", tok, reason="fear").json()
-    assert fear["extras"] and "nurse" in fear["extras"][0]
+    assert [o["choice"] for o in fear["options"]] == ["held"]
+    assert client.app.state.db.one("SELECT prefs FROM call_plans")["prefs"] == "female_doctor"
+    far = tool(client, "get_solutions", tok, reason="far").json()
+    assert [o["place_kind"] for o in far["options"]] == ["mobile_clinic", "home_visit"]
+    ride = tool(client, "get_solutions", tok, reason="transport").json()
+    assert [o["choice"] for o in ride["options"]] == ["held"] and "4:00 العصر" in ride["extras"][0]
 
 
 def test_cannot_confirm_option_from_another_call(client):
@@ -135,7 +140,7 @@ def test_last_place_race_gives_one_booking(client):
     choices = []
     for t in toks:
         opts = tool(client, "get_solutions", t, reason="work_hours").json()["options"]
-        o = [x for x in opts if x["when"].startswith("الأحد")][0]  # Sunday evening: one place left
+        o = [x for x in opts if x["time_band"] == "evening"][0]  # Wednesday evening: one place left
         choices.append(o["choice"])
     results = []
 
@@ -160,19 +165,41 @@ def test_location_link_keeps_only_distance(client):
     lat, lon = 24.81234, 46.73456
     assert client.post(f"/l/{code}", json={"lat": lat, "lon": lon}).status_code == 200
     assert client.post(f"/l/{code}", json={"lat": lat, "lon": lon}).status_code == 404  # one use only
-    sol = tool(client, "get_solutions", tok, reason="transport").json()
+    sol = tool(client, "get_solutions", tok, reason="far").json()
     assert sol["location_shared"] and sol["nearest_center_km"] is not None
     assert sol["options"][0]["mobile_clinic"]
-    assert sol["extras"] and "ride" in sol["extras"][0]
     dump = "\n".join(client.app.state.db.conn.iterdump())
     assert "24.81234" not in dump and "46.73456" not in dump and code not in dump
 
 
-def test_transport_after_booking(client):
+def test_ride_is_held_then_goes_through_on_confirm(client):
+    db = client.app.state.db
     tok = start(client)
-    assert tool(client, "request_transport", tok, mode="ride").status_code == 409  # nothing booked yet
-    tool(client, "confirm_booking", tok, choice="held")
+    r = tool(client, "request_transport", tok, mode="car", party="wheelchair", pickup="early").json()
+    assert r["transport_status"] == "held_until_confirmed" and r["ride"]["pickup_at"] == "3:30 العصر"
+    assert db.one("SELECT COUNT(*) AS n FROM support_requests")["n"] == 0
+    p = tool(client, "set_preferences", tok, prefs=["companion_reminders"]).json()
+    assert set(p["prefs"]) == {"wheelchair_center", "companion_reminders"} and "name" in p["message"]
+    b = tool(client, "confirm_booking", tok, choice="held").json()
+    assert b["ride"]["party"] == "wheelchair" and "wheelchair_center" in b["prefs"]
+    assert db.one("SELECT kind, status FROM support_requests")["kind"] == "car:wheelchair"
     assert tool(client, "request_transport", tok, mode="metro").json()["transport_status"] == "metro_plan_sent"
+
+
+def test_home_test_preference_offers_a_home_visit(client):
+    tok = start(client)
+    tool(client, "request_transport", tok, mode="car")
+    p = tool(client, "set_preferences", tok, prefs=["home_test"]).json()
+    home = p["home_visit_option"]
+    assert home and home["place_kind"] == "home_visit"
+    b = tool(client, "confirm_booking", tok, choice=home["choice"]).json()
+    assert b["place_kind"] == "home_visit" and b["ride"] is None
+
+
+def test_preferences_are_fixed_codes(client):
+    tok = start(client)
+    bad = tool(client, "set_preferences", tok, prefs=["my son Saad 0551234567"])
+    assert bad.status_code == 422 and "0551234567" not in bad.text
 
 
 # ---------- strict inputs ----------

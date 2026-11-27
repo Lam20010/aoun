@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS slots (
     remaining INTEGER NOT NULL CHECK (remaining >= 0),
     step_free INTEGER NOT NULL,
     transport INTEGER NOT NULL,
-    kind TEXT NOT NULL DEFAULT 'center',      -- center | mobile_clinic
+    kind TEXT NOT NULL DEFAULT 'center',      -- center | mobile_clinic | home_visit
     female_staff INTEGER NOT NULL DEFAULT 0,
     companion_ok INTEGER NOT NULL DEFAULT 0,  -- two places together for a companion
     lat REAL NOT NULL DEFAULT 0,
@@ -97,6 +97,15 @@ CREATE TABLE IF NOT EXISTS support_requests (
     booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
     kind TEXT NOT NULL,
     status TEXT NOT NULL                 -- requested | confirmed | unavailable
+);
+
+CREATE TABLE IF NOT EXISTS call_plans (
+    call_id TEXT PRIMARY KEY REFERENCES call_sessions(id),  -- what the person chose during the call
+    ride_mode TEXT,                      -- car | metro
+    ride_party TEXT,                     -- alone | group | wheelchair
+    pickup_minutes INTEGER,              -- 30 or 60 minutes before the appointment
+    prefs TEXT NOT NULL DEFAULT '',      -- comma-separated fixed codes, never free text
+    booking_id TEXT
 );
 
 CREATE TABLE IF NOT EXISTS barriers (
@@ -176,27 +185,33 @@ DEMO_CASES = [
     ("C04", "R04", "diabetes", 1, "2026-10-01", "2026-10-01"),
     ("C05", "R05", "diabetes", 0, "2027-03-01", "2027-03-01"),
 ]
-# Centers and a mobile clinic per district, with fictional coordinates in Riyadh.
+# Centers, a mobile clinic and home visits per district, with fictional coordinates in Riyadh.
+# The times follow the prototype call: held Thursday 4:30 Asr at the center; Thursday 5:00 at the
+# mobile clinic by the mosque; Thursday 4:30 home visit; Sunday 8:30 morning; Wednesday 7:00 evening;
+# Saturday 10:00 weekend.
 _C = {
-    "Qurtubah":   ("مركز قرطبة الصحي أ", 24.8160, 46.7350, "عيادة متنقلة عند جامع قرطبة", 24.8105, 46.7290),
-    "Al-Naseem":  ("مركز النسيم الصحي", 24.7360, 46.8330, "عيادة متنقلة عند حديقة النسيم", 24.7300, 46.8270),
-    "Al-Yarmouk": ("مركز اليرموك الصحي", 24.8030, 46.7810, "عيادة متنقلة عند جامع اليرموك", 24.7985, 46.7760),
+    "Qurtubah":   ("مركز صحي قرطبة", 24.8160, 46.7350, "العيادة المتنقلة عند جامع قرطبة", 24.8105, 46.7290),
+    "Al-Naseem":  ("مركز صحي النسيم", 24.7360, 46.8330, "العيادة المتنقلة عند جامع النسيم", 24.7300, 46.8270),
+    "Al-Yarmouk": ("مركز صحي اليرموك", 24.8030, 46.7810, "العيادة المتنقلة عند جامع اليرموك", 24.7985, 46.7760),
 }
+DISTRICT_AR = {"Qurtubah": "قرطبة", "Al-Naseem": "النسيم", "Al-Yarmouk": "اليرموك"}
+HOME_VISIT = "في بيتك، الفريق الصحي يجيك"
 _SCREEN = {"Qurtubah": "diabetes", "Al-Naseem": "diabetes", "Al-Yarmouk": "hypertension"}
 # (suffix, day, time, kind, places, step_free, transport, female_staff, companion_ok)
 _PATTERN = [
-    ("1", "2026-11-29", "10:00", "center", 2, 1, 1, 0, 0),   # Sunday morning
-    ("2", "2026-11-29", "19:00", "center", 1, 0, 0, 0, 0),   # Sunday evening, last place
-    ("3", "2026-11-30", "16:30", "center", 3, 1, 1, 1, 1),   # Monday after Asr, female staff, companion
-    ("4", "2026-12-01", "20:00", "center", 2, 0, 0, 0, 1),   # Tuesday evening
-    ("5", "2026-12-04", "17:00", "mobile_clinic", 4, 1, 0, 1, 1),  # Friday after Asr, near home
-    ("6", "2026-12-05", "09:30", "center", 2, 1, 1, 1, 0),   # Saturday morning
+    ("1", "2026-12-03", "16:30", "center", 3, 1, 1, 1, 1),         # Thursday 4:30 Asr: the held appointment
+    ("2", "2026-12-09", "19:00", "center", 1, 1, 1, 1, 1),         # Wednesday 7:00 evening, last place
+    ("3", "2026-12-06", "08:30", "center", 2, 1, 1, 1, 1),         # Sunday 8:30 early morning
+    ("4", "2026-12-05", "10:00", "center", 2, 1, 1, 1, 1),         # Saturday 10:00 weekend
+    ("5", "2026-12-03", "17:00", "mobile_clinic", 4, 1, 0, 1, 1),  # Thursday 5:00 by the mosque, near home
+    ("6", "2026-12-03", "16:30", "home_visit", 2, 1, 0, 1, 1),     # Thursday 4:30 the team comes home
 ]
 DEMO_SLOTS = []
 for _i, (_d, (_cn, _la, _lo, _mn, _mla, _mlo)) in enumerate(_C.items()):
     for _suf, _day, _t, _kind, _n, _sf, _tr, _fs, _co in _PATTERN:
+        _name = {"center": _cn, "mobile_clinic": _mn, "home_visit": HOME_VISIT}[_kind]
         _mob = _kind == "mobile_clinic"
-        DEMO_SLOTS.append((f"S{_i + 1}{_suf}", _mn if _mob else _cn, _d, _SCREEN[_d],
+        DEMO_SLOTS.append((f"S{_i + 1}{_suf}", _name, _d, _SCREEN[_d],
                            f"{_day}T{_t}:00+03:00", _n, _sf, _tr, _kind, _fs, _co,
                            _mla if _mob else _la, _mlo if _mob else _lo))
 

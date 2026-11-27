@@ -5,9 +5,11 @@
   3. record_barrier          if they say no: save the ONE main reason (fixed code)
   4. send_location_link      with consent, text a one-time link to share location
   5. get_solutions           options that remove their reason (evening, mobile clinic, ride, ...)
-  6. request_transport       a ride or a metro plan for the booked appointment
-  7. request_nurse_callback  for fear or medical questions
-  8. opt_out                 never call again
+  6. request_transport       a car (alone / with family / wheelchair) or the metro, with a pickup time
+  7. set_preferences         wheelchair-ready center, home test, companion reminders, female doctor
+  8. confirm_booking         after reading the plan back and hearing a clear yes
+  9. request_nurse_callback  for medical questions or wanting a person
+ 10. opt_out                 never call again
 
 Design rules:
 - Every request needs the shared tool key (X-Aoun-Key) AND a conversation bound to a call the server started.
@@ -23,6 +25,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from .db import DISTRICT_AR
 from .security import hash_token, new_id, require_tool_key, secrets_token
 
 RIYADH = timezone(timedelta(hours=3))
@@ -50,8 +53,9 @@ class Empty(Strict):
 
 
 class Reason(str, Enum):
-    transport = "transport"              # no car / far away
-    work_hours = "work_hours"            # work or the time does not suit
+    transport = "transport"              # "ما عندي مشوار": no one to take them
+    far = "far"                          # "المكان بعيد"
+    work_hours = "work_hours"            # "الوقت ما يناسب": work or the time does not suit
     fear = "fear"                        # afraid of the test or the result
     no_need = "no_need"                  # "I have no symptoms"
     needs_companion = "needs_companion"  # needs a companion / mahram
@@ -75,12 +79,39 @@ class ConfirmIn(Strict):
 
 
 class TransportMode(str, Enum):
-    ride = "ride"
+    car = "car"
     metro = "metro"
+
+
+class Party(str, Enum):
+    alone = "alone"            # "لحالي"
+    group = "group"            # "معي واحد أو أكثر": family car
+    wheelchair = "wheelchair"  # "معي كرسي متحرك"
+
+
+class Pickup(str, Enum):
+    on_time = "on_time"  # 30 minutes before the appointment
+    early = "early"      # 60 minutes before
+
+
+PICKUP_MIN = {Pickup.on_time: 30, Pickup.early: 60}
 
 
 class TransportIn(Strict):
     mode: TransportMode
+    party: Party = Party.alone
+    pickup: Pickup = Pickup.on_time
+
+
+class Pref(str, Enum):
+    wheelchair_center = "wheelchair_center"      # "مركز يدعم الكرسي المتحرك"
+    home_test = "home_test"                      # "فحص منزلي"
+    companion_reminders = "companion_reminders"  # "مرافق من العائلة يستلم التنبيهات"
+    female_doctor = "female_doctor"              # "طبيبة"
+
+
+class PrefsIn(Strict):
+    prefs: list[Pref] = Field(default_factory=list, max_length=4)
 
 
 class NurseTopic(str, Enum):
@@ -110,6 +141,53 @@ def label_ar(start_iso: str) -> str:
     period = "الصبح" if d.hour < 12 else ("العصر" if d.hour < 17 else "المساء")
     minutes = f":{d.minute:02d}" if d.minute else ""
     return f"{AR_DAYS[d.weekday()]} {d.day} {AR_MONTHS[d.month - 1]}، الساعة {hour}{minutes} {period}"
+
+
+def time_ar(d: datetime) -> str:
+    d = d.astimezone(RIYADH)
+    hour = d.hour % 12 or 12
+    period = "الصبح" if d.hour < 12 else ("العصر" if d.hour < 17 else "المساء")
+    return f"{hour}:{d.minute:02d} {period}"
+
+
+def band(r) -> str:
+    """morning | evening | weekend | day, for the 'what time suits you' question."""
+    d = datetime.fromisoformat(r["start_local"])
+    if d.weekday() in (4, 5):
+        return "weekend"
+    if d.hour < 12:
+        return "morning"
+    if d.hour >= 17:
+        return "evening"
+    return "day"
+
+
+def _plan(c, call_id):
+    c.execute("INSERT OR IGNORE INTO call_plans (call_id) VALUES (?)", (call_id,))
+    return c.execute("SELECT * FROM call_plans WHERE call_id = ?", (call_id,)).fetchone()
+
+
+def _prefs(row) -> list[str]:
+    return [p for p in (row["prefs"] or "").split(",") if p]
+
+
+def _target_slot(c, call_id, case_id):
+    """The appointment the plan is about: the booking if there is one, else the held one."""
+    return (c.execute("""SELECT sl.* FROM bookings b JOIN slots sl ON sl.id = b.slot_id
+                         WHERE b.case_id = ? AND b.status = 'confirmed'""", (case_id,)).fetchone()
+            or c.execute("""SELECT sl.* FROM holds h JOIN slots sl ON sl.id = h.slot_id
+                            WHERE h.call_id = ? AND h.status = 'held'""", (call_id,)).fetchone())
+
+
+def _ride_view(plan, slot) -> dict | None:
+    if not plan or not plan["ride_mode"]:
+        return None
+    if plan["ride_mode"] == "metro":
+        return {"mode": "metro", "note": "Riyadh Metro from the nearest station, ticket ready in Darb"}
+    out = {"mode": "car", "party": plan["ride_party"]}
+    if slot is not None:
+        out["pickup_at"] = time_ar(datetime.fromisoformat(slot["start_local"]) - timedelta(minutes=plan["pickup_minutes"] or 30))
+    return out
 
 
 def km(lat1, lon1, lat2, lon2) -> float:
@@ -157,7 +235,8 @@ def _case(db, case_id):
 
 
 def _slot_view(r) -> dict:
-    return {"center": r["center"], "when": label_ar(r["start_local"]),
+    return {"center": r["center"], "when": label_ar(r["start_local"]), "place_kind": r["kind"],
+            "time_band": band(r),
             "mobile_clinic": r["kind"] == "mobile_clinic", "female_staff": bool(r["female_staff"]),
             "companion_welcome": bool(r["companion_ok"]), "transport_available": bool(r["transport"])}
 
@@ -177,24 +256,28 @@ def place_hold(c, call_id: str, case_id: str, district: str, screening: str, now
     return False
 
 
-# What each reason gets offered. Filters run over open future slots in the person's district.
+# What each reason gets offered, as in the prototype call. Filters run over open future slots in the
+# person's district. "pick" chooses one slot per tag so the agent can ask the prototype's question
+# ("morning, evening or weekend?", "mobile clinic or at home?") and book the matching one.
 SOLUTIONS = {
-    Reason.work_hours: ("Evening or weekend appointments.",
-                        lambda s, d: d.hour >= 17 or d.weekday() in (4, 5)),
-    Reason.transport: ("A mobile clinic close to home, or a center with a free ride.",
-                       lambda s, d: s["kind"] == "mobile_clinic" or s["transport"]),
+    Reason.transport: ("Keep the held appointment and arrange the trip: a car to the door or the metro.", None),
+    Reason.far: ("Two closer choices: the mobile clinic by the neighbourhood mosque, or a test at home.",
+                 lambda s, d: s["kind"] in ("mobile_clinic", "home_visit")),
+    Reason.work_hours: ("Another time: early morning, after Maghrib, or the weekend.",
+                        lambda s, d: s["kind"] == "center" and band(s) in ("morning", "evening", "weekend")),
+    Reason.fear: ("Keep the appointment: a tiny finger-prick, two minutes, a kind female doctor.", None),
+    Reason.no_need: ("Keep the appointment: some conditions come quietly with no symptoms; finding them early keeps you well for years.", None),
     Reason.childcare: ("A mobile clinic close to home, or an evening time.",
-                       lambda s, d: s["kind"] == "mobile_clinic" or d.hour >= 17),
+                       lambda s, d: s["kind"] == "mobile_clinic" or (s["kind"] == "center" and d.hour >= 17)),
     Reason.needs_companion: ("Appointments where a companion is welcome, with two places together.",
-                             lambda s, d: s["companion_ok"]),
+                             lambda s, d: s["kind"] == "center" and s["companion_ok"]),
     Reason.embarrassment: ("Appointments with female staff and a private room.",
-                           lambda s, d: s["female_staff"]),
-    Reason.fear: ("Keep the appointment, and a nurse calls first to explain and reassure.", None),
-    Reason.no_need: ("Keep the appointment: early screening finds issues before any symptoms appear.", None),
+                           lambda s, d: s["kind"] == "center" and s["female_staff"]),
     Reason.cost_concern: ("Keep the appointment: the screening is completely free.", None),
     Reason.language: ("Keep the appointment: an interpreter in their language will be at the center.", None),
-    Reason.other: ("The next open times.", lambda s, d: True),
+    Reason.other: ("The next open times.", lambda s, d: s["kind"] == "center"),
 }
+ONE_PER_TAG = {Reason.far: "place_kind", Reason.work_hours: "time_band"}
 
 
 # ---------- tools ----------
@@ -206,9 +289,11 @@ def get_appointment(body: Empty, request: Request):
     h = db.one("""SELECT h.status, sl.* FROM holds h JOIN slots sl ON sl.id = h.slot_id
                   WHERE h.call_id = ?""", s["id"])
     if h is None or h["status"] != "held":
-        return {"held": False, "message": "No appointment is held. Ask what time suits them and use get_solutions with reason other."}
-    return {"held": True, **_slot_view(h),
-            "message": "Tell them this appointment is held for them and ask if they confirm it."}
+        return {"held": False, "district": DISTRICT_AR.get(_case(db, s["case_id"])["district"], ""),
+                "message": "No appointment is held. Ask what time suits them and use get_solutions with reason work_hours."}
+    district = _case(db, s["case_id"])["district"]
+    return {"held": True, **_slot_view(h), "district": DISTRICT_AR.get(district, ""),
+            "message": "Say you arranged a simple check-up, then the day, time and center, and ask if that time suits them."}
 
 
 @router.post("/confirm_booking")
@@ -247,7 +332,15 @@ def confirm_booking(body: ConfirmIn, request: Request):
         c.execute("UPDATE call_sessions SET outcome = 'booked' WHERE id = ?", (s["id"],))
         _event(c, s["case_id"], "booking_confirmed", booking_id=bid)
         slot = c.execute("SELECT * FROM slots WHERE id = ?", (slot_id,)).fetchone()
-    return {"status": "confirmed", "booking_ref": bid, **_slot_view(slot)}
+        plan = _plan(c, s["id"])
+        if slot["kind"] == "home_visit" and plan["ride_mode"]:
+            c.execute("UPDATE call_plans SET ride_mode = NULL, ride_party = NULL, pickup_minutes = NULL WHERE call_id = ?", (s["id"],))
+        c.execute("UPDATE call_plans SET booking_id = ? WHERE call_id = ?", (bid, s["id"]))
+        plan = _plan(c, s["id"])
+        _sync_support(c, s["case_id"], plan)
+    return {"status": "confirmed", "booking_ref": bid, **_slot_view(slot),
+            "ride": _ride_view(plan, slot), "prefs": _prefs(plan),
+            "message": "Say it is confirmed and the full plan is in the Aoun app, a reminder comes a day before, then say goodbye and end the call."}
 
 
 @router.post("/record_barrier")
@@ -260,7 +353,7 @@ def record_barrier(body: RecordBarrierIn, request: Request):
                      ON CONFLICT(call_id) DO UPDATE SET reason = excluded.reason""",
                   (s["id"], s["case_id"], case["district"], body.reason.value, _now_utc().isoformat()))
         _event(c, s["case_id"], "barrier_reported", detail=body.reason.value)
-    return {"status": "recorded", "message": "Now ask for consent to share location, then call get_solutions."}
+    return {"status": "recorded", "message": "Now call get_solutions with the same reason and offer its choices."}
 
 
 @router.post("/send_location_link")
@@ -309,13 +402,25 @@ def get_solutions(body: SolutionsIn, request: Request):
     if rule is not None:
         rows = db.all("""SELECT * FROM slots WHERE district = ? AND screening = ? AND remaining > 0
                          ORDER BY start_local""", case["district"], case["screening"])
+        seen = set()
+        tag = ONE_PER_TAG.get(body.reason)
         for r in rows:
             d = datetime.fromisoformat(r["start_local"])
             if d <= now or (held is not None and r["id"] == held["id"]) or not rule(r, d):
                 continue
+            if tag:
+                key = _slot_view(r)[tag]
+                if key in seen:
+                    continue
+                seen.add(key)
             picked.append(r)
-        if body.reason in (Reason.transport, Reason.childcare) and distance is not None:
+        if body.reason == Reason.childcare and distance is not None:
             picked.sort(key=lambda r: (r["kind"] != "mobile_clinic", r["start_local"]))
+        if body.reason == Reason.work_hours:
+            order = {"morning": 0, "evening": 1, "weekend": 2}
+            picked.sort(key=lambda r: order[band(r)])
+        if body.reason == Reason.far:
+            picked.sort(key=lambda r: r["kind"] != "mobile_clinic")
         picked = picked[:MAX_OPTIONS]
 
     options = []
@@ -326,41 +431,106 @@ def get_solutions(body: SolutionsIn, request: Request):
             oid = new_id("of")
             c.execute("INSERT INTO offers VALUES (?,?,?,?)", (oid, s["id"], r["id"], _now_utc().isoformat()))
             options.append({"choice": oid, **_slot_view(r)})
+        if body.reason == Reason.fear:  # the prototype adds a female doctor for them
+            p = _plan(c, s["id"])
+            prefs = _prefs(p)
+            if Pref.female_doctor.value not in prefs:
+                prefs.append(Pref.female_doctor.value)
+                c.execute("UPDATE call_plans SET prefs = ? WHERE call_id = ?", (",".join(prefs), s["id"]))
     extras = []
-    if body.reason == Reason.transport:
-        extras.append("After booking, offer a free ride (request_transport mode ride) or a Riyadh Metro plan (mode metro).")
+    if body.reason == Reason.transport and held is not None:
+        start = datetime.fromisoformat(held["start_local"])
+        extras.append("Ask: a car to the door, or the metro? For a car ask how many are going (alone, with "
+                      "someone, a wheelchair), then the pickup time: "
+                      f"{time_ar(start - timedelta(minutes=30))} (pickup on_time) or "
+                      f"{time_ar(start - timedelta(minutes=60))} (pickup early). Then call request_transport.")
     if body.reason == Reason.fear:
-        extras.append("Offer a nurse call before the appointment (request_nurse_callback topic fear).")
+        extras.append("A female doctor is now in their preferences. Reassure them; no need to ask anything else.")
+    if body.reason == Reason.no_need:
+        extras.append("Then ask if they are convinced. If still unsure, ask what is making it hard and record that reason.")
     return {
         "plan": plan,
         "options": options,
         "location_shared": distance is not None,
         "nearest_center_km": round(distance, 1) if distance is not None else None,
         "extras": extras,
-        "message": ("Explain the plan simply, read back the option(s), and wait for a clear yes before "
-                    "calling confirm_booking with that option's choice value.") if options else
-                   "No matching times. Offer a nurse callback or a call back later.",
+        "message": ("Offer these choices in your words. Do not book yet: next call set_preferences, then read "
+                    "the whole plan back and only after a clear yes call confirm_booking with the chosen choice value.")
+                   if options else "No matching times. Offer a nurse callback or a call back later.",
     }
+
+
+def _sync_support(c, case_id, plan):
+    """Keep the ride on the booking in step with the plan (only once something is booked)."""
+    b = c.execute("""SELECT b.id, sl.transport FROM bookings b JOIN slots sl ON sl.id = b.slot_id
+                     WHERE b.case_id = ? AND b.status = 'confirmed'""", (case_id,)).fetchone()
+    if b is None or not plan["ride_mode"]:
+        return None
+    if plan["ride_mode"] == "metro":
+        status = "metro_plan_sent"
+    else:
+        status = "ride_requested" if b["transport"] else "ride_unavailable"
+    kind = plan["ride_mode"] + (":" + plan["ride_party"] if plan["ride_mode"] == "car" else "")
+    c.execute("""INSERT INTO support_requests VALUES (?,?,?,?)
+                 ON CONFLICT(booking_id) DO UPDATE SET kind = excluded.kind, status = excluded.status""",
+              (new_id("sr"), b["id"], kind, status))
+    _event(c, case_id, "transport_" + status, booking_id=b["id"])
+    return status
 
 
 @router.post("/request_transport")
 def request_transport(body: TransportIn, request: Request):
+    """Add the trip to the plan. It is held tentatively and goes through when the booking is confirmed."""
     s = _session(request, body.conversation_id)
     db = request.app.state.db
     with db.tx() as c:
-        b = c.execute("""SELECT b.id, sl.transport, sl.kind FROM bookings b JOIN slots sl ON sl.id = b.slot_id
-                         WHERE b.case_id = ? AND b.status = 'confirmed'""", (s["case_id"],)).fetchone()
-        if b is None:
-            raise HTTPException(409, "no_booking: confirm an appointment first")
-        if body.mode == TransportMode.metro:
-            status = "metro_plan_sent"
-        else:
-            status = "ride_requested" if b["transport"] else "ride_unavailable"
-        c.execute("""INSERT INTO support_requests VALUES (?,?,?,?)
-                     ON CONFLICT(booking_id) DO UPDATE SET kind = excluded.kind, status = excluded.status""",
-                  (new_id("sr"), b["id"], body.mode.value, status))
-        _event(c, s["case_id"], "transport_" + status, booking_id=b["id"])
-    return {"transport_status": status}
+        _plan(c, s["id"])
+        car = body.mode == TransportMode.car
+        c.execute("""UPDATE call_plans SET ride_mode = ?, ride_party = ?, pickup_minutes = ?
+                     WHERE call_id = ?""",
+                  (body.mode.value, body.party.value if car else None,
+                   PICKUP_MIN[body.pickup] if car else None, s["id"]))
+        if car and body.party == Party.wheelchair:
+            p = _plan(c, s["id"])
+            prefs = _prefs(p)
+            if Pref.wheelchair_center.value not in prefs:
+                c.execute("UPDATE call_plans SET prefs = ? WHERE call_id = ?",
+                          (",".join(prefs + [Pref.wheelchair_center.value]), s["id"]))
+        plan = _plan(c, s["id"])
+        slot = _target_slot(c, s["id"], s["case_id"])
+        status = _sync_support(c, s["case_id"], plan)
+    return {"transport_status": status or "held_until_confirmed", "ride": _ride_view(plan, slot),
+            "message": "Say it is booked tentatively and goes through when they confirm. Then call set_preferences."}
+
+
+@router.post("/set_preferences")
+def set_preferences(body: PrefsIn, request: Request):
+    """The prototype's 'anything to make your day easier?' step. Replaces the previous choice,
+    except a female doctor or wheelchair-ready center already added by the flow is kept."""
+    s = _session(request, body.conversation_id)
+    db = request.app.state.db
+    case = _case(db, s["case_id"])
+    home = None
+    with db.tx() as c:
+        p = _plan(c, s["id"])
+        keep = [x for x in _prefs(p) if x in (Pref.female_doctor.value, Pref.wheelchair_center.value)]
+        chosen = list(dict.fromkeys(keep + [x.value for x in body.prefs]))
+        c.execute("UPDATE call_plans SET prefs = ? WHERE call_id = ?", (",".join(chosen), s["id"]))
+        if Pref.home_test.value in chosen:
+            r = c.execute("""SELECT * FROM slots WHERE district = ? AND screening = ? AND kind = 'home_visit'
+                             AND remaining > 0 ORDER BY start_local LIMIT 1""",
+                          (case["district"], case["screening"])).fetchone()
+            if r is not None:
+                oid = new_id("of")
+                c.execute("INSERT INTO offers VALUES (?,?,?,?)", (oid, s["id"], r["id"], _now_utc().isoformat()))
+                home = {"choice": oid, **_slot_view(r)}
+                c.execute("UPDATE call_plans SET ride_mode = NULL, ride_party = NULL, pickup_minutes = NULL WHERE call_id = ?",
+                          (s["id"],))
+    msg = "Now read the plan back: day and time, place, the trip, the companion, the preferences. Then ask: shall we confirm?"
+    if Pref.companion_reminders.value in chosen:
+        msg = ("Never ask for the companion's name or number: they pick the companion in the Aoun app, who gets "
+               "reminders only and never results. " + msg)
+    return {"prefs": chosen, "home_visit_option": home, "message": msg}
 
 
 @router.post("/request_nurse_callback")
