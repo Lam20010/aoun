@@ -78,6 +78,10 @@ every screen follow. They can also pick it in settings. Arabic and Urdu read rig
 - Buttons open Google Maps directions (car, metro), Uber with the center already set as the drop-off, and the Darb app
   (Darb has no public link to a route, so it opens the store page).
 
+## Sehhaty and cost
+
+The app shows the Sehhaty account (masked ID, insurance) in Settings, with a demo switcher between four profiles. Each slot and the plan show the cost: free through Sehhaty, or the private price, what insurance pays and what you pay. See the backend README for the rules.
+
 ## Privacy
 
 - No API keys in the app.

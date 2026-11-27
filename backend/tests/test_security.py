@@ -98,7 +98,9 @@ def test_refusal_gets_solutions_and_switching_releases_the_hold(client):
     before = db.one("SELECT remaining FROM slots WHERE id=?", held_slot)["remaining"]
     assert tool(client, "record_barrier", tok, reason="work_hours").status_code == 200
     sol = tool(client, "get_solutions", tok, reason="work_hours").json()
-    assert [o["time_band"] for o in sol["options"]] == ["morning", "evening", "weekend"]
+    assert [o["time_band"] for o in sol["options"]][:3] == ["morning", "evening", "weekend"]
+    assert all(o["cost"] == "free" for o in sol["options"][:3])
+    assert sol["options"][-1]["cost"] == "paid" and sol["options"][-1]["private_clinic"]  # a paid late/Friday choice
     assert all(o["choice"].startswith("of_") for o in sol["options"])
     r = tool(client, "confirm_booking", tok, choice=sol["options"][0]["choice"])
     assert r.status_code == 200

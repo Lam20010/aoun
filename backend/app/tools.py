@@ -62,6 +62,7 @@ class Reason(str, Enum):
     needs_companion = "needs_companion"  # needs a companion / mahram
     embarrassment = "embarrassment"      # feels embarrassed
     cost_concern = "cost_concern"        # thinks it costs money
+    sooner = "sooner"                    # wants an earlier appointment, even if paid
     language = "language"
     childcare = "childcare"              # no one to look after children or dependants
     other = "other"
@@ -111,6 +112,7 @@ class Pref(str, Enum):
     home_test = "home_test"                      # "فحص منزلي"
     companion_reminders = "companion_reminders"  # "مرافق من العائلة يستلم التنبيهات"
     female_doctor = "female_doctor"              # "طبيبة"
+    virtual_consult = "virtual_consult"          # "استشارة فيديو قبل الفحص عبر صحتي" (free)
 
 
 class PrefsIn(Strict):
@@ -237,7 +239,24 @@ def _case(db, case_id):
                      FROM cases c JOIN residents r ON r.id = c.resident_id WHERE c.id = ?""", case_id)
 
 
-def _slot_view(r) -> dict:
+def _person(db_or_c, case_id: str):
+    q = "SELECT r.*, c.screening AS case_screening FROM cases c JOIN residents r ON r.id = c.resident_id WHERE c.id = ?"
+    return db_or_c.execute(q, (case_id,)).fetchone() if hasattr(db_or_c, "execute") and not hasattr(db_or_c, "one") else db_or_c.one(q, case_id)
+
+
+def _cost(r, person) -> dict:
+    """Cost for the agent to say: free through Sehhaty, or the price and what insurance covers. Never ID data."""
+    fkind = catalog.facility(r["facility_id"])["kind"] if r["facility_id"] else "phc"
+    q = catalog.quote(fkind, r["kind"], person["case_screening"] if person else r["screening"], person)
+    say = ("free, booked through Sehhaty" if q["free"] else
+           f"paid private clinic: price SAR {q['price']}, insurance pays {q['insurance_pays']}, they pay SAR {q['you_pay']}"
+           if q["basis"] == "insurance" else f"paid private clinic: SAR {q['price']}, no insurance on their Sehhaty record")
+    return {"cost": "free" if q["free"] else "paid", "price_sar": q["price"], "you_pay_sar": q["you_pay"],
+            "insurance_pays_sar": q["insurance_pays"], "cost_say": say, "cost_ar": q["note_ar"],
+            "private_clinic": fkind == "private_clinic"}
+
+
+def _slot_view(r, person=None) -> dict:
     extra = {}
     if r["doctor_id"]:
         d = catalog.doctor(r["doctor_id"])
@@ -245,7 +264,8 @@ def _slot_view(r) -> dict:
     return {"center": r["center"], "when": label_ar(r["start_local"]), "place_kind": r["kind"], **extra,
             "time_band": band(r),
             "mobile_clinic": r["kind"] == "mobile_clinic", "female_staff": bool(r["female_staff"]),
-            "companion_welcome": bool(r["companion_ok"]), "transport_available": bool(r["transport"])}
+            "companion_welcome": bool(r["companion_ok"]), "transport_available": bool(r["transport"]),
+            **_cost(r, person)}
 
 
 def place_hold(c, call_id: str, case_id: str, district: str, screening: str, now: datetime) -> bool:
@@ -280,7 +300,10 @@ SOLUTIONS = {
                              lambda s, d: s["kind"] == "center" and s["companion_ok"]),
     Reason.embarrassment: ("Appointments with female staff and a private room.",
                            lambda s, d: s["kind"] == "center" and s["female_staff"]),
-    Reason.cost_concern: ("Keep the appointment: the screening is completely free.", None),
+    Reason.cost_concern: ("Keep the appointment: at the Ministry health center, booked through Sehhaty, the screening is "
+                          "completely free. Only private clinics cost money, and their insurance would pay part.", None),
+    Reason.sooner: ("The earliest free time at a Ministry center, and the earliest at a private clinic (paid; say the "
+                    "price and what insurance covers).", lambda s, d: s["kind"] == "center"),
     Reason.language: ("Keep the appointment: an interpreter in their language will be at the center.", None),
     Reason.other: ("The next open times.", lambda s, d: s["kind"] == "center"),
 }
@@ -299,8 +322,14 @@ def get_appointment(body: Empty, request: Request):
         return {"held": False, "district": DISTRICT_AR.get(_case(db, s["case_id"])["district"], ""),
                 "message": "No appointment is held. Ask what time suits them and use get_solutions with reason work_hours."}
     district = _case(db, s["case_id"])["district"]
-    return {"held": True, **_slot_view(h), "district": DISTRICT_AR.get(district, ""),
-            "message": "Say you arranged a simple check-up, then the day, time and center, and ask if that time suits them."}
+    person = _person(db, s["case_id"])
+    ins = catalog.insurance(person)
+    return {"held": True, **_slot_view(h, person), "district": DISTRICT_AR.get(district, ""),
+            "booked_through": "Sehhaty (the appointment will appear in their Sehhaty app too)",
+            "insurance_on_file": bool(ins), "insurance_copay_percent": ins["copay_pct"] if ins else None,
+            "message": "Say you arranged a simple check-up, then the day, time and center, that it is free through "
+                       "Sehhaty, and ask if that time suits them. Never ask for ID or insurance numbers: Aoun already "
+                       "has what it needs from Sehhaty."}
 
 
 @router.post("/confirm_booking")
@@ -312,7 +341,7 @@ def confirm_booking(body: ConfirmIn, request: Request):
                      (s["case_id"],)).fetchone():
             b = c.execute("""SELECT b.id, sl.* FROM bookings b JOIN slots sl ON sl.id = b.slot_id
                              WHERE b.case_id = ? AND b.status = 'confirmed'""", (s["case_id"],)).fetchone()
-            return {"status": "confirmed", "booking_ref": b["id"], **_slot_view(b), "replayed": True}
+            return {"status": "confirmed", "booking_ref": b["id"], **_slot_view(b, _person(db, s["case_id"])), "replayed": True}
         hold = c.execute("SELECT * FROM holds WHERE call_id = ?", (s["id"],)).fetchone()
 
         if body.choice == "held":
@@ -333,8 +362,8 @@ def confirm_booking(body: ConfirmIn, request: Request):
             slot_id, offer_id = offer["slot_id"], offer["id"]
 
         bid = new_id("bk")
-        c.execute("INSERT INTO bookings VALUES (?,?,?,?,?,?)",
-                  (bid, s["case_id"], slot_id, offer_id, "confirmed", _now_utc().isoformat()))
+        c.execute("INSERT INTO bookings (id,case_id,slot_id,offer_id,status,confirmed_at,sehhaty_ref) VALUES (?,?,?,?,?,?,?)",
+                  (bid, s["case_id"], slot_id, offer_id, "confirmed", _now_utc().isoformat(), catalog.new_sehhaty_ref()))
         c.execute("UPDATE cases SET status = 'booked' WHERE id = ?", (s["case_id"],))
         c.execute("UPDATE call_sessions SET outcome = 'booked' WHERE id = ?", (s["id"],))
         _event(c, s["case_id"], "booking_confirmed", booking_id=bid)
@@ -350,7 +379,9 @@ def confirm_booking(body: ConfirmIn, request: Request):
                   (lang, s["case_id"]))
         c.execute("UPDATE call_sessions SET language = ? WHERE id = ?", (lang, s["id"]))
     send_booking_text(request, s["case_id"], slot, lang)
-    return {"status": "confirmed", "booking_ref": bid, **_slot_view(slot), "language": lang,
+    person = _person(db, s["case_id"])
+    ref = db.one("SELECT sehhaty_ref FROM bookings WHERE id = ?", bid)["sehhaty_ref"]
+    return {"status": "confirmed", "booking_ref": bid, "sehhaty_ref": ref, **_slot_view(slot, person), "language": lang,
             "ride": _ride_view(plan, slot), "prefs": _prefs(plan),
             "message": "Say it is confirmed and the full plan is in the Aoun app, a reminder comes a day before, then say goodbye and end the call."}
 
@@ -456,9 +487,11 @@ def get_solutions(body: SolutionsIn, request: Request):
 
     held = db.one("""SELECT sl.* FROM holds h JOIN slots sl ON sl.id = h.slot_id
                      WHERE h.call_id = ? AND h.status = 'held'""", s["id"])
+    person = _person(db, s["case_id"])
     picked = []
     if rule is not None:
         rows = db.all("""SELECT * FROM slots WHERE district = ? AND screening IN (?, 'general') AND remaining > 0
+                         AND (facility_id IS NULL OR facility_id NOT LIKE 'C-%')
                          ORDER BY screening = 'general', start_local""", case["district"], case["screening"])
         seen = set()
         tag = ONE_PER_TAG.get(body.reason)
@@ -467,7 +500,7 @@ def get_solutions(body: SolutionsIn, request: Request):
             if d <= now or (held is not None and r["id"] == held["id"]) or not rule(r, d):
                 continue
             if tag:
-                key = _slot_view(r)[tag]
+                key = _slot_view(r, person)[tag]
                 if key in seen:
                     continue
                 seen.add(key)
@@ -480,15 +513,25 @@ def get_solutions(body: SolutionsIn, request: Request):
         if body.reason == Reason.far:
             picked.sort(key=lambda r: r["kind"] != "mobile_clinic")
         picked = picked[:MAX_OPTIONS]
+        if body.reason == Reason.sooner:
+            picked = picked[:1]
+        # A paid private-clinic choice when the free ones do not fit: earlier, very late, or on Friday.
+        if body.reason in (Reason.sooner, Reason.work_hours):
+            for r in db.all("""SELECT * FROM slots WHERE facility_id LIKE 'C-%' AND screening IN (?, 'general')
+                               AND remaining > 0 ORDER BY start_local""", case["screening"]):
+                d = datetime.fromisoformat(r["start_local"])
+                if d > now and (body.reason == Reason.sooner or d.hour >= 21 or d.weekday() == 4):
+                    picked.append(r)
+                    break
 
     options = []
     with db.tx() as c:
         if rule is None and held is not None:
-            options.append({"choice": "held", **_slot_view(held)})
+            options.append({"choice": "held", **_slot_view(held, person)})
         for r in picked:
             oid = new_id("of")
             c.execute("INSERT INTO offers VALUES (?,?,?,?)", (oid, s["id"], r["id"], _now_utc().isoformat()))
-            options.append({"choice": oid, **_slot_view(r)})
+            options.append({"choice": oid, **_slot_view(r, person)})
         if body.reason == Reason.fear:  # the prototype adds a female doctor for them
             p = _plan(c, s["id"])
             prefs = _prefs(p)
@@ -506,6 +549,15 @@ def get_solutions(body: SolutionsIn, request: Request):
         extras.append("A female doctor is now in their preferences. Reassure them; no need to ask anything else.")
     if body.reason == Reason.no_need:
         extras.append("Then ask if they are convinced. If still unsure, ask what is making it hard and record that reason.")
+    if body.reason in (Reason.fear, Reason.no_need, Reason.embarrassment):
+        extras.append("You may also offer a free video consultation with a doctor through Sehhaty before the test "
+                      "(set_preferences with virtual_consult).")
+    if any(o.get("cost") == "paid" for o in options):
+        extras.append("Offer the free choices first. For a paid private-clinic choice, say clearly it is a private clinic, "
+                      "the price, what their insurance covers and what they pay (cost_say). Book it only if they accept the cost.")
+    if body.reason == Reason.cost_concern:
+        extras.append("Reassure them: Ministry health centers, mobile clinics, home care and video consultations booked "
+                      "through Sehhaty are free.")
     return {
         "plan": plan,
         "options": options,
@@ -581,10 +633,12 @@ def set_preferences(body: PrefsIn, request: Request):
             if r is not None:
                 oid = new_id("of")
                 c.execute("INSERT INTO offers VALUES (?,?,?,?)", (oid, s["id"], r["id"], _now_utc().isoformat()))
-                home = {"choice": oid, **_slot_view(r)}
+                home = {"choice": oid, **_slot_view(r, _person(db, s["case_id"]))}
                 c.execute("UPDATE call_plans SET ride_mode = NULL, ride_party = NULL, pickup_minutes = NULL WHERE call_id = ?",
                           (s["id"],))
     msg = "Now read the plan back: day and time, place, the trip, the companion, the preferences. Then ask: shall we confirm?"
+    if Pref.virtual_consult.value in chosen:
+        msg = ("A free video consultation through Sehhaty is added: the doctor calls them the evening before the test. " + msg)
     if Pref.companion_reminders.value in chosen:
         msg = ("Never ask for the companion's name or number: they pick the companion in the Aoun app, who gets "
                "reminders only and never results. " + msg)

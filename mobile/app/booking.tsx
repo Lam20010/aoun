@@ -24,14 +24,15 @@ export default function Booking() {
   const [district, setDistrict] = useState<string | undefined>(undefined);
   const [districts, setDistricts] = useState<{ key: string; ar: string; en: string }[]>([]);
   useEffect(() => { api.catalog().then((c) => setDistricts(c.districts ?? [])).catch(() => {}); }, []);
+  const [paid, setPaid] = useState(false);
   const [slots, setSlots] = useState<Slot[] | null>(null);
   const [day, setDay] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(() => {
     setSlots(null);
-    api.slots({ days: 10, female, district }).then((r) => setSlots(r.slots)).catch(() => setSlots([]));
-  }, [female, district]);
+    api.slots({ days: 10, female, district, private: paid }).then((r) => setSlots(r.slots)).catch(() => setSlots([]));
+  }, [female, district, paid]);
   useEffect(() => { load(); }, [load]);
 
   const dayKey = (s: Slot) => when(s.iso, 'en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -43,7 +44,8 @@ export default function Booking() {
 
   const book = (s: Slot) => {
     const doctor = s.doctor ? pick(s.doctor as never, 'name') : placeName(s, t, lang);
-    Alert.alert(t('bookThis'), t('bookAsk', { when: when(s.iso, locale), doctor }), [
+    const cost = s.cost ? '\n' + (s.cost.free ? t('freeSehhaty') : (lang === 'ar' ? s.cost.note_ar : s.cost.note_en)) : '';
+    Alert.alert(t('bookThis'), t('bookAsk', { when: when(s.iso, locale), doctor }) + cost, [
       { text: t('back'), style: 'cancel' },
       { text: t('confirm'), onPress: async () => {
         setBusy(true);
@@ -67,6 +69,10 @@ export default function Booking() {
         <Row style={{ justifyContent: 'space-between' }}>
           <Txt size={15} weight="600">{t('femaleOnly')}</Txt>
           <Switch value={female} onValueChange={(v) => { setFemaleSet(true); setFemale(v); }} trackColor={{ true: C.teal, false: C.line }} />
+        </Row>
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Txt size={15} weight="600" style={{ flex: 1 }}>{t('showPrivate')}</Txt>
+          <Switch value={paid} onValueChange={setPaid} trackColor={{ true: C.teal, false: C.line }} />
         </Row>
         <View style={{ flexDirection: rtl ? 'row-reverse' : 'row', flexWrap: 'wrap', gap: 8 }}>
           {districts.map((d) => {
@@ -105,6 +111,7 @@ export default function Booking() {
           <Row gap={6}><Icon d={ICON.pin} size={16} color={C.inkSoft} /><Txt size={15} style={{ flex: 1 }}>{placeName(s, t, lang)}{s.kind === 'center' && lang === 'ar' ? ' · حي ' + s.district_ar : ''}</Txt></Row>
           {s.doctor && <Row gap={6}><Icon d={ICON.people} size={16} color={C.inkSoft} /><Txt size={14} style={{ flex: 1 }}>{pick(s.doctor as never, 'name')} · {pick(s.doctor as never, 'clinic')}</Txt></Row>}
           <Row gap={6} style={{ flexWrap: 'wrap' }}>
+            {s.cost && <Pill text={s.cost.free ? t('freeSehhaty') : t('privateClinic') + ' · ' + t('youPay', { n: s.cost.you_pay })} tone={s.cost.free ? 'mint' : 'amber'} />}
             {s.female_staff && <Pill text={t('femaleStaff')} tone="mint" />}
             {s.wheelchair && <Pill text={t('wheelchair')} tone="mint" />}
           </Row>

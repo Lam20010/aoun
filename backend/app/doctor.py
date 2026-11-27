@@ -228,7 +228,7 @@ def doctor_catalog(doc=Depends(current_doctor)):
 @router.get("/doctor/api/me")
 def me(request: Request, doc=Depends(current_doctor)):
     db = request.app.state.db
-    rows = db.all("""SELECT b.status AS bstatus, sl.start_local, sl.kind, c.screening, r.*
+    rows = db.all("""SELECT b.status AS bstatus, b.sehhaty_ref, sl.start_local, sl.kind, sl.facility_id, c.screening, r.*
                      FROM bookings b JOIN slots sl ON sl.id = b.slot_id JOIN cases c ON c.id = b.case_id
                      JOIN residents r ON r.id = c.resident_id
                      WHERE sl.doctor_id = ? AND b.status IN ('confirmed','attended') ORDER BY sl.start_local""", doc["id"])
@@ -239,7 +239,10 @@ def me(request: Request, doc=Depends(current_doctor)):
                               "status": r["bstatus"], "screening": r["screening"],
                               "screening_ar": catalog.SCREENINGS.get(r["screening"], {}).get("ar", r["screening"]),
                               "screening_en": catalog.SCREENINGS.get(r["screening"], {}).get("en", r["screening"]),
-                              "age_band": r["age_band"], "language": r["language"], "messages": unread.get(r["id"], 0)}
+                              "age_band": r["age_band"], "language": r["language"], "messages": unread.get(r["id"], 0),
+                              "sehhaty_ref": r["sehhaty_ref"],
+                              "cost": catalog.quote(catalog.facility(r["facility_id"])["kind"] if r["facility_id"] else "phc",
+                                                    r["kind"], r["screening"], r)}
                              for r in rows]}
 
 
@@ -287,7 +290,8 @@ def patient(rid: str, request: Request, lang: str | None = None, doc=Depends(cur
                         "language": r["language"],
                         "family_history": [catalog.FAMILY_HISTORY[x][0] for x in ((fam["codes"] if fam else "") or "").split(",") if x],
                         "family_history_en": [catalog.FAMILY_HISTORY[x][1] for x in ((fam["codes"] if fam else "") or "").split(",") if x],
-                        "prefs": [x for x in ((prefs["prefs"] if prefs else "") or "").split(",") if x]},
+                        "prefs": [x for x in ((prefs["prefs"] if prefs else "") or "").split(",") if x],
+                        "sehhaty": catalog.sehhaty_profile(r)},
             **full_record(db, vault, rid), "meds": meds_view(db, vault, rid), "messages": msgs}
 
 

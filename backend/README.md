@@ -51,6 +51,24 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
   is shown translated (doctor: Arabic or English; patient: their app language), with "show original". Translations stay in memory
   only. Without the key, messages show as written.
 
+## Sehhaty integration (simulated)
+
+The demo assumes Aoun is linked to Sehhaty. Nothing here calls the real Sehhaty; it behaves the way the integration would:
+
+- **Bookings live in Sehhaty.** Every confirmed booking gets a Sehhaty reference (`SH-` + 8 digits) shown in the plan and the doctor portal.
+- **Identity and insurance come from Sehhaty.** The resident row holds the ID type (citizen / resident), only the last 4 digits of the ID, and the insurer, class and expiry. The agent is told never to ask for an ID or insurance; it only hears the cost.
+- **Cost is part of the plan.** `catalog.quote()` decides:
+  - Health centers, mobile clinics, home visits and video consultations → **free** (MOH primary care booked through Sehhaty).
+  - Private clinics (C-NAKHEEL, C-SHIFA) → listed price; with insurance the patient pays the class copay (A 10% up to 50 SAR, B 20% up to 75, C 20% up to 100); without insurance the full price.
+- **The agent adapts to Sehhaty's options** through `get_solutions`:
+  - `sooner` → the earliest free slot plus the earliest private slot, with its price.
+  - `work_hours` → evening/Friday free options first, then a late or Friday private slot.
+  - fear / no need / embarrassment → offers a free video consultation first.
+  - `cost_concern` → reminds that the visit is free at the health center.
+- **Demo profiles** (`citizen`, `citizen_insured`, `resident_insured`, `resident_uninsured`) are switchable from the app settings or `PATCH /patient/sehhaty-profile` (demo mode only).
+
+Insurer names, classes and private prices are invented for the demo.
+
 ## The call, step by step
 
 1. "السلام عليكم، معك عون من وزارة الصحة. عساك بخير وصحة؟" The agent introduces itself.

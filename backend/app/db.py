@@ -18,7 +18,13 @@ CREATE TABLE IF NOT EXISTS residents (
     language TEXT NOT NULL,              -- preferred language code, never nationality
     phone_enc TEXT NOT NULL,             -- Fernet-encrypted phone number
     contact_permission INTEGER NOT NULL, -- 1 allowed, 0 declined / opted out
-    gender TEXT NOT NULL DEFAULT 'f'      -- picks the agent voice (Rufaida for women, Rafeed for men)
+    gender TEXT NOT NULL DEFAULT 'f',     -- picks the agent voice (Rufaida for women, Rafeed for men)
+    -- from Sehhaty (simulated): identity type, the last 4 digits only, and insurance
+    id_type TEXT NOT NULL DEFAULT 'citizen',
+    id_last4 TEXT,
+    insurer TEXT NOT NULL DEFAULT '',
+    insurance_class TEXT NOT NULL DEFAULT '',
+    insurance_until TEXT
 );
 
 CREATE TABLE IF NOT EXISTS cases (
@@ -92,7 +98,8 @@ CREATE TABLE IF NOT EXISTS bookings (
     slot_id TEXT NOT NULL REFERENCES slots(id),
     offer_id TEXT NOT NULL UNIQUE,       -- one offer can become at most one booking (idempotency)
     status TEXT NOT NULL,                -- confirmed | cancelled | missed | attended
-    confirmed_at TEXT NOT NULL
+    confirmed_at TEXT NOT NULL,
+    sehhaty_ref TEXT                     -- the appointment number in Sehhaty (simulated)
 );
 
 CREATE TABLE IF NOT EXISTS support_requests (
@@ -332,9 +339,7 @@ def generated_slots(start_day: str, days: int = 21) -> list[tuple]:
     d0 = date.fromisoformat(start_day)
     for di in range(days):
         day = d0 + _td(days=di)
-        if day.weekday() == 4:  # Friday
-            continue
-        for dist in DISTRICTS:
+        for dist in (DISTRICTS if day.weekday() != 4 else ()):  # health centers close on Friday
             fid = phc_for(dist)
             f = _fac_info(fid)
             docs = doctors_at(fid)
@@ -344,6 +349,16 @@ def generated_slots(start_day: str, days: int = 21) -> list[tuple]:
                 places = 1 + (di * 7 + ti * 3 + len(dist)) % 3
                 out.append((f"G{fid[2:]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], dist, "general",
                             f"{day.isoformat()}T{t}:00+03:00", places, int(f["wheelchair"]), 1, "center",
+                            int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
+        # private clinics: earlier, later and on Fridays, but paid
+        for fid in ("C-NAKHEEL", "C-SHIFA"):
+            f = _fac_info(fid)
+            docs = doctors_at(fid)
+            for ti, t in enumerate(["07:00", "13:00", "21:00", "22:30"]):
+                doc = docs[(ti + di) % len(docs)]
+                info = _doc(doc)
+                out.append((f"P{fid[2:5]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], f["district"], "general",
+                            f"{day.isoformat()}T{t}:00+03:00", 2, int(f["wheelchair"]), 1, "center",
                             int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
     return out
 

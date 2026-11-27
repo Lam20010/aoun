@@ -141,6 +141,9 @@ label{display:block;font-size:var(--fs-sm);font-weight:500;color:var(--soft);mar
 .appt .t{font-weight:600;font-size:var(--fs-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .appt .s{font-size:var(--fs-xs);color:var(--muted)}
 .appt .scr{font-size:var(--fs-sm);color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appt .cst{display:block;font-size:var(--fs-xs);color:var(--teal);font-weight:500}
+.appt .cst.paid{color:var(--amber)}
+.sehref{display:flex;gap:8px;align-items:center;margin:0 18px;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:var(--fs-sm);color:var(--soft)}
 .appt .tm{font-weight:600;font-size:var(--fs-md)}
 .appt .tm small{display:block;font-weight:400;font-size:var(--fs-xs);color:var(--muted)}
 
@@ -329,7 +332,7 @@ const T = {
     eGenetic:'النتائج الجينية ما تنحفظ. أرسل إحالة لاستشارة وراثية.', eType:'PDF أو صورة فقط', eNotYours:'هذا المراجع مو محجوز عندك',
     hospital:'مستشفى', private_clinic:'عيادة خاصة', lab:'مختبر', phc:'مركز صحي',
     normal:'طبيعي', borderline:'حدّي', high:'مرتفع', low:'منخفض', positive:'إيجابي', negative:'سلبي',
-    translatedLbl:'مترجمة', showOriginal:'عرض الأصل', showTranslation:'عرض الترجمة', female_doctor:'طبيبة', wheelchair_center:'يدعم الكرسي المتحرك', home_test:'فحص منزلي', companion_reminders:'مرافق يستلم التذكير', now:'الآن', minAgo:'قبل {n} د', hrAgo:'قبل {n} س',
+    identity:'الهوية (من صحتي)', insurance:'التأمين', insClass:'فئة {c} · تحمّل {p}٪', noInsurance:'بدون تأمين', cost:'تكلفة الزيارة', free:'مجاني', youPay:'{n} ريال على المراجع', sehhatyRef:'رقم الموعد في صحتي', freeSehhaty:'مجاني · صحتي', privatePaid:'خاص · {n} ريال', translatedLbl:'مترجمة', showOriginal:'عرض الأصل', showTranslation:'عرض الترجمة', female_doctor:'طبيبة', wheelchair_center:'يدعم الكرسي المتحرك', home_test:'فحص منزلي', companion_reminders:'مرافق يستلم التذكير', now:'الآن', minAgo:'قبل {n} د', hrAgo:'قبل {n} س',
   },
   en: {
     aoun:'Aoun', portal:'Doctor portal', ministry:'Aoun · Ministry of Health', loginNote:'Sign in with your Aoun doctor ID and password.', doctorId:'Doctor ID', password:'Password', signIn:'Sign in', signInTitle:'Sign in', show:'Show', hide:'Hide',
@@ -357,7 +360,7 @@ const T = {
     eGenetic:'Genetic results are not stored. Send a genetic counselling referral.', eType:'PDF or image only', eNotYours:'This patient is not booked with you',
     hospital:'Hospital', private_clinic:'Private clinic', lab:'Lab', phc:'Health center',
     normal:'Normal', borderline:'Borderline', high:'High', low:'Low', positive:'Positive', negative:'Negative',
-    translatedLbl:'Translated', showOriginal:'Show original', showTranslation:'Show translation', female_doctor:'Female doctor', wheelchair_center:'Wheelchair access', home_test:'Home test', companion_reminders:'Companion gets reminders', now:'now', minAgo:'{n} min ago', hrAgo:'{n} h ago',
+    identity:'Identity (from Sehhaty)', insurance:'Insurance', insClass:'Class {c} · {p}% co-pay', noInsurance:'No insurance', cost:'Visit cost', free:'Free', youPay:'Patient pays SAR {n}', sehhatyRef:'Sehhaty appointment no.', freeSehhaty:'Free · Sehhaty', privatePaid:'Private · SAR {n}', translatedLbl:'Translated', showOriginal:'Show original', showTranslation:'Show translation', female_doctor:'Female doctor', wheelchair_center:'Wheelchair access', home_test:'Home test', companion_reminders:'Companion gets reminders', now:'now', minAgo:'{n} min ago', hrAgo:'{n} h ago',
   },
 };
 let lang = ls.get('aoun_dr_lang') === 'en' ? 'en' : 'ar';
@@ -485,7 +488,7 @@ function drawShell(){
     <button class="appt ${current===a.patient?'on':''}" data-p="${a.patient}">
       <span class="who">${avatar(a.alias,i)}<span style="min-width:0"><div class="t">${esc(al(a.alias))}</div>
         <div class="s">${LANG[a.language]||a.language}${a.messages?' · '+icon('chat').replace('class="ico"','class="ico" style="width:12px;height:12px;vertical-align:-2px"')+' '+a.messages:''}</div></span></span>
-      <span class="scr">${esc(pk(a,'screening'))}</span>
+      <span class="scr">${esc(pk(a,'screening'))}<small class="cst ${a.cost&&!a.cost.free?'paid':''}">${a.cost?(a.cost.free?t('freeSehhaty'):t('privatePaid',{n:a.cost.price})):''}</small></span>
       <span class="tm num">${tm(a.start)}<small>${dy(a.start)}</small></span>
       <span class="st"><span class="pill ${a.status==='attended'?'gray':''}">${a.status==='attended'?t('attended'):t('booked')}</span></span>
     </button>`).join('') : `<div class="empty">${t('noAppts')}</div>`;
@@ -517,7 +520,11 @@ function render(d){
       <div><small>${t('appointment')}</small><b class="num">${a.start?dt(a.start):'—'}</b></div>
       <div><small>${t('lastResult')}</small><b class="num">${last?date(last.taken_at):'—'}</b></div>
       <div><small>${t('activeMeds')}</small><b class="num">${active}</b></div>
+      <div><small>${t('identity')}</small><b class="num">${p.sehhaty?esc(pk(p.sehhaty,'id_type'))+' · <span dir="ltr">'+esc(p.sehhaty.id_masked)+'</span>':'—'}</b></div>
+      <div><small>${t('insurance')}</small><b>${p.sehhaty&&p.sehhaty.insurance?esc(pk(p.sehhaty.insurance,'name'))+' · '+t('insClass',{c:p.sehhaty.insurance.class,p:p.sehhaty.insurance.copay_pct}):t('noInsurance')}</b></div>
+      <div><small>${t('cost')}</small><b>${a.cost?(a.cost.free?t('free'):esc(t('youPay',{n:a.cost.you_pay}))):'—'}</b></div>
     </div>
+    ${a.sehhaty_ref?`<div class="sehref">${icon('shield')}<span>${t('sehhatyRef')} <b class="num" dir="ltr">${esc(a.sehhaty_ref)}</b></span></div>`:''}
     <div class="tags">${tags.length?tags.map(([x,c])=>`<span class="tag ${c}">${esc(x)}</span>`).join(''):`<span class="tag k-teal">${t('noTags')}</span>`}</div>
     <div class="pacts">
       <button class="btn" data-go="result">${icon('flask')}${t('addResult')}</button>

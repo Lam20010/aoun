@@ -241,3 +241,36 @@ def test_no_translation_without_a_key(c, monkeypatch):
     book_first(c, h)
     c.post("/patient/messages", headers=h, json={"body": "Hello"})
     assert "translated" not in c.get("/patient/messages", headers=h).json()["messages"][0]
+
+
+def test_sehhaty_profile_prices_and_reference(c):
+    h = {"Authorization": "Bearer " + c.post("/patient/demo", json={"gender": "f", "lang": "ar", "profile": "resident_insured"}).json()["token"]}
+    me = c.get("/patient/me", headers=h).json()
+    assert me["sehhaty"]["id_masked"].startswith("••••••") and len(me["sehhaty"]["id_masked"]) == 10
+    assert me["sehhaty"]["insurance"]["copay_pct"] == 20
+    slots = c.get("/patient/slots", headers=h).json()["slots"]
+    free = [s for s in slots if s["cost"]["free"]]
+    paid = [s for s in slots if not s["cost"]["free"]]
+    assert free and paid and all(s["facility_kind"] == "private_clinic" for s in paid)
+    p = paid[0]["cost"]
+    assert p["you_pay"] == min(round(p["price"] * 0.2), 75) and p["insurance_pays"] == p["price"] - p["you_pay"]
+    plan = c.post("/patient/book", json={"slot_id": free[0]["id"]}, headers=h).json()
+    assert plan["sehhaty_ref"].startswith("SH-") and plan["slot"]["cost"]["free"]
+    c.patch("/patient/sehhaty-profile", json={"profile": "resident_uninsured"}, headers=h)
+    paid2 = [s for s in c.get("/patient/slots", headers=h).json()["slots"] if not s["cost"]["free"]][0]["cost"]
+    assert paid2["basis"] == "cash" and paid2["you_pay"] == paid2["price"]
+    dump = "\n".join(c.app.state.db.conn.iterdump())
+    assert "id_last4" in dump  # only the last four digits are kept; there is no column for a full ID
+
+
+def test_agent_hears_cost_but_no_identity(c):
+    h = patient(c)
+    token = h["Authorization"].split()[1]
+    k = c.post("/demo/start", json={"voice": "f", "lang": "ar", "p": token}).json()["k"]
+    c.post("/demo/bind", json={"k": k, "conversation_id": "conv_cost_1"})
+    appt = c.post("/tools/get_appointment", json={"conversation_id": "conv_cost_1"}, headers=TOOL).json()
+    assert appt["cost"] == "free" and "Sehhaty" in appt["booked_through"]
+    sol = c.post("/tools/get_solutions", json={"conversation_id": "conv_cost_1", "reason": "sooner"}, headers=TOOL).json()
+    assert any(o["cost"] == "paid" and o["you_pay_sar"] > 0 for o in sol["options"])
+    text = str(appt) + str(sol)
+    assert "id_last4" not in text and "••••" not in text and "policy" not in text

@@ -79,6 +79,25 @@ export default function PlanScreen() {
         </Card>
       )}
 
+      {slot.cost && (
+        <Card style={{ gap: 8 }}>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <Txt size={17} weight="800">{t('costTitle')}</Txt>
+            <Pill text={slot.cost.free ? t('free') : t('privateClinic')} tone={slot.cost.free ? 'mint' : 'amber'} />
+          </Row>
+          {slot.cost.free ? (
+            <Txt size={14} color={C.inkSoft}>{lang === 'ar' ? slot.cost.note_ar : slot.cost.note_en}</Txt>
+          ) : (
+            <View style={{ gap: 4 }}>
+              <Row style={{ justifyContent: 'space-between' }}><Txt size={14} color={C.inkSoft}>{t('priceLbl')}</Txt><Txt size={14} weight="600">{slot.cost.price} SAR</Txt></Row>
+              <Row style={{ justifyContent: 'space-between' }}><Txt size={14} color={C.inkSoft}>{t('insurancePays')}</Txt><Txt size={14} weight="600">{slot.cost.insurance_pays} SAR</Txt></Row>
+              <Row style={{ justifyContent: 'space-between' }}><Txt size={15} weight="700">{t('youPayLbl')}</Txt><Txt size={17} weight="800" color={C.teal}>{slot.cost.you_pay} SAR</Txt></Row>
+            </View>
+          )}
+          {!!plan!.sehhaty_ref && <Txt size={13} color={C.muted}>{t('sehhatyRef')}: {plan!.sehhaty_ref}</Txt>}
+        </Card>
+      )}
+
       {reach && (
         <>
           <PlanMap slot={slot} title={place} />

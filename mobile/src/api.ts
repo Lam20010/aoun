@@ -51,8 +51,9 @@ export const api = {
   me: () => req<Me>('/patient/me'),
   catalog: () => req<Catalog>('/patient/catalog', { auth: false }),
   plan: () => req<Plan>('/patient/plan'),
-  slots: (opts: { days?: number; female?: boolean; district?: string }) =>
-    req<{ district: string; slots: Slot[] }>(`/patient/slots?days=${opts.days ?? 14}&female=${opts.female ? 'true' : 'false'}${opts.district ? '&district=' + encodeURIComponent(opts.district) : ''}`),
+  slots: (opts: { days?: number; female?: boolean; district?: string; private?: boolean }) =>
+    req<{ district: string; slots: Slot[] }>(`/patient/slots?days=${opts.days ?? 14}&female=${opts.female ? 'true' : 'false'}&private=${opts.private === false ? 'false' : 'true'}${opts.district ? '&district=' + encodeURIComponent(opts.district) : ''}`),
+  sehhatyProfile: (profile: string) => req('/patient/sehhaty-profile', { method: 'PATCH', body: { profile } }),
   book: (slot_id: string) => req<Plan>('/patient/book', { body: { slot_id } }),
   cancel: () => req<Plan>('/patient/cancel', { body: {} }),
   language: (language: string) => req('/patient/language', { method: 'PATCH', body: { language } }),

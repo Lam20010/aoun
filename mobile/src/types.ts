@@ -4,15 +4,19 @@ export interface Slot {
   id: string; iso: string; kind: 'center' | 'mobile_clinic' | 'home_visit'; band: string;
   center_ar: string; center_en?: string; district: string; district_ar: string; lat: number; lon: number;
   female_staff: boolean; wheelchair: boolean; remaining: number; facility_id?: string; doctor?: Doctor & { clinic_ar: string; clinic_en: string };
+  facility_kind?: string; cost?: Cost;
 }
+export interface Cost { free: boolean; price: number; insurance_pays: number; you_pay: number; basis: 'moh_free' | 'insurance' | 'cash'; say_ar: string; say_en: string; note_ar: string; note_en: string }
+export interface Sehhaty { id_type: string; id_type_ar: string; id_type_en: string; id_masked: string; linked: boolean;
+  insurance: { insurer: string; name_ar: string; name_en: string; class: string; copay_pct: number; copay_cap: number; valid_until: string } | null }
 export interface Ride { mode: 'car' | 'metro'; party?: string; pickup_at?: string; pickup_minutes?: number }
 export interface Plan {
   confirmed: boolean; slot: Slot | null; ride: Ride | null; prefs: string[];
-  screening: string; screening_ar: string; screening_en: string; case_status: string; language?: string;
+  screening: string; screening_ar: string; screening_en: string; case_status: string; language?: string; sehhaty_ref?: string | null;
 }
 export interface Me {
   patient: string; district: string; district_ar: string; district_en: string; language: string; gender: 'f' | 'm';
-  age_band: string; family_history: string[]; recommended: { key: string; ar: string; en: string; every_months: number }[]; plan: Plan | null;
+  age_band: string; family_history: string[]; recommended: { key: string; ar: string; en: string; every_months: number }[]; plan: Plan | null; sehhaty?: Sehhaty;
 }
 export interface FileRef { id: string; record_id: string | null; filename: string; mime: string; size: number; created_at: string; doctor: string }
 export interface Rec {
