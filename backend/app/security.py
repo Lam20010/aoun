@@ -38,6 +38,10 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+def secrets_token() -> str:
+    return secrets.token_urlsafe(24)
+
+
 def new_id(prefix: str) -> str:
     return f"{prefix}_{secrets.token_hex(6)}"
 

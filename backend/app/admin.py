@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from .security import hash_token, mask_phone, new_call_token, new_id, require_admin_key
+from .tools import RIYADH, place_hold
 
 router = APIRouter(prefix="/admin", dependencies=[Depends(require_admin_key)])
 
@@ -28,7 +29,7 @@ class StartCallIn(BaseModel):
 def _open_session(request: Request, case_id: str, voice: Voice):
     db = request.app.state.db
     st = request.app.state.settings
-    row = db.one("""SELECT c.id, c.status, c.due, r.language, r.phone_enc, r.contact_permission
+    row = db.one("""SELECT c.id, c.status, c.due, c.screening, r.district, r.language, r.phone_enc, r.contact_permission
                     FROM cases c JOIN residents r ON r.id = c.resident_id WHERE c.id = ?""", case_id)
     if row is None:
         raise HTTPException(404, "case_not_found")
@@ -46,6 +47,8 @@ def _open_session(request: Request, case_id: str, voice: Voice):
                    (now + timedelta(minutes=st.token_ttl_minutes)).isoformat()))
         c.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?)",
                   (new_id("ev"), case_id, None, "call_started", "admin", voice.value, now.isoformat()))
+        demo_now = datetime.fromisoformat(st.demo_now) if st.demo_now else now.astimezone(RIYADH)
+        place_hold(c, call_id, case_id, row["district"], row["screening"], demo_now)
     return call_id, token, row
 
 

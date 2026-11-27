@@ -8,7 +8,8 @@ from .security import require_admin_key
 router = APIRouter(prefix="/ministry", dependencies=[Depends(require_admin_key)])
 
 MIN_GROUP = 50
-REASONS = ["transport", "work_hours", "fear", "no_need", "language", "childcare", "other"]
+REASONS = ["transport", "work_hours", "fear", "no_need", "needs_companion", "embarrassment",
+           "cost_concern", "language", "childcare", "other"]
 
 
 @router.get("/kpis")

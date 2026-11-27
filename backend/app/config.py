@@ -23,6 +23,14 @@ class Settings:
     agent_rufaida: str
     token_ttl_minutes: int
     demo_now: str            # optional fixed clock (ISO, Riyadh) for the demo
+    public_base_url: str = ""  # e.g. https://aoun-voice-tools.onrender.com (for the location link)
+    twilio_sid: str = ""       # optional: SMS for the location link
+    twilio_token: str = ""
+    twilio_from: str = ""
+
+    @property
+    def sms_ready(self) -> bool:
+        return bool(self.twilio_sid and self.twilio_token and self.twilio_from)
 
 
 def load_settings() -> Settings:
@@ -38,4 +46,8 @@ def load_settings() -> Settings:
         agent_rufaida=os.environ.get("AOUN_AGENT_RUFAIDA", "agent_9701m8d18596fbv8ghbf9jk4we3c"),
         token_ttl_minutes=int(os.environ.get("AOUN_TOKEN_TTL_MINUTES", "1440")),
         demo_now=os.environ.get("AOUN_DEMO_NOW", "2026-11-26T09:00:00+03:00"),
+        public_base_url=os.environ.get("AOUN_PUBLIC_BASE_URL", "").rstrip("/"),
+        twilio_sid=os.environ.get("TWILIO_ACCOUNT_SID", ""),
+        twilio_token=os.environ.get("TWILIO_AUTH_TOKEN", ""),
+        twilio_from=os.environ.get("TWILIO_FROM_NUMBER", ""),
     )

@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from . import admin, ministry, tools, webhooks
+from . import admin, location, ministry, tools, webhooks
 from .config import Settings, load_settings
 from .db import Database, seed_demo
 from .security import PhoneVault
@@ -32,7 +32,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         response.headers["Cache-Control"] = "no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        log.info("%s %s %s", request.method, request.url.path, response.status_code)
+        path = request.url.path
+        if path.startswith("/l/"):
+            path = "/l/<code>"  # the one-time location code never reaches the logs
+        log.info("%s %s %s", request.method, path, response.status_code)
         return response
 
     @app.exception_handler(RequestValidationError)
@@ -49,5 +52,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(admin.router)
     app.include_router(webhooks.router)
     app.include_router(ministry.router)
+    app.include_router(location.router)
     return app
 

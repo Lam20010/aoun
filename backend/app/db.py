@@ -38,7 +38,28 @@ CREATE TABLE IF NOT EXISTS slots (
     start_local TEXT NOT NULL,           -- ISO 8601 with +03:00
     remaining INTEGER NOT NULL CHECK (remaining >= 0),
     step_free INTEGER NOT NULL,
-    transport INTEGER NOT NULL
+    transport INTEGER NOT NULL,
+    kind TEXT NOT NULL DEFAULT 'center',      -- center | mobile_clinic
+    female_staff INTEGER NOT NULL DEFAULT 0,
+    companion_ok INTEGER NOT NULL DEFAULT 0,  -- two places together for a companion
+    lat REAL NOT NULL DEFAULT 0,
+    lon REAL NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS holds (
+    id TEXT PRIMARY KEY,
+    call_id TEXT NOT NULL UNIQUE REFERENCES call_sessions(id),
+    case_id TEXT NOT NULL,
+    slot_id TEXT NOT NULL REFERENCES slots(id),
+    status TEXT NOT NULL,                -- held | confirmed | released
+    expires_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS location_links (
+    code_hash TEXT PRIMARY KEY,          -- SHA-256 of the one-time code in the SMS link
+    call_id TEXT NOT NULL REFERENCES call_sessions(id),
+    expires_at TEXT NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS call_sessions (
@@ -51,7 +72,8 @@ CREATE TABLE IF NOT EXISTS call_sessions (
     expires_at TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'active',  -- active | ended
     outcome TEXT,                        -- booked | refused | no_answer | later | opted_out | ended
-    tool_calls INTEGER NOT NULL DEFAULT 0
+    tool_calls INTEGER NOT NULL DEFAULT 0,
+    distance_km REAL                     -- only this is kept from a shared location; coordinates are discarded
 );
 
 CREATE TABLE IF NOT EXISTS offers (
@@ -154,15 +176,29 @@ DEMO_CASES = [
     ("C04", "R04", "diabetes", 1, "2026-10-01", "2026-10-01"),
     ("C05", "R05", "diabetes", 0, "2027-03-01", "2027-03-01"),
 ]
-DEMO_SLOTS = [
-    # id,   center,                      district,     screening,      start_local,                 remaining, step_free, transport
-    ("S01", "مركز قرطبة الصحي أ", "Qurtubah", "diabetes", "2026-11-29T10:00:00+03:00", 2, 0, 0),
-    ("S02", "مركز قرطبة الصحي أ", "Qurtubah", "diabetes", "2026-11-29T19:00:00+03:00", 1, 0, 0),
-    ("S03", "مركز النسيم الصحي", "Al-Naseem", "diabetes", "2026-11-30T16:30:00+03:00", 3, 1, 1),
-    ("S04", "مركز اليرموك الصحي", "Al-Yarmouk", "hypertension", "2026-11-30T09:30:00+03:00", 2, 1, 0),
-    ("S05", "مركز اليرموك الصحي", "Al-Yarmouk", "hypertension", "2026-12-01T17:00:00+03:00", 2, 0, 1),
-    ("S06", "مركز قرطبة الصحي أ", "Qurtubah", "diabetes", "2026-12-01T20:00:00+03:00", 2, 0, 0),
+# Centers and a mobile clinic per district, with fictional coordinates in Riyadh.
+_C = {
+    "Qurtubah":   ("مركز قرطبة الصحي أ", 24.8160, 46.7350, "عيادة متنقلة عند جامع قرطبة", 24.8105, 46.7290),
+    "Al-Naseem":  ("مركز النسيم الصحي", 24.7360, 46.8330, "عيادة متنقلة عند حديقة النسيم", 24.7300, 46.8270),
+    "Al-Yarmouk": ("مركز اليرموك الصحي", 24.8030, 46.7810, "عيادة متنقلة عند جامع اليرموك", 24.7985, 46.7760),
+}
+_SCREEN = {"Qurtubah": "diabetes", "Al-Naseem": "diabetes", "Al-Yarmouk": "hypertension"}
+# (suffix, day, time, kind, places, step_free, transport, female_staff, companion_ok)
+_PATTERN = [
+    ("1", "2026-11-29", "10:00", "center", 2, 1, 1, 0, 0),   # Sunday morning
+    ("2", "2026-11-29", "19:00", "center", 1, 0, 0, 0, 0),   # Sunday evening, last place
+    ("3", "2026-11-30", "16:30", "center", 3, 1, 1, 1, 1),   # Monday after Asr, female staff, companion
+    ("4", "2026-12-01", "20:00", "center", 2, 0, 0, 0, 1),   # Tuesday evening
+    ("5", "2026-12-04", "17:00", "mobile_clinic", 4, 1, 0, 1, 1),  # Friday after Asr, near home
+    ("6", "2026-12-05", "09:30", "center", 2, 1, 1, 1, 0),   # Saturday morning
 ]
+DEMO_SLOTS = []
+for _i, (_d, (_cn, _la, _lo, _mn, _mla, _mlo)) in enumerate(_C.items()):
+    for _suf, _day, _t, _kind, _n, _sf, _tr, _fs, _co in _PATTERN:
+        _mob = _kind == "mobile_clinic"
+        DEMO_SLOTS.append((f"S{_i + 1}{_suf}", _mn if _mob else _cn, _d, _SCREEN[_d],
+                           f"{_day}T{_t}:00+03:00", _n, _sf, _tr, _kind, _fs, _co,
+                           _mla if _mob else _la, _mlo if _mob else _lo))
 
 
 def seed_demo(db: Database, vault) -> None:
@@ -175,4 +211,4 @@ def seed_demo(db: Database, vault) -> None:
         for row in DEMO_CASES:
             c.execute("INSERT INTO cases (id,resident_id,screening,due,due_date,cohort_entry) VALUES (?,?,?,?,?,?)", row)
         for row in DEMO_SLOTS:
-            c.execute("INSERT INTO slots VALUES (?,?,?,?,?,?,?,?)", row)
+            c.execute("INSERT INTO slots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", row)
