@@ -26,10 +26,16 @@ def client(tmp_path):
     return TestClient(create_app(s))
 
 
+_n = [0]
+
+
 def start(client, case="C01"):
-    r = client.post("/admin/calls", json={"case_id": case}, headers=ADMIN)
+    """Open a call session bound to a fresh conversation id, as a real outbound call would be."""
+    _n[0] += 1
+    conv = f"conv_test_{case}_{_n[0]:04d}"
+    r = client.post("/admin/calls", json={"case_id": case, "conversation_id": conv}, headers=ADMIN)
     assert r.status_code == 200, r.text
-    return r.json()["call_token"]
+    return conv
 
 
 def text(resp):
@@ -40,8 +46,8 @@ def text(resp):
 
 def test_tools_reject_missing_or_wrong_key(client):
     tok = start(client)
-    assert client.post("/tools/get_appointment", json={"call_token": tok}).status_code == 401
-    assert client.post("/tools/get_appointment", json={"call_token": tok},
+    assert client.post("/tools/get_appointment", json={"conversation_id": tok}).status_code == 401
+    assert client.post("/tools/get_appointment", json={"conversation_id": tok},
                        headers={"X-Aoun-Key": "wrong"}).status_code == 401
 
 
@@ -51,7 +57,7 @@ def test_admin_rejects_tool_key(client):
 
 
 def test_unknown_token_is_rejected(client):
-    r = client.post("/tools/get_appointment", json={"call_token": "ct_" + "x" * 40}, headers=TOOL)
+    r = client.post("/tools/get_appointment", json={"conversation_id": "ct_" + "x" * 40}, headers=TOOL)
     assert r.status_code == 403
 
 
@@ -72,7 +78,7 @@ def test_declined_and_not_due_cases_cannot_be_called(client):
 # ---------- conversation flow ----------
 
 def tool(client, name, tok, **kw):
-    return client.post(f"/tools/{name}", json={"call_token": tok, **kw}, headers=TOOL)
+    return client.post(f"/tools/{name}", json={"conversation_id": tok, **kw}, headers=TOOL)
 
 
 def test_held_appointment_is_read_and_confirmed(client):
@@ -92,8 +98,8 @@ def test_refusal_gets_solutions_and_switching_releases_the_hold(client):
     before = db.one("SELECT remaining FROM slots WHERE id=?", held_slot)["remaining"]
     assert tool(client, "record_barrier", tok, reason="work_hours").status_code == 200
     sol = tool(client, "get_solutions", tok, reason="work_hours").json()
-    assert sol["options"] and all(o["choice"].startswith("of_") for o in sol["options"])
-    assert all(("المساء" in o["when"]) or ("الجمعة" in o["when"]) or ("السبت" in o["when"]) for o in sol["options"])
+    assert [o["time_band"] for o in sol["options"]] == ["morning", "evening", "weekend"]
+    assert all(o["choice"].startswith("of_") for o in sol["options"])
     r = tool(client, "confirm_booking", tok, choice=sol["options"][0]["choice"])
     assert r.status_code == 200
     assert db.one("SELECT remaining FROM slots WHERE id=?", held_slot)["remaining"] == before + 1
@@ -110,7 +116,12 @@ def test_each_reason_gets_a_fitting_plan(client):
     cost = tool(client, "get_solutions", tok, reason="cost_concern").json()
     assert [o["choice"] for o in cost["options"]] == ["held"] and "free" in cost["plan"]
     fear = tool(client, "get_solutions", tok, reason="fear").json()
-    assert fear["extras"] and "nurse" in fear["extras"][0]
+    assert [o["choice"] for o in fear["options"]] == ["held"]
+    assert client.app.state.db.one("SELECT prefs FROM call_plans")["prefs"] == "female_doctor"
+    far = tool(client, "get_solutions", tok, reason="far").json()
+    assert [o["place_kind"] for o in far["options"]] == ["mobile_clinic", "home_visit"]
+    ride = tool(client, "get_solutions", tok, reason="transport").json()
+    assert [o["choice"] for o in ride["options"]] == ["held"] and "4:00 العصر" in ride["extras"][0]
 
 
 def test_cannot_confirm_option_from_another_call(client):
@@ -129,7 +140,7 @@ def test_last_place_race_gives_one_booking(client):
     choices = []
     for t in toks:
         opts = tool(client, "get_solutions", t, reason="work_hours").json()["options"]
-        o = [x for x in opts if x["when"].startswith("الأحد")][0]  # Sunday evening: one place left
+        o = [x for x in opts if x["time_band"] == "evening"][0]  # Wednesday evening: one place left
         choices.append(o["choice"])
     results = []
 
@@ -154,45 +165,67 @@ def test_location_link_keeps_only_distance(client):
     lat, lon = 24.81234, 46.73456
     assert client.post(f"/l/{code}", json={"lat": lat, "lon": lon}).status_code == 200
     assert client.post(f"/l/{code}", json={"lat": lat, "lon": lon}).status_code == 404  # one use only
-    sol = tool(client, "get_solutions", tok, reason="transport").json()
+    sol = tool(client, "get_solutions", tok, reason="far").json()
     assert sol["location_shared"] and sol["nearest_center_km"] is not None
     assert sol["options"][0]["mobile_clinic"]
-    assert sol["extras"] and "ride" in sol["extras"][0]
     dump = "\n".join(client.app.state.db.conn.iterdump())
     assert "24.81234" not in dump and "46.73456" not in dump and code not in dump
 
 
-def test_transport_after_booking(client):
+def test_ride_is_held_then_goes_through_on_confirm(client):
+    db = client.app.state.db
     tok = start(client)
-    assert tool(client, "request_transport", tok, mode="ride").status_code == 409  # nothing booked yet
-    tool(client, "confirm_booking", tok, choice="held")
+    r = tool(client, "request_transport", tok, mode="car", party="wheelchair", pickup="early").json()
+    assert r["transport_status"] == "held_until_confirmed" and r["ride"]["pickup_at"] == "3:30 العصر"
+    assert db.one("SELECT COUNT(*) AS n FROM support_requests")["n"] == 0
+    p = tool(client, "set_preferences", tok, prefs=["companion_reminders"]).json()
+    assert set(p["prefs"]) == {"wheelchair_center", "companion_reminders"} and "name" in p["message"]
+    b = tool(client, "confirm_booking", tok, choice="held").json()
+    assert b["ride"]["party"] == "wheelchair" and "wheelchair_center" in b["prefs"]
+    assert db.one("SELECT kind, status FROM support_requests")["kind"] == "car:wheelchair"
     assert tool(client, "request_transport", tok, mode="metro").json()["transport_status"] == "metro_plan_sent"
+
+
+def test_home_test_preference_offers_a_home_visit(client):
+    tok = start(client)
+    tool(client, "request_transport", tok, mode="car")
+    p = tool(client, "set_preferences", tok, prefs=["home_test"]).json()
+    home = p["home_visit_option"]
+    assert home and home["place_kind"] == "home_visit"
+    b = tool(client, "confirm_booking", tok, choice=home["choice"]).json()
+    assert b["place_kind"] == "home_visit" and b["ride"] is None
+
+
+def test_preferences_are_fixed_codes(client):
+    tok = start(client)
+    bad = tool(client, "set_preferences", tok, prefs=["my son Saad 0551234567"])
+    assert bad.status_code == 422 and "0551234567" not in bad.text
 
 
 # ---------- strict inputs ----------
 
 def test_reason_must_be_from_the_list(client):
     tok = start(client)
-    bad = client.post("/tools/record_barrier", json={"call_token": tok, "reason": "my name is Noura and ..."}, headers=TOOL)
+    bad = client.post("/tools/record_barrier", json={"conversation_id": tok, "reason": "my name is Noura and ..."}, headers=TOOL)
     assert bad.status_code == 422 and "Noura" not in text(bad)
-    ok = client.post("/tools/record_barrier", json={"call_token": tok, "reason": "work_hours"}, headers=TOOL)
+    ok = client.post("/tools/record_barrier", json={"conversation_id": tok, "reason": "work_hours"}, headers=TOOL)
     assert ok.status_code == 200
 
 
 def test_extra_fields_are_rejected(client):
     tok = start(client)
-    r = client.post("/tools/get_appointment", json={"call_token": tok, "national_id": "1012345678"}, headers=TOOL)
+    r = client.post("/tools/get_appointment", json={"conversation_id": tok, "national_id": "1012345678"}, headers=TOOL)
     assert r.status_code == 422 and "1012345678" not in text(r)
 
 
 # ---------- privacy of responses ----------
 
 def test_no_pii_in_tool_or_admin_responses(client):
-    r = client.post("/admin/calls", json={"case_id": "C01"}, headers=ADMIN)
-    tok = r.json()["call_token"]
+    r = client.post("/admin/calls", json={"case_id": "C01", "conversation_id": "conv_pii_check_01"}, headers=ADMIN)
+    tok = "conv_pii_check_01"
     bodies = [text(r), text(client.get("/admin/due_queue", headers=ADMIN))]
-    bodies.append(text(client.post("/tools/get_appointment", json={"call_token": tok}, headers=TOOL)))
-    bodies.append(text(client.post("/tools/get_solutions", json={"call_token": tok, "reason": "other"}, headers=TOOL)))
+    bodies.append(text(client.post("/tools/get_appointment", json={"conversation_id": tok}, headers=TOOL)))
+    bodies.append(text(client.post("/tools/get_solutions", json={"conversation_id": tok, "reason": "other"}, headers=TOOL)))
     for b in bodies:
         for p in PHONES:
             assert p not in b and p[1:] not in b
@@ -216,7 +249,7 @@ def test_opt_out_blocks_future_calls_and_releases_hold(client):
     db = client.app.state.db
     slot = db.one("SELECT slot_id FROM holds")["slot_id"]
     before = db.one("SELECT remaining FROM slots WHERE id=?", slot)["remaining"]
-    assert client.post("/tools/opt_out", json={"call_token": tok}, headers=TOOL).status_code == 200
+    assert client.post("/tools/opt_out", json={"conversation_id": tok}, headers=TOOL).status_code == 200
     assert db.one("SELECT remaining FROM slots WHERE id=?", slot)["remaining"] == before + 1
     assert client.post("/admin/calls", json={"case_id": "C03"}, headers=ADMIN).status_code == 409
 
@@ -232,7 +265,7 @@ def sign(body: bytes, secret=WEBHOOK_SECRET, ts=None):
 def test_webhook_requires_valid_signature_and_ends_call(client):
     tok = start(client)
     body = json.dumps({"type": "post_call_transcription", "data": {
-        "conversation_initiation_client_data": {"dynamic_variables": {"call_token": tok}},
+        "conversation_id": tok,
         "transcript": [{"role": "user", "message": "رقم هويتي 1012345678"}]}}).encode()
     assert client.post("/webhooks/elevenlabs/post-call", content=body).status_code == 401
     assert client.post("/webhooks/elevenlabs/post-call", content=body,
@@ -244,7 +277,7 @@ def test_webhook_requires_valid_signature_and_ends_call(client):
     # transcript was not stored anywhere, and the token no longer works
     dump = "\n".join(client.app.state.db.conn.iterdump())
     assert "1012345678" not in dump
-    assert client.post("/tools/get_appointment", json={"call_token": tok}, headers=TOOL).status_code == 403
+    assert client.post("/tools/get_appointment", json={"conversation_id": tok}, headers=TOOL).status_code == 403
 
 
 # ---------- ministry ----------
@@ -252,3 +285,13 @@ def test_webhook_requires_valid_signature_and_ends_call(client):
 def test_small_groups_are_suppressed(client):
     k = client.get("/ministry/kpis", headers=ADMIN).json()
     assert k["districts"] and all(d["suppressed"] for d in k["districts"])
+
+
+def test_demo_claim_only_in_demo_mode(client, tmp_path):
+    # Demo mode off (fixture): an unknown conversation cannot claim a session.
+    client.post("/admin/calls", json={"case_id": "C01"}, headers=ADMIN)
+    assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_1"}, headers=TOOL).status_code == 403
+    # Demo mode on: the newest unbound session is claimed once, and a second conversation cannot take it.
+    client.app.state.settings = client.app.state.settings.__class__(**{**client.app.state.settings.__dict__, "demo_mode": True})
+    assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_1"}, headers=TOOL).status_code == 200
+    assert client.post("/tools/get_appointment", json={"conversation_id": "conv_web_test_2"}, headers=TOOL).status_code == 403

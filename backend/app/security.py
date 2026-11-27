@@ -27,12 +27,7 @@ def require_admin_key(request: Request, x_admin_key: str = Header(default="")) -
 
 
 # ---------- call tokens ----------
-# The plain token exists only inside the ElevenLabs conversation (as a dynamic variable).
-# The database stores only its SHA-256 hash, so a database leak cannot be used to act on a call.
-
-def new_call_token() -> str:
-    return "ct_" + secrets.token_urlsafe(32)
-
+# Conversation ids and one-time link codes are stored only as SHA-256 hashes.
 
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
