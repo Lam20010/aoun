@@ -36,7 +36,8 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "BLUETOOTH_CONNECT",
-        "INTERNET"
+        "INTERNET",
+        "POST_NOTIFICATIONS"
       ]
     },
     "plugins": [
@@ -55,6 +56,13 @@
       ],
       "@livekit/react-native-expo-plugin",
       "@config-plugins/react-native-webrtc",
+      [
+        "expo-notifications",
+        {
+          "color": "#2F7F80"
+        }
+      ],
+      "expo-secure-store",
       "expo-dev-client"
     ],
     "scheme": "aoun",

@@ -34,7 +34,7 @@ export function AssistantBar() {
   const sub = mine && session.status === 'connecting' ? t('connecting')
     : mine && session.lastReply ? session.lastReply
     : mine && session.status === 'error' ? t('couldNotCall')
-    : persona.name + ' ' + t('assistantHint');
+    : t(voice === 'f' ? 'female' : 'male') + ' ' + t('assistantHint');
 
   return (
     <View style={s.bar}>
@@ -49,10 +49,10 @@ export function AssistantBar() {
         <Row gap={10}>
           <Image source={persona.avatar} style={s.avatar} />
           <Pressable style={{ flex: 1 }} onPress={() => setTyping(true)} accessibilityRole="button" accessibilityHint={t('typeHere')}>
-            <Txt size={16} weight="800" color={C.white}>{t('assistantCall', { name: persona.name })}</Txt>
+            <Txt size={16} weight="800" color={C.white}>{t('assistantCall', { name: t(voice === 'f' ? 'female' : 'male') })}</Txt>
             <Txt size={13} color="rgba(255,255,255,.82)" lines={2}>{sub}</Txt>
           </Pressable>
-          <Pressable onPress={toggle} accessibilityRole="button" accessibilityLabel={persona.name}>
+          <Pressable onPress={toggle} accessibilityRole="button" accessibilityLabel={t(voice === 'f' ? 'female' : 'male')}>
             <Circle size={42} bg="transparent" style={s.mic}>
               <Icon d={ICON.mic} color={C.white} size={18} />
               <View style={[s.dot, { backgroundColor: live ? C.lime : mine ? '#E2D36B' : 'rgba(255,255,255,.35)' }]} />

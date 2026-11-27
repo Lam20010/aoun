@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from . import admin, demo, location, ministry, tools, webhooks
+from . import admin, demo, doctor, location, ministry, patient, tools, webhooks
 from .config import Settings, load_settings
 from .db import Database, seed_demo
 from .security import PhoneVault
@@ -24,7 +24,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.vault = PhoneVault(settings.phone_enc_key)
     app.state.db = Database(settings.db_path)
-    seed_demo(app.state.db, app.state.vault)
+    seed_demo(app.state.db, app.state.vault)  # also seeds open times, doctors and past records
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
@@ -36,6 +36,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         path = request.url.path
         if path.startswith("/l/"):
             path = "/l/<code>"  # the one-time location code never reaches the logs
+        elif path.startswith("/f/"):
+            path = "/f/<code>"
         log.info("%s %s %s", request.method, path, response.status_code)
         return response
 
@@ -55,5 +57,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(ministry.router)
     app.include_router(location.router)
     app.include_router(demo.router)
+    app.include_router(patient.router)
+    app.include_router(patient.files_router)
+    app.include_router(doctor.router)
     return app
 

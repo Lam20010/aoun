@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS residents (
     age_band TEXT NOT NULL,
     language TEXT NOT NULL,              -- preferred language code, never nationality
     phone_enc TEXT NOT NULL,             -- Fernet-encrypted phone number
-    contact_permission INTEGER NOT NULL  -- 1 allowed, 0 declined / opted out
+    contact_permission INTEGER NOT NULL, -- 1 allowed, 0 declined / opted out
+    gender TEXT NOT NULL DEFAULT 'f'      -- picks the agent voice (Rufaida for women, Rafeed for men)
 );
 
 CREATE TABLE IF NOT EXISTS cases (
@@ -43,7 +44,9 @@ CREATE TABLE IF NOT EXISTS slots (
     female_staff INTEGER NOT NULL DEFAULT 0,
     companion_ok INTEGER NOT NULL DEFAULT 0,  -- two places together for a companion
     lat REAL NOT NULL DEFAULT 0,
-    lon REAL NOT NULL DEFAULT 0
+    lon REAL NOT NULL DEFAULT 0,
+    facility_id TEXT,                    -- the health center that runs it (see catalog.FACILITIES)
+    doctor_id TEXT                       -- the doctor who sees the person (see catalog.DOCTORS)
 );
 
 CREATE TABLE IF NOT EXISTS holds (
@@ -125,6 +128,104 @@ CREATE TABLE IF NOT EXISTS tasks (
     state TEXT NOT NULL                  -- pending | done | cancelled
 );
 
+-- ---------- the person's health record (app + doctor portal) ----------
+
+CREATE TABLE IF NOT EXISTS patient_tokens (
+    token_hash TEXT PRIMARY KEY,         -- SHA-256 of the app's token; the token itself is never stored
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS records (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    facility_id TEXT NOT NULL,           -- where it came from: Aoun centers, hospitals, private clinics, labs
+    doctor_id TEXT,                      -- set when an Aoun doctor wrote it
+    kind TEXT NOT NULL,                  -- lab | report | visit | imaging
+    screening TEXT,
+    test_key TEXT,
+    value TEXT,
+    unit TEXT,
+    flag TEXT,                           -- normal | borderline | high | low | positive | negative
+    title_enc TEXT NOT NULL,             -- encrypted
+    summary_enc TEXT,                    -- encrypted
+    taken_at TEXT NOT NULL,
+    source TEXT NOT NULL                 -- history (other facilities) | aoun
+);
+
+CREATE TABLE IF NOT EXISTS files (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    record_id TEXT,
+    doctor_id TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    mime TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    data_enc TEXT NOT NULL,              -- encrypted base64 of the file
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS notes (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    doctor_id TEXT NOT NULL,
+    body_enc TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS meds (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    doctor_id TEXT,
+    facility_id TEXT NOT NULL,
+    kind TEXT NOT NULL,                  -- medication | vitamin | supplement
+    name TEXT NOT NULL,
+    dose TEXT NOT NULL,
+    times TEXT NOT NULL,                 -- comma-separated HH:MM
+    days INTEGER NOT NULL,               -- 0 = ongoing
+    start_date TEXT NOT NULL,
+    with_food INTEGER NOT NULL DEFAULT 0,
+    instructions_enc TEXT,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    doctor_id TEXT NOT NULL,
+    sender TEXT NOT NULL,                -- doctor | patient
+    body_enc TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS family_history (
+    resident_id TEXT PRIMARY KEY REFERENCES residents(id),
+    codes TEXT NOT NULL DEFAULT ''       -- fixed codes only; no relative is ever named
+);
+
+CREATE TABLE IF NOT EXISTS referrals (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL,
+    doctor_id TEXT NOT NULL,
+    kind TEXT NOT NULL,                  -- genetic_counselling | specialist
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS access_log (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL,
+    doctor_id TEXT NOT NULL,
+    action TEXT NOT NULL,                -- viewed_record | added_result | added_note | ...
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS doctor_sessions (
+    token_hash TEXT PRIMARY KEY,
+    doctor_id TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY,
     case_id TEXT NOT NULL,
@@ -194,7 +295,9 @@ _C = {
     "Al-Naseem":  ("مركز صحي النسيم", 24.7360, 46.8330, "العيادة المتنقلة عند جامع النسيم", 24.7300, 46.8270),
     "Al-Yarmouk": ("مركز صحي اليرموك", 24.8030, 46.7810, "العيادة المتنقلة عند جامع اليرموك", 24.7985, 46.7760),
 }
-DISTRICT_AR = {"Qurtubah": "قرطبة", "Al-Naseem": "النسيم", "Al-Yarmouk": "اليرموك"}
+from .catalog import DISTRICTS, doctor as _doc, doctors_at, phc_for
+
+DISTRICT_AR = {k: v[0] for k, v in DISTRICTS.items()}
 HOME_VISIT = "في بيتك، الفريق الصحي يجيك"
 _SCREEN = {"Qurtubah": "diabetes", "Al-Naseem": "diabetes", "Al-Yarmouk": "hypertension"}
 # (suffix, day, time, kind, places, step_free, transport, female_staff, companion_ok)
@@ -208,22 +311,54 @@ _PATTERN = [
 ]
 DEMO_SLOTS = []
 for _i, (_d, (_cn, _la, _lo, _mn, _mla, _mlo)) in enumerate(_C.items()):
+    _fac = phc_for(_d)
+    _docs = doctors_at(_fac)
+    _female = [x for x in _docs if _doc(x)["gender"] == "f"] or _docs
     for _suf, _day, _t, _kind, _n, _sf, _tr, _fs, _co in _PATTERN:
         _name = {"center": _cn, "mobile_clinic": _mn, "home_visit": HOME_VISIT}[_kind]
         _mob = _kind == "mobile_clinic"
         DEMO_SLOTS.append((f"S{_i + 1}{_suf}", _name, _d, _SCREEN[_d],
                            f"{_day}T{_t}:00+03:00", _n, _sf, _tr, _kind, _fs, _co,
-                           _mla if _mob else _la, _mlo if _mob else _lo))
+                           _mla if _mob else _la, _mlo if _mob else _lo, _fac, _female[0]))
 
 
-def seed_demo(db: Database, vault) -> None:
+def generated_slots(start_day: str, days: int = 21) -> list[tuple]:
+    """Open times at every health center for the next three weeks (not Fridays), one doctor per time.
+    'general' slots suit any screening; the prototype's own slots above are offered first."""
+    from datetime import date, timedelta as _td
+    from .catalog import facility as _fac_info
+    times = ["08:00", "09:00", "10:30", "16:00", "17:30", "19:30"]
+    out = []
+    d0 = date.fromisoformat(start_day)
+    for di in range(days):
+        day = d0 + _td(days=di)
+        if day.weekday() == 4:  # Friday
+            continue
+        for dist in DISTRICTS:
+            fid = phc_for(dist)
+            f = _fac_info(fid)
+            docs = doctors_at(fid)
+            for ti, t in enumerate(times):
+                doc = docs[(ti + di) % len(docs)]
+                info = _doc(doc)
+                places = 1 + (di * 7 + ti * 3 + len(dist)) % 3
+                out.append((f"G{fid[2:]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], dist, "general",
+                            f"{day.isoformat()}T{t}:00+03:00", places, int(f["wheelchair"]), 1, "center",
+                            int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
+    return out
+
+
+def seed_demo(db: Database, vault, start_day: str = "2026-11-27") -> None:
     if db.one("SELECT COUNT(*) AS n FROM residents")["n"]:
         return
     with db.tx() as c:
         for rid, dist, age, lang, phone, ok in DEMO_RESIDENTS:
-            c.execute("INSERT INTO residents VALUES (?,?,?,?,?,?)",
+            c.execute("INSERT INTO residents (id,district,age_band,language,phone_enc,contact_permission) VALUES (?,?,?,?,?,?)",
                       (rid, dist, age, lang, vault.encrypt(phone), ok))
         for row in DEMO_CASES:
             c.execute("INSERT INTO cases (id,resident_id,screening,due,due_date,cohort_entry) VALUES (?,?,?,?,?,?)", row)
-        for row in DEMO_SLOTS:
-            c.execute("INSERT INTO slots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", row)
+        for row in DEMO_SLOTS + generated_slots(start_day):
+            c.execute("INSERT INTO slots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", row)
+        from .history import seed_history
+        for rid, *_ in DEMO_RESIDENTS:
+            seed_history(c, vault, rid)

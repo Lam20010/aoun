@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عون · بوابة الطبيب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F8F6;--card:#fff;--ink:#173F42;--soft:#4E5C5E;--muted:#7E8C8E;--teal:#2F7F80;--mid:#5AA7A7;--mint:#96D7C6;--mintSoft:#D5EFE8;--dark:#0F2E30;--line:#E3ECEA;--yellow:#F6F0C4;--lav:#E3E8F6;--red:#C2410C;--amber:#A16207;--green:#2F7F80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hide{display:none!important}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:var(--dark);color:#fff}
+header b{font-size:18px}
+header .who{opacity:.85;font-size:14px}
+.btn{border:0;border-radius:999px;padding:9px 16px;background:var(--dark);color:#fff;font-weight:600}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn.mint{background:var(--mint);color:var(--dark)}
+.btn.small{padding:6px 12px;font-size:13px}
+.card{background:var(--card);border-radius:20px;padding:18px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;background:#fff}
+textarea{min-height:80px;resize:vertical}
+label{display:block;font-size:13px;color:var(--soft);margin:10px 0 4px}
+/* login */
+#login{max-width:420px;margin:8vh auto;padding:0 16px}
+#login h1{margin:0 0 4px;font-size:26px}
+.hint{background:var(--yellow);border-radius:12px;padding:10px 12px;font-size:13px;margin-top:12px}
+/* layout */
+#app{display:grid;grid-template-columns:330px 1fr;gap:18px;padding:18px;max-width:1400px;margin:auto}
+@media (max-width:900px){#app{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 160px);overflow:auto}
+.appt{border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;background:#fff;text-align:start;width:100%}
+.appt.on{border-color:var(--mid);background:var(--mintSoft)}
+.appt .t{font-weight:700}
+.appt .s{font-size:13px;color:var(--soft)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;background:var(--mintSoft);color:var(--teal)}
+.pill.amber{background:#FBEFD5;color:var(--amber)}
+.pill.red{background:#FDE4DA;color:var(--red)}
+.pill.gray{background:#EEF2F1;color:var(--soft)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;background:#fff;border-radius:999px;padding:5px;margin:14px 0}
+.tabs button{border:0;background:transparent;border-radius:999px;padding:8px 14px;font-weight:600}
+.tabs button.on{background:var(--dark);color:#fff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:700px){.grid2{grid-template-columns:1fr}}
+.rec{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.rec:last-child{border-bottom:0}
+.rec .v{font-weight:700;font-size:18px}
+.rec .src{font-size:12px;color:var(--muted)}
+.msgs{display:flex;flex-direction:column;gap:8px;max-height:380px;overflow:auto;padding:4px}
+.msg{max-width:75%;padding:9px 12px;border-radius:16px;background:var(--mintSoft)}
+.msg.me{align-self:flex-start;background:var(--dark);color:#fff}
+.msg.them{align-self:flex-end}
+.msg small{display:block;opacity:.7;font-size:11px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);border-radius:999px;padding:5px 10px;font-size:13px;background:#fff}
+.chip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.empty{color:var(--muted);text-align:center;padding:40px 10px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:999px;font-weight:600;z-index:9}
+.note{background:var(--yellow);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.note small{color:var(--soft)}
+h2{margin:0 0 6px;font-size:22px}
+h3{margin:18px 0 8px;font-size:17px}
+.kv{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--soft)}
+.kv b{color:var(--ink)}
+</style>
+</head>
+<body>
+<header><b>عون · بوابة الطبيب</b><span class="who" id="who"></span></header>
+
+<section id="login" class="card hide">
+  <h1>تسجيل الدخول</h1>
+  <div class="muted" style="color:var(--soft)">تشوف بس المراجعين المحجوزين عندك.</div>
+  <label for="docSel">الطبيب</label>
+  <select id="docSel"></select>
+  <label for="code">رمز الدخول</label>
+  <input id="code" type="password" autocomplete="current-password">
+  <div style="margin-top:14px"><button class="btn" id="loginBtn">دخول</button></div>
+  <div class="hint hide" id="demoHint"></div>
+</section>
+
+<main id="app" class="hide">
+  <aside>
+    <div class="card">
+      <h3 style="margin-top:0">مواعيدي</h3>
+      <div class="list" id="appts"></div>
+    </div>
+  </aside>
+  <section>
+    <div id="detail" class="card"><div class="empty">اختر مراجعًا من القائمة.</div></div>
+  </section>
+</main>
+<div id="toast" class="toast hide"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let token = sessionStorage.getItem('aoun_dr') || '';
+let CAT = null, current = null, tab = 'record';
+const LANG = {ar:'العربية',en:'English',ur:'اردو',hi:'हिन्दी',bn:'বাংলা',fil:'Filipino',id:'Indonesia'};
+const FLAG = {normal:['طبيعي',''],borderline:['حدّي','amber'],high:['مرتفع','red'],low:['منخفض','amber'],positive:['إيجابي','red'],negative:['سلبي','']};
+const PREF = {female_doctor:'طبيبة',wheelchair_center:'يدعم الكرسي المتحرك',home_test:'فحص منزلي',companion_reminders:'مرافق يستلم التذكير'};
+const KIND = {hospital:'مستشفى',private_clinic:'عيادة خاصة',lab:'مختبر',phc:'مركز صحي'};
+
+function toast(t){const e=$('toast');e.textContent=t;e.classList.remove('hide');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.add('hide'),2600)}
+async function api(path, opts={}){
+  const r = await fetch('/doctor/api'+path, {...opts, headers:{'content-type':'application/json', ...(token?{authorization:'Bearer '+token}:{}) }});
+  if (r.status===401){ token=''; sessionStorage.removeItem('aoun_dr'); showLogin(); throw new Error('401'); }
+  const j = await r.json().catch(()=>({}));
+  if (!r.ok) { toast(({genetic_results_are_not_stored:'النتائج الجينية ما تنحفظ. أرسل إحالة لاستشارة وراثية.',file_too_large:'الملف أكبر من 5 ميجا',pdf_png_or_jpeg_only:'PDF أو صورة فقط',not_your_patient:'هذا المراجع مو محجوز عندك'})[String(j.detail||'').split(':')[0]] || 'صار خطأ، جرّب مرة ثانية'); throw new Error(j.detail); }
+  return j;
+}
+const date = (s) => new Date(s).toLocaleDateString('ar-SA-u-nu-latn',{day:'numeric',month:'short',year:'numeric'});
+const dt = (s) => new Date(s).toLocaleString('ar-SA-u-nu-latn',{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+
+async function showLogin(){
+  $('app').classList.add('hide'); $('login').classList.remove('hide'); $('who').textContent='';
+  const c = await fetch('/doctor/api/config').then(r=>r.json());
+  $('docSel').innerHTML = c.doctors.map(d=>`<option value="${d.id}">${esc(d.name_ar)} · ${esc(d.facility_ar)}</option>`).join('');
+  if (c.demo_code){ $('demoHint').classList.remove('hide'); $('demoHint').textContent = 'نسخة تجريبية ببيانات وهمية. رمز الدخول: '+c.demo_code; }
+}
+$('loginBtn').onclick = async () => {
+  try { const j = await api('/login',{method:'POST',body:JSON.stringify({doctor_id:$('docSel').value, code:$('code').value})});
+    token=j.token; sessionStorage.setItem('aoun_dr',token); start(); } catch(e){}
+};
+
+async function start(){
+  $('login').classList.add('hide'); $('app').classList.remove('hide');
+  CAT = CAT || await api('/catalog');
+  const me = await api('/me');
+  $('who').textContent = me.doctor.name_ar+' · '+me.doctor.clinic_ar+' · '+me.facility.name_ar;
+  $('appts').innerHTML = me.appointments.length ? me.appointments.map(a=>`
+    <button class="appt ${current===a.patient?'on':''}" data-p="${a.patient}">
+      <div class="row" style="justify-content:space-between"><span class="t">${esc(a.alias)}</span>
+      <span class="pill ${a.status==='attended'?'gray':''}">${a.status==='attended'?'تمت الزيارة':'محجوز'}</span></div>
+      <div class="s">${dt(a.start)} · ${esc(a.screening_ar)}</div>
+      <div class="s">${esc(a.age_band)} · ${LANG[a.language]||a.language}${a.messages?` · ${a.messages} رسائل`:''}</div>
+    </button>`).join('') : '<div class="empty">ما عندك مواعيد محجوزة الحين.</div>';
+  document.querySelectorAll('.appt').forEach(b=>b.onclick=()=>open(b.dataset.p));
+  if (current) open(current, true);
+}
+
+async function open(pid, keepTab){
+  current = pid; if(!keepTab) tab='record';
+  document.querySelectorAll('.appt').forEach(b=>b.classList.toggle('on', b.dataset.p===pid));
+  const d = await api('/patients/'+pid);
+  render(d);
+}
+
+function render(d){
+  const p = d.patient;
+  const tabs = [['record','السجل الصحي'],['result','إضافة نتيجة'],['notes','الملاحظات والمرفقات'],['meds','الأدوية والفيتامينات'],['chat','المراسلة']];
+  $('detail').innerHTML = `
+    <h2>${esc(p.alias)}</h2>
+    <div class="kv"><span>العمر: <b>${esc(p.age_band)}</b></span><span>الحي: <b>${esc(p.district_ar)}</b></span>
+      <span>اللغة: <b>${LANG[p.language]||p.language}</b></span>
+      ${p.prefs.length?`<span>التفضيلات: <b>${p.prefs.map(x=>PREF[x]||x).join('، ')}</b></span>`:''}
+      ${p.family_history.length?`<span>تاريخ عائلي: <b>${p.family_history.map(esc).join('، ')}</b></span>`:''}</div>
+    <div class="tabs">${tabs.map(([k,l])=>`<button data-t="${k}" class="${tab===k?'on':''}">${l}</button>`).join('')}</div>
+    <div id="pane"></div>`;
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t; render(d);});
+  ({record:paneRecord, result:paneResult, notes:paneNotes, meds:paneMeds, chat:paneChat})[tab](d);
+}
+
+function flagPill(f){ if(!f) return ''; const [t,c]=FLAG[f]||[f,'']; return `<span class="pill ${c}">${t}</span>`; }
+
+function paneRecord(d){
+  const recs = d.records;
+  $('pane').innerHTML = `
+    <div class="hint" style="background:var(--lav);margin-bottom:10px">السجل يجمع نتائج المراجع من كل المستشفيات والعيادات والمختبرات. فتحك له ينسجل ويشوفه المراجع في تطبيقه.</div>
+    ${recs.length? recs.map(r=>`<div class="rec">
+      <div><div style="font-weight:600">${esc(r.title_ar)} ${flagPill(r.flag)}</div>
+        ${r.summary_ar?`<div style="color:var(--soft);font-size:14px">${esc(r.summary_ar)}</div>`:''}
+        <div class="src">${esc(r.facility.name_ar)} · ${KIND[r.facility.kind]||''}${r.doctor?' · '+esc(r.doctor.name_ar):''} · ${date(r.taken_at)}</div>
+        ${r.files.map(f=>`<button class="btn ghost small" data-f="${f.id}">📄 ${esc(f.filename)}</button>`).join(' ')}</div>
+      <div class="v">${r.value?esc(r.value)+' <small style="font-size:12px;color:var(--muted)">'+esc(r.unit||'')+'</small>':''}</div></div>`).join('') : '<div class="empty">ما فيه سجلات سابقة.</div>'}
+    ${d.referrals.length?`<h3>الإحالات</h3>${d.referrals.map(r=>`<div class="note">${r.kind==='genetic_counselling'?'إحالة لاستشارة وراثية':'إحالة لمختص'} <small>· ${esc(r.doctor)} · ${date(r.created_at)}</small></div>`).join('')}`:''}`;
+  bindFiles();
+}
+
+function bindFiles(){ document.querySelectorAll('[data-f]').forEach(b=>b.onclick=async()=>{
+  const r = await fetch('/doctor/api/files/'+b.dataset.f,{headers:{authorization:'Bearer '+token}});
+  if(!r.ok) return toast('ما قدرت أفتح الملف'); const url = URL.createObjectURL(await r.blob()); window.open(url,'_blank'); }); }
+
+function paneResult(d){
+  const opts = CAT.screenings.map(s=>`<option value="${s.key}">${esc(s.ar)}</option>`).join('');
+  $('pane').innerHTML = `
+    <div class="grid2"><div><label>الفحص</label><select id="scr">${opts}</select></div><div></div></div>
+    <div id="tests"></div>
+    <label>ملخص للمراجع (يطلع له في «نتائجي»)</label><textarea id="sum" maxlength="600" placeholder="مثال: النتيجة ضمن مرحلة ما قبل السكري، نعيد الفحص بعد ٦ أشهر."></textarea>
+    <div style="margin-top:12px" class="row"><button class="btn" id="saveRes">حفظ النتيجة وإرسالها للمراجع</button></div>
+    <h3>الأمراض الوراثية</h3>
+    <div class="hint" style="margin-top:0">نتائج الفحوص الجينية ما تنحفظ في عون ولا تطلع في التطبيق. إذا احتاج المراجع، أرسل إحالة لاستشارة وراثية.</div>
+    <div class="row" style="margin-top:8px"><button class="btn ghost" id="refGen">إحالة لاستشارة وراثية</button><button class="btn ghost" id="refSpec">إحالة لمختص</button></div>`;
+  const draw = () => { const s = CAT.screenings.find(x=>x.key===$('scr').value);
+    $('tests').innerHTML = `<div class="grid2">${s.tests.map(t=>`<div><label>${esc(t.ar)} ${t.unit?'('+esc(t.unit)+')':''}${t.low!=null&&t.high!=null?` · الطبيعي ${t.low}–${t.high}`:''}</label>
+      <input data-k="${t.key}" ${t.unit?'inputmode="decimal"':''} placeholder="${t.unit?'':'سلبي / إيجابي / BI-RADS 1'}"></div>`).join('')}</div>`; };
+  $('scr').onchange = draw; draw();
+  $('saveRes').onclick = async () => {
+    const values = [...document.querySelectorAll('[data-k]')].filter(i=>i.value.trim()).map(i=>({test_key:i.dataset.k, value:i.value.trim()}));
+    if(!values.length) return toast('اكتب قيمة وحدة على الأقل');
+    await api(`/patients/${current}/results`,{method:'POST',body:JSON.stringify({screening:$('scr').value, values, summary:$('sum').value.trim()})});
+    toast('انحفظت النتيجة ووصلت لتطبيق المراجع'); tab='record'; start();
+  };
+  $('refGen').onclick = async()=>{ await api(`/patients/${current}/referral`,{method:'POST',body:JSON.stringify({kind:'genetic_counselling'})}); toast('أُرسلت الإحالة'); };
+  $('refSpec').onclick = async()=>{ await api(`/patients/${current}/referral`,{method:'POST',body:JSON.stringify({kind:'specialist'})}); toast('أُرسلت الإحالة'); };
+}
+
+function paneNotes(d){
+  $('pane').innerHTML = `
+    <label>ملاحظة الطبيب (تطلع للمراجع في «ملاحظات الطبيب»)</label><textarea id="note" maxlength="2000"></textarea>
+    <div style="margin-top:8px"><button class="btn" id="saveNote">إضافة الملاحظة</button></div>
+    <h3>إرفاق تقرير أو صورة</h3>
+    <div class="grid2"><div><label>الملف (PDF أو صورة، حتى 5 ميجا)</label><input type="file" id="file" accept="application/pdf,image/png,image/jpeg"></div>
+    <div><label>ربطه بنتيجة (اختياري)</label><select id="recSel"><option value="">— بدون —</option>${d.records.filter(r=>r.source==='aoun').map(r=>`<option value="${r.id}">${esc(r.title_ar)} · ${date(r.taken_at)}</option>`).join('')}</select></div></div>
+    <div style="margin-top:8px"><button class="btn" id="up">رفع الملف</button></div>
+    <h3>الملاحظات السابقة</h3>
+    ${d.notes.length? d.notes.map(n=>`<div class="note">${esc(n.body)}<br><small>${esc(n.doctor.name_ar)} · ${date(n.created_at)}</small></div>`).join('') : '<div class="empty">ما فيه ملاحظات.</div>'}
+    ${d.files.length?`<h3>مرفقات</h3>${d.files.map(f=>`<button class="btn ghost small" data-f="${f.id}">📄 ${esc(f.filename)}</button>`).join(' ')}`:''}`;
+  bindFiles();
+  $('saveNote').onclick = async()=>{ const b=$('note').value.trim(); if(!b) return; await api(`/patients/${current}/notes`,{method:'POST',body:JSON.stringify({body:b})}); toast('انحفظت الملاحظة'); open(current,true); };
+  $('up').onclick = async()=>{ const f=$('file').files[0]; if(!f) return toast('اختر ملف');
+    if(f.size>5*1024*1024) return toast('الملف أكبر من 5 ميجا');
+    const b64 = await new Promise(res=>{const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.readAsDataURL(f);});
+    await api(`/patients/${current}/files`,{method:'POST',body:JSON.stringify({filename:f.name, mime:f.type, data_b64:b64, record_id:$('recSel').value||null})});
+    toast('انرفع الملف ووصل للمراجع'); open(current,true); };
+}
+
+function paneMeds(d){
+  const times = new Set(['08:00']);
+  $('pane').innerHTML = `
+    <div class="chips" id="quick">${CAT.medicines.map((m,i)=>`<button class="chip" data-i="${i}">${esc(m.ar)} ${esc(m.dose)}</button>`).join('')}</div>
+    <div class="grid2" style="margin-top:6px">
+      <div><label>الاسم بالعربي</label><input id="mAr"></div><div><label>الاسم بالإنجليزي</label><input id="mEn" dir="ltr"></div>
+      <div><label>النوع</label><select id="mKind"><option value="medication">دواء</option><option value="vitamin">فيتامين</option><option value="supplement">مكمّل</option></select></div>
+      <div><label>الجرعة</label><input id="mDose"></div>
+      <div><label>المدة بالأيام (0 = مستمر)</label><input id="mDays" type="number" min="0" max="365" value="30"></div>
+      <div><label>مع الأكل؟</label><select id="mFood"><option value="0">لا يهم</option><option value="1">بعد الأكل</option></select></div>
+    </div>
+    <label>أوقات الأخذ (يصل المراجع تذكير في كل وقت)</label>
+    <div class="row"><div class="chips" id="times"></div><input id="tNew" type="time" style="width:130px"><button class="btn ghost small" id="tAdd">إضافة وقت</button></div>
+    <label>تعليمات</label><input id="mIns" maxlength="300">
+    <div style="margin-top:12px"><button class="btn" id="saveMed">إضافة للخطة العلاجية</button></div>
+    <h3>الأدوية الحالية والسابقة</h3>
+    ${d.meds.length? d.meds.map(m=>`<div class="rec"><div><div style="font-weight:600">${esc(m.name_ar)} · ${esc(m.dose)} ${m.active?'<span class="pill">مستمر</span>':'<span class="pill gray">منتهي</span>'}</div>
+      <div class="src">${m.times.join(' · ')} · ${m.days?m.days+' يوم':'مستمر'} · ${esc(m.facility_ar)}${m.doctor?' · '+esc(m.doctor.name_ar):''}</div></div>
+      <div>${m.active?`<button class="btn ghost small" data-stop="${m.id}">إيقاف</button>`:''}</div></div>`).join('') : '<div class="empty">ما فيه أدوية.</div>'}`;
+  const drawT = () => { $('times').innerHTML=[...times].sort().map(t=>`<button class="chip on" data-t="${t}">${t} ✕</button>`).join('');
+    document.querySelectorAll('#times [data-t]').forEach(b=>b.onclick=()=>{times.delete(b.dataset.t); drawT();}); };
+  drawT();
+  $('tAdd').onclick = ()=>{ if($('tNew').value){ times.add($('tNew').value); drawT(); } };
+  document.querySelectorAll('#quick [data-i]').forEach(b=>b.onclick=()=>{ const m=CAT.medicines[+b.dataset.i];
+    $('mAr').value=m.ar; $('mEn').value=m.en; $('mKind').value=m.kind; $('mDose').value=m.dose; times.clear(); m.times.forEach(t=>times.add(t)); drawT(); });
+  $('saveMed').onclick = async()=>{ if(!$('mAr').value.trim()||!$('mDose').value.trim()||!times.size) return toast('اكتب الاسم والجرعة ووقت واحد على الأقل');
+    await api(`/patients/${current}/meds`,{method:'POST',body:JSON.stringify({kind:$('mKind').value,name_ar:$('mAr').value.trim(),name_en:$('mEn').value.trim(),dose:$('mDose').value.trim(),times:[...times],days:+$('mDays').value||0,with_food:$('mFood').value==='1',instructions:$('mIns').value.trim()})});
+    toast('انضاف، وبتوصل المراجع تذكيرات بمواعيده'); open(current,true); };
+  document.querySelectorAll('[data-stop]').forEach(b=>b.onclick=async()=>{ await api(`/patients/${current}/meds/${b.dataset.stop}/stop`,{method:'POST'}); open(current,true); });
+}
+
+function paneChat(d){
+  $('pane').innerHTML = `
+    <div class="msgs" id="msgs">${d.messages.length? d.messages.map(m=>`<div class="msg ${m.sender==='doctor'?'me':'them'}">${esc(m.body)}<small>${dt(m.created_at)}</small></div>`).join('') : '<div class="empty">ابدأ المحادثة مع المراجع.</div>'}</div>
+    <div class="row" style="margin-top:10px"><input id="msg" maxlength="1000" placeholder="اكتب رسالة…" style="flex:1"><button class="btn" id="send">إرسال</button></div>`;
+  const box=$('msgs'); box.scrollTop=box.scrollHeight;
+  const send = async()=>{ const b=$('msg').value.trim(); if(!b) return; await api(`/patients/${current}/messages`,{method:'POST',body:JSON.stringify({body:b})}); open(current,true); };
+  $('send').onclick=send; $('msg').onkeydown=(e)=>{ if(e.key==='Enter') send(); };
+}
+
+token ? start().catch(()=>{}) : showLogin();
+</script>
+</body>
+</html>

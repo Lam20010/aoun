@@ -25,6 +25,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from . import catalog
 from .db import DISTRICT_AR
 from .security import hash_token, new_id, require_tool_key, secrets_token
 
@@ -76,6 +77,8 @@ class SolutionsIn(Strict):
 
 class ConfirmIn(Strict):
     choice: str = Field(pattern=r"^(held|of_[0-9a-f]{12})$")
+    # the language the person spoke in the call; the confirmation and the app follow it
+    language: str | None = Field(default=None, pattern=r"^(ar|en|ur|hi|bn|fil|id)$")
 
 
 class TransportMode(str, Enum):
@@ -235,7 +238,11 @@ def _case(db, case_id):
 
 
 def _slot_view(r) -> dict:
-    return {"center": r["center"], "when": label_ar(r["start_local"]), "place_kind": r["kind"],
+    extra = {}
+    if r["doctor_id"]:
+        d = catalog.doctor(r["doctor_id"])
+        extra = {"doctor": d["name_ar"], "doctor_en": d["name_en"], "clinic": d["clinic_ar"], "clinic_en": d["clinic_en"]}
+    return {"center": r["center"], "when": label_ar(r["start_local"]), "place_kind": r["kind"], **extra,
             "time_band": band(r),
             "mobile_clinic": r["kind"] == "mobile_clinic", "female_staff": bool(r["female_staff"]),
             "companion_welcome": bool(r["companion_ok"]), "transport_available": bool(r["transport"])}
@@ -243,8 +250,8 @@ def _slot_view(r) -> dict:
 
 def place_hold(c, call_id: str, case_id: str, district: str, screening: str, now: datetime) -> bool:
     """Hold the earliest open center slot for this case when the call starts (used by /admin/calls)."""
-    for r in c.execute("""SELECT * FROM slots WHERE district = ? AND screening = ? AND kind = 'center'
-                          AND remaining > 0 ORDER BY start_local""", (district, screening)).fetchall():
+    for r in c.execute("""SELECT * FROM slots WHERE district = ? AND screening IN (?, 'general') AND kind = 'center'
+                          AND remaining > 0 ORDER BY screening = 'general', start_local""", (district, screening)).fetchall():
         if datetime.fromisoformat(r["start_local"]) <= now:
             continue
         if c.execute("UPDATE slots SET remaining = remaining - 1 WHERE id = ? AND remaining > 0",
@@ -338,9 +345,49 @@ def confirm_booking(body: ConfirmIn, request: Request):
         c.execute("UPDATE call_plans SET booking_id = ? WHERE call_id = ?", (bid, s["id"]))
         plan = _plan(c, s["id"])
         _sync_support(c, s["case_id"], plan)
-    return {"status": "confirmed", "booking_ref": bid, **_slot_view(slot),
+        lang = body.language or s["language"] or "ar"
+        c.execute("UPDATE residents SET language = ? WHERE id = (SELECT resident_id FROM cases WHERE id = ?)",
+                  (lang, s["case_id"]))
+        c.execute("UPDATE call_sessions SET language = ? WHERE id = ?", (lang, s["id"]))
+    send_booking_text(request, s["case_id"], slot, lang)
+    return {"status": "confirmed", "booking_ref": bid, **_slot_view(slot), "language": lang,
             "ride": _ride_view(plan, slot), "prefs": _prefs(plan),
             "message": "Say it is confirmed and the full plan is in the Aoun app, a reminder comes a day before, then say goodbye and end the call."}
+
+
+def booking_text(slot, lang: str) -> str:
+    """The confirmation the person receives, in the language they spoke."""
+    lang = lang if lang in catalog.LANGS else "ar"
+    doc = ""
+    if slot["doctor_id"]:
+        d = catalog.doctor(slot["doctor_id"])
+        doc = catalog.WITH_DOCTOR[lang].format(d=d["name_ar"] if lang == "ar" else d["name_en"])
+    place = slot["center"]
+    if lang != "ar" and slot["facility_id"]:
+        place = catalog.facility(slot["facility_id"])["name_en"]
+        if slot["kind"] == "home_visit":
+            place = "your home"
+        elif slot["kind"] == "mobile_clinic":
+            place = "the mobile clinic by the district mosque"
+    return catalog.BOOKED_SMS[lang].format(when=catalog.when_text(slot["start_local"], lang), place=place, doctor=doc)
+
+
+def send_booking_text(request: Request, case_id: str, slot, lang: str) -> bool:
+    st = request.app.state.settings
+    db = request.app.state.db
+    text = booking_text(slot, lang)
+    with db.tx() as c:
+        _event(c, case_id, "booking_text", detail=lang)
+    if not st.sms_ready:
+        return False
+    phone = request.app.state.vault.decrypt(_case(db, case_id)["phone_enc"])
+    try:
+        r = httpx.post(f"https://api.twilio.com/2010-04-01/Accounts/{st.twilio_sid}/Messages.json",
+                       data={"To": phone, "From": st.twilio_from, "Body": text},
+                       auth=(st.twilio_sid, st.twilio_token), timeout=10)
+        return r.status_code < 300
+    except httpx.HTTPError:
+        return False
 
 
 @router.post("/record_barrier")
@@ -411,8 +458,8 @@ def get_solutions(body: SolutionsIn, request: Request):
                      WHERE h.call_id = ? AND h.status = 'held'""", s["id"])
     picked = []
     if rule is not None:
-        rows = db.all("""SELECT * FROM slots WHERE district = ? AND screening = ? AND remaining > 0
-                         ORDER BY start_local""", case["district"], case["screening"])
+        rows = db.all("""SELECT * FROM slots WHERE district = ? AND screening IN (?, 'general') AND remaining > 0
+                         ORDER BY screening = 'general', start_local""", case["district"], case["screening"])
         seen = set()
         tag = ONE_PER_TAG.get(body.reason)
         for r in rows:

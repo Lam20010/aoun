@@ -55,3 +55,21 @@ const s = StyleSheet.create({
   seg: { backgroundColor: C.white, borderRadius: R.pill, padding: 4 },
   segItem: { flex: 1, paddingVertical: 10, borderRadius: R.pill },
 });
+
+export function Pill({ text, tone = 'mint' }: { text: string; tone?: 'mint' | 'amber' | 'red' | 'gray' | 'dark' }) {
+  const c = { mint: [C.mintSoft, C.teal], amber: ['#FBEFD5', '#A16207'], red: ['#FDE4DA', '#C2410C'], gray: ['#EEF2F1', C.inkSoft], dark: [C.dark, C.white] }[tone];
+  return <View style={{ backgroundColor: c[0], borderRadius: R.pill, paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}><Txt size={12} weight="700" color={c[1]}>{text}</Txt></View>;
+}
+
+export function Button({ title, onPress, tone = 'dark', icon, disabled }: { title: string; onPress: () => void; tone?: 'dark' | 'mint' | 'ghost'; icon?: ReactNode; disabled?: boolean }) {
+  const bg = { dark: C.dark, mint: C.mint, ghost: 'transparent' }[tone];
+  const fg = { dark: C.white, mint: C.dark, ghost: C.ink }[tone];
+  return (
+    <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" style={({ pressed }) => [{ backgroundColor: bg, borderRadius: R.pill, paddingVertical: 12, paddingHorizontal: 16, opacity: disabled ? 0.5 : pressed ? 0.85 : 1 }, tone === 'ghost' && { borderWidth: 1.5, borderColor: C.line }]}>
+      <Row gap={8} style={{ justifyContent: 'center' }}>{icon}<Txt size={15} weight="700" color={fg} center>{title}</Txt></Row>
+    </Pressable>
+  );
+}
+
+export const flagTone = (f: string | null): 'mint' | 'amber' | 'red' | 'gray' =>
+  f === 'normal' || f === 'negative' ? 'mint' : f === 'high' || f === 'positive' ? 'red' : f ? 'amber' : 'gray';

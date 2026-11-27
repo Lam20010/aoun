@@ -342,7 +342,7 @@ def test_demo_page_location_in_app_keeps_only_distance(demo_client):
     dump = "\n".join(db.conn.iterdump())
     assert "24.7361" not in dump and "46.8331" not in dump
     plan = demo_client.get("/demo/plan", params={"k": k}).json()
-    assert plan["confirmed"] is False and plan["slot"]["center"] == "مركز صحي النسيم"
+    assert plan["confirmed"] is False and plan["slot"]["center_ar"] == "مركز صحي النسيم" and plan["slot"]["doctor"]["name_ar"].startswith("د.")
 
 
 def test_demo_page_refusal_is_respected(demo_client):
