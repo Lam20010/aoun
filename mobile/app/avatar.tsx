@@ -58,7 +58,7 @@ export default function AvatarScreen() {
   );
   const toggle = (title: string, key: string) => (
     <Row style={{ justifyContent: 'space-between' }}><Txt size={14} weight="700">{title}</Txt>
-      <Switch value={!!cur[key]} onValueChange={(v) => put({ [key]: v })} trackColor={{ true: C.teal, false: C.line }} /></Row>
+      <Switch value={!!cur[key]} onValueChange={(v) => put({ [key]: v })} trackColor={{ true: C.teal, false: C.line }} thumbColor={C.white} ios_backgroundColor={C.line} {...({ activeThumbColor: C.white } as object)} /></Row>
   );
 
   return (

@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Tabs, type BottomTabBarProps } from 'expo-router/tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AssistantBar } from '../../src/ui/AssistantBar';
 import { Icon, ICON } from '../../src/ui/Icon';
 import { Row, Txt } from '../../src/ui/kit';
@@ -18,6 +19,8 @@ function Bar({ state, navigateToTab }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[s.wrap, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
+      {/* Content fades out under the bar instead of showing beside it. */}
+      <LinearGradient pointerEvents="none" colors={['rgba(243,248,251,0)', C.bg, C.bg]} locations={[0, 0.35, 1]} style={s.fade} />
       <AssistantBar />
       <Row style={s.pill} gap={4}>
         {TABS.map((tab, i) => {
@@ -47,5 +50,6 @@ export default function TabsLayout() {
 const s = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, bottom: 0, gap: 10, alignItems: 'stretch' },
   pill: { alignSelf: 'center', backgroundColor: C.white, borderRadius: 30, padding: 5, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, elevation: 4 },
+  fade: { position: 'absolute', left: 0, right: 0, top: -28, bottom: 0 },
   item: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 24 },
 });

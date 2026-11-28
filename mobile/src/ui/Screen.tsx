@@ -15,11 +15,12 @@ export function Screen({ title, children }: { title: string; children: ReactNode
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + 40, gap: 14 }}>
-        <Row style={{ justifyContent: 'space-between' }}>
-          <Txt size={26} weight="800">{title}</Txt>
-          <Pressable onPress={back} accessibilityRole="button" accessibilityLabel={t('back')}>
+        {/* iOS style: the back button sits at the leading edge (the right in Arabic), the title right after it. */}
+        <Row gap={12}>
+          <Pressable onPress={back} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={8}>
             <Circle size={42}><Icon d={rtl ? ICON.chevronRight : ICON.chevronLeft} /></Circle>
           </Pressable>
+          <Txt size={26} weight="800" style={{ flex: 1 }} lines={1}>{title}</Txt>
         </Row>
         {children}
       </ScrollView>

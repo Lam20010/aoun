@@ -13,6 +13,8 @@ import type { Catalog } from '../src/types';
 // Family history is a set of fixed codes ("runs in the family"); we never ask who, and never link an
 // illness to a person. It only adds screenings to the person's own list.
 const TREE = [['grand', 'grand', 'grand', 'grand'], ['parent', 'parent', 'aunt'], ['me', 'sib']];
+// Who is who in the tree; the tree never shows who has which condition.
+const REL: Record<string, [string, string]> = { grand: ['الأجداد', 'Grandparent'], parent: ['الوالدين', 'Parent'], aunt: ['العم/الخال', 'Aunt/uncle'], me: ['أنا', 'Me'], sib: ['الإخوة', 'Sibling'] };
 
 export default function Family() {
   const { t, lang } = useT();
@@ -39,9 +41,12 @@ export default function Family() {
             {gen.map((_, i) => {
               const self = gi === 2 && i === 0;
               return (
-                <Circle key={i} size={self ? 54 : 42} bg={C.mintSoft} style={{ borderWidth: 2, borderColor: self ? C.tealMid : C.mint }}>
-                  <Icon d={ICON.people} size={17} color={C.teal} />
-                </Circle>
+                <View key={i} style={{ alignItems: 'center', gap: 4 }}>
+                  <Circle size={self ? 54 : 42} bg={self ? C.teal : C.mintSoft} style={{ borderWidth: 2, borderColor: self ? C.teal : C.mint }}>
+                    <Icon d={ICON.people} size={17} color={self ? C.white : C.teal} />
+                  </Circle>
+                  <Txt size={11} color={self ? C.teal : C.inkSoft} weight={self ? '700' : '500'}>{REL[gen[i]][lang === 'ar' ? 0 : 1]}</Txt>
+                </View>
               );
             })}
           </Row>

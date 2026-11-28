@@ -58,7 +58,7 @@ export default function Settings() {
         <Row style={{ justifyContent: 'space-between' }}>
           <Row gap={8} style={{ flex: 1 }}><Icon d={ICON.phone} color={C.teal} />
             <Txt size={16} weight="700" style={{ flex: 1 }}>{lang === 'ar' ? (voice === 'm' ? 'مكالمات رفيد' : 'مكالمات رفيدة') : (voice === 'm' ? 'Calls from Rafeed' : 'Calls from Rufaida')}</Txt></Row>
-          <Switch value={me?.calls_ok !== false} trackColor={{ true: C.teal, false: C.line }}
+          <Switch value={me?.calls_ok !== false} trackColor={{ true: C.teal, false: C.line }} thumbColor={C.white} ios_backgroundColor={C.line} {...({ activeThumbColor: C.white } as object)}
             onValueChange={async (v) => { try { await api.calls(v); await refresh(); } catch {} }} />
         </Row>
         <Txt size={13} color={C.muted}>{me?.calls_ok === false

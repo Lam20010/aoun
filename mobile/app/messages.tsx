@@ -45,11 +45,11 @@ export default function Messages() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: C.bg }}>
       <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 20, gap: 10 }}>
-        <Row style={{ justifyContent: 'space-between' }}>
-          <Txt size={26} weight="800">{t('messagesTitle')}</Txt>
-          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} accessibilityRole="button" accessibilityLabel={t('back')}>
+        <Row gap={12}>
+          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={8}>
             <Circle size={42}><Icon d={rtl ? ICON.chevronRight : ICON.chevronLeft} /></Circle>
           </Pressable>
+          <Txt size={26} weight="800" style={{ flex: 1 }} lines={1}>{t('messagesTitle')}</Txt>
         </Row>
         {docs && docs.length > 1 && (
           <Row gap={8} style={{ flexWrap: 'wrap' }}>

@@ -75,7 +75,9 @@ export default function GameScreen() {
   const T = (ar: string, en: string) => (L === 'ar' ? ar : en);
   const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  // The scene is drawn to the screen's real width (measured), so it fits on any phone or in a browser frame.
+  const win = useWindowDimensions();
+  const [width, setWidth] = useState(Math.min(win.width, 430));
   const k = width / W;
   const voice = useApp((s) => s.voice);
   const plan = useApp((s) => s.plan);
@@ -194,7 +196,7 @@ export default function GameScreen() {
   const pct = (v: number) => (v * k);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} onLayout={(e: LayoutChangeEvent) => { const w = e.nativeEvent.layout.width; if (w && Math.abs(w - width) > 1) setWidth(w); }}>
       <LinearGradient colors={['#59C2F9', '#D6EEFC', '#F6F0C4', '#EADFAE']} locations={[0, 0.3, 0.52, 1]} style={StyleSheet.absoluteFill} />
       <Svg width={width} height={H * k} viewBox={`0 0 ${W} ${H}`} style={{ position: 'absolute', top: 0, left: 0 }}>
         <G opacity={0.55}><Ellipse cx={70} cy={120} rx={34} ry={10} fill="#FFFFFF" /><Ellipse cx={300} cy={200} rx={40} ry={11} fill="#FFFFFF" /><Ellipse cx={200} cy={250} rx={28} ry={8} fill="#FFFFFF" /></G>
@@ -231,7 +233,7 @@ export default function GameScreen() {
       <View style={[s.top, { top: insets.top + 8 }]}>
         <Row gap={8}>
           <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} style={s.round} accessibilityRole="button" accessibilityLabel={T('رجوع', 'Back')}>
-            <Icon d={L === 'ar' ? 'M5 12h14M13 6l6 6-6 6' : ICON.arrowLeft} size={20} width={2.4} />
+            <Icon d={L === 'ar' ? ICON.chevronRight : ICON.chevronLeft} size={20} width={2.4} />
           </Pressable>
           <Row gap={6} style={s.chip}><Icon d={ICON.game} size={18} color={C.teal} /><Txt size={17} weight="800" color="#1E86C4">{calm ? T('وضع التشتيت', 'Calm mode') : T('حيّ عون', 'Aoun district')}</Txt></Row>
           <View style={{ flex: 1 }} />

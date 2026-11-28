@@ -275,10 +275,10 @@ export default function Booking() {
             {section(T('تفضيلاتك', 'Your preferences'), (
               <View style={s.toggles}>
                 <Row style={{ justifyContent: 'space-between' }}><Txt size={14} weight="600">{T('طبيبة فقط', 'Woman doctor only')}</Txt>
-                  <Switch value={draft.female} onValueChange={(v) => setDraft({ ...draft, female: v })} trackColor={{ true: C.teal, false: C.line }} /></Row>
+                  <Switch value={draft.female} onValueChange={(v) => setDraft({ ...draft, female: v })} trackColor={{ true: C.teal, false: C.line }} thumbColor={C.white} ios_backgroundColor={C.line} {...({ activeThumbColor: C.white } as object)} /></Row>
                 <View style={{ height: 1, backgroundColor: C.line }} />
                 <Row style={{ justifyContent: 'space-between' }}><Txt size={14} weight="600">{T('يدعم الكرسي المتحرك', 'Wheelchair access')}</Txt>
-                  <Switch value={draft.wheelchair} onValueChange={(v) => setDraft({ ...draft, wheelchair: v })} trackColor={{ true: C.teal, false: C.line }} /></Row>
+                  <Switch value={draft.wheelchair} onValueChange={(v) => setDraft({ ...draft, wheelchair: v })} trackColor={{ true: C.teal, false: C.line }} thumbColor={C.white} ios_backgroundColor={C.line} {...({ activeThumbColor: C.white } as object)} /></Row>
               </View>
             ))}
             {section(T('الترتيب', 'Sort by'), opt<Sort>(draft.sort, [['soon', T('الأقرب وقتًا', 'Soonest')], ['near', T('الأقرب للبيت', 'Nearest')], ['cheap', T('الأقل تكلفة', 'Cheapest')]], (v) => setDraft({ ...draft, sort: v })))}
