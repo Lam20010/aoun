@@ -6,6 +6,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from . import link
 from .security import hash_token, mask_phone, new_id, require_admin_key
 from .tools import RIYADH, place_hold
 
@@ -45,6 +46,7 @@ def _open_session(request: Request, case_id: str, voice: Voice, conversation_id:
                      VALUES (?,?,?,?,?,?,?)""",
                   (call_id, hash_token(conversation_id) if conversation_id else None, case_id, voice.value, row["language"], now.isoformat(),
                    (now + timedelta(minutes=st.token_ttl_minutes)).isoformat()))
+        link.record_case(c, case_id, "contacted")
         c.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?)",
                   (new_id("ev"), case_id, None, "call_started", "admin", voice.value, now.isoformat()))
         demo_now = datetime.fromisoformat(st.demo_now) if st.demo_now else now.astimezone(RIYADH)

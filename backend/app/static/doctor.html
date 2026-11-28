@@ -311,7 +311,7 @@ const T = {
     demo:'حساب تجريبي ببيانات وهمية: رقم الطبيب {id} · كلمة المرور {pw}', useDemo:'استخدم الحساب التجريبي', loginFoot:'تشوف بس المراجعين المحجوزين عندك. خمس محاولات خاطئة توقف الدخول ١٥ دقيقة.', eLogin:'رقم الطبيب أو كلمة المرور غير صحيحة.', eLocked:'محاولات كثيرة. جرّب بعد ١٥ دقيقة.', eMissing:'اكتب رقم الطبيب وكلمة المرور.',
     artTitle:'كل مراجعينك وسجلاتهم في مكان واحد', artBody:'بوابة عون للأطباء في مراكز الرعاية الأولية.', art1:'سجل المراجع من كل المستشفيات والعيادات والمختبرات', art2:'نتائج وملاحظات وأدوية توصل لتطبيق المراجع فورًا', art3:'كل فتح للسجل يُسجَّل ويشوفه المراجع', menu:'القائمة', today:'لوحة اليوم', appointments:'المواعيد', record:'سجل المراجع', messages:'الرسائل', meds:'الأدوية',
     privacy:'كل فتح للسجل يُسجَّل ويشوفه المراجع في تطبيقه.', signOut:'تسجيل الخروج', notifications:'التنبيهات', markRead:'تعليم الكل كمقروء', noNotifications:'ما فيه تنبيهات جديدة.',
-    nBooking:'حجز جديد: {a}', nMessage:'رسالة من {a}', nSoon:'موعد قريب: {a}', sPatients:'المراجعين', sUpcoming:'مواعيد قادمة', sDone:'تمت زيارتهم', sMsgs:'رسائل المراجعين',
+    nBooking:'حجز جديد: {a}', nMinistry:'من الوزارة: {a}', walks:'المشي هذا الأسبوع', walkMin:'{n} من {g} دقيقة', nMessage:'رسالة من {a}', nSoon:'موعد قريب: {a}', sPatients:'المراجعين', sUpcoming:'مواعيد قادمة', sDone:'تمت زيارتهم', sMsgs:'رسائل المراجعين',
     myAppointments:'مواعيدي', countAppts:'{n} مواعيد', colPatient:'المراجع', colScreening:'الفحص', colTime:'الوقت', colStatus:'الحالة', booked:'محجوز', attended:'تمت الزيارة',
     noAppts:'ما عندك مواعيد محجوزة الحين.', pickPatient:'اختر مراجعًا من القائمة.', pickPatientWork:'اختر مراجعًا لعرض سجله وإضافة النتائج.', pickFirst:'اختر مراجعًا من القائمة أول',
     district:'حي {d}', age:'العمر', gender:'الجنس', female:'أنثى', male:'ذكر', language:'اللغة', appointment:'الموعد', lastResult:'آخر نتيجة من عون', activeMeds:'أدوية حالية',
@@ -339,7 +339,7 @@ const T = {
     demo:'Demo account with invented data: doctor ID {id} · password {pw}', useDemo:'Use the demo account', loginFoot:'You only see the patients booked with you. Five wrong tries lock sign-in for 15 minutes.', eLogin:'Wrong doctor ID or password.', eLocked:'Too many tries. Try again in 15 minutes.', eMissing:'Enter your doctor ID and password.',
     artTitle:'All your patients and their records in one place', artBody:'The Aoun portal for doctors in primary care centers.', art1:'The patient record from every hospital, clinic and lab', art2:'Results, notes and medicines reach the patient’s app at once', art3:'Every opening of a record is logged and shown to the patient', menu:'Menu', today:'Today', appointments:'Appointments', record:'Patient record', messages:'Messages', meds:'Medicines',
     privacy:'Every time a record is opened, it is logged and shown to the patient.', signOut:'Sign out', notifications:'Notifications', markRead:'Mark all as read', noNotifications:'No new notifications.',
-    nBooking:'New booking: {a}', nMessage:'Message from {a}', nSoon:'Coming up: {a}', sPatients:'Patients', sUpcoming:'Upcoming', sDone:'Seen', sMsgs:'Patient messages',
+    nBooking:'New booking: {a}', nMinistry:'From the Ministry: {a}', walks:'Walking this week', walkMin:'{n} of {g} min', nMessage:'Message from {a}', nSoon:'Coming up: {a}', sPatients:'Patients', sUpcoming:'Upcoming', sDone:'Seen', sMsgs:'Patient messages',
     myAppointments:'My appointments', countAppts:'{n} appointments', colPatient:'Patient', colScreening:'Screening', colTime:'Time', colStatus:'Status', booked:'Booked', attended:'Seen',
     noAppts:'No booked appointments right now.', pickPatient:'Choose a patient from the list.', pickPatientWork:'Choose a patient to see their record and add results.', pickFirst:'Choose a patient from the list first',
     district:'{d}', age:'Age', gender:'Sex', female:'Female', male:'Male', language:'Language', appointment:'Appointment', lastResult:'Last Aoun result', activeMeds:'Current medicines',
@@ -444,15 +444,15 @@ function drawNoti(){
   const seen = ls.get(seenKey());
   const fresh = NOTI.filter(n => !seen || n.at > seen).length;
   $('bellDot').textContent = fresh; $('bellDot').classList.toggle('hide', !fresh);
-  const st = { booking:['cal','k-lav','nBooking'], message:['chat','k-yel','nMessage'], soon:['clock','k-teal','nSoon'] };
+  const st = { booking:['cal','k-lav','nBooking'], message:['chat','k-yel','nMessage'], soon:['clock','k-teal','nSoon'], ministry:['shield','k-teal','nMinistry'] };
   $('nItems').innerHTML = NOTI.length ? NOTI.map((n,i) => { const [ic,k,key] = st[n.kind] || st.booking; return `
     <button class="nitem ${(!seen || n.at > seen)?'new':''}" data-i="${i}">
       <span class="ni ${k}">${icon(ic)}</span>
-      <span style="min-width:0"><div class="nt">${esc(t(key,{a:al(n.alias)}))}</div>
-        ${n.preview?`<div class="np" dir="auto">${esc(n.preview)}</div>`:''}
-        <div class="ns num">${n.kind==='message'?ago(n.at):dt(n.start)}${n.screening_ar?' · '+esc(pk(n,'screening')):''}</div></span>
+      <span style="min-width:0"><div class="nt">${esc(t(key,{a:n.kind==='ministry'?pk(n,'title'):al(n.alias)}))}</div>
+        ${n.preview?`<div class="np" dir="auto">${esc(n.preview)}</div>`:''}${n.kind==='ministry'?`<div class="np">${esc(pk(n,'detail'))}</div>`:''}
+        <div class="ns num">${n.kind==='message'||n.kind==='ministry'?ago(n.at):dt(n.start)}${n.screening_ar?' · '+esc(pk(n,'screening')):''}</div></span>
     </button>`; }).join('') : `<div class="empty">${t('noNotifications')}</div>`;
-  document.querySelectorAll('#nItems [data-i]').forEach(b => b.onclick = () => { const n = NOTI[+b.dataset.i]; closePanel(); open(n.patient, false, n.kind==='message'?'chat':'record'); });
+  document.querySelectorAll('#nItems [data-i]').forEach(b => b.onclick = () => { const n = NOTI[+b.dataset.i]; closePanel(); if (n.kind==='ministry') return; open(n.patient, false, n.kind==='message'?'chat':'record'); });
 }
 async function loadNoti(){ try { NOTI = (await api('/notifications?lang='+lang)).items || []; drawNoti(); } catch(e){} }
 function closePanel(){ $('panel').classList.add('hide'); $('bell').setAttribute('aria-expanded','false'); }
@@ -522,6 +522,7 @@ function render(d){
       <div><small>${t('activeMeds')}</small><b class="num">${active}</b></div>
       <div><small>${t('identity')}</small><b class="num">${p.sehhaty?esc(pk(p.sehhaty,'id_type'))+' · <span dir="ltr">'+esc(p.sehhaty.id_masked)+'</span>':'—'}</b></div>
       <div><small>${t('insurance')}</small><b>${p.sehhaty&&p.sehhaty.insurance?esc(pk(p.sehhaty.insurance,'name'))+' · '+t('insClass',{c:p.sehhaty.insurance.class,p:p.sehhaty.insurance.copay_pct}):t('noInsurance')}</b></div>
+      <div><small>${t('walks')}</small><b class="num">${d.walks?esc(t("walkMin",{n:d.walks.week_minutes,g:d.walks.goal_minutes})):'—'}</b></div>
       <div><small>${t('cost')}</small><b>${a.cost?(a.cost.free?t('free'):esc(t('youPay',{n:a.cost.you_pay}))):'—'}</b></div>
     </div>
     ${a.sehhaty_ref?`<div class="sehref">${icon('shield')}<span>${t('sehhatyRef')} <b class="num" dir="ltr">${esc(a.sehhaty_ref)}</b></span></div>`:''}

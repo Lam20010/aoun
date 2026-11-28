@@ -8,6 +8,7 @@ export interface Slot {
 }
 export interface Cost { free: boolean; price: number; insurance_pays: number; you_pay: number; basis: 'moh_free' | 'insurance' | 'cash'; say_ar: string; say_en: string; note_ar: string; note_en: string }
 export interface Sehhaty { id_type: string; id_type_ar: string; id_type_en: string; id_masked: string; linked: boolean;
+  first_name_ar?: string; first_name_en?: string; name_ar?: string; name_en?: string; phone_masked?: string; mode?: string;
   insurance: { insurer: string; name_ar: string; name_en: string; class: string; copay_pct: number; copay_cap: number; valid_until: string } | null }
 export interface Ride { mode: 'car' | 'metro'; party?: string; pickup_at?: string; pickup_minutes?: number }
 export interface Plan {
@@ -38,4 +39,12 @@ export interface Catalog {
   symptoms: { key: string; ar: string; en: string; screening: string; urgency: 'soon' | 'urgent' | 'emergency' }[];
   hereditary: { key: string; ar: string; en: string }[];
   districts: { key: string; ar: string; en: string }[];
+}
+export interface Walks { week_minutes: number; goal_minutes: number; today_minutes: number; days: { day: string; minutes: number }[] }
+export interface Intervention { id: string; kind: string; title_ar: string; title_en: string; detail_ar: string; detail_en: string; approved_at: string; slots: number; progress?: number; goal?: number }
+export interface DistrictNews { district: string; district_ar: string; district_en: string; interventions: Intervention[] }
+export interface Route {
+  source: 'google' | 'estimate'; duration_min: number; distance_km: number; points: [number, number][]; steps: string[]; mode: string; to: string;
+  origin: [number, number]; dest: [number, number]; name_ar: string; name_en: string;
+  links: { google: string; apple: string; uber: string; careem: string; darb_ios: string; darb_android: string; transit: string };
 }

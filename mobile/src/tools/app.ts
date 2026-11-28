@@ -8,7 +8,7 @@ import type { Tool } from './types';
 
 const SCREENS: Record<string, string> = {
   home: '/home', notebook: '/notebook', results: '/notebook?seg=results', preferences: '/notebook?seg=prefs',
-  family: '/family', settings: '/settings', map: '/map', game: '/soon?k=game', plan: '/plan',
+  family: '/family', settings: '/settings', map: '/map', game: '/game', needle: '/game?mode=calm', walk: '/walk', care: '/care', avatar: '/avatar', plan: '/plan',
   booking: '/booking', record: '/record', medicines: '/meds', messages: '/messages',
 };
 const LANG_CODES: Lang[] = ['ar', 'en', 'ur', 'hi', 'bn', 'fil', 'id'];
@@ -50,7 +50,7 @@ export const appTools: Record<string, Tool> = {
   },
 
   show_on_map: ({ target }) => {
-    router.navigate((target === 'walk' ? '/map?focus=walk' : '/map') as never);
+    router.navigate((target === 'walk' ? '/walk' : '/map') as never);
     return 'done';
   },
 

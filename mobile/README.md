@@ -78,6 +78,17 @@ every screen follow. They can also pick it in settings. Arabic and Urdu read rig
 - Buttons open Google Maps directions (car, metro), Uber with the center already set as the drop-off, and the Darb app
   (Darb has no public link to a route, so it opens the store page).
 
+## Screens from the presentation
+
+- **Welcome**: the account comes ready from Sehhaty (masked ID and mobile), then Aoun calls.
+- **Home**: «هلا يا …» over the neighbourhood scene, the visit card, a ride card, news from the Ministry for the district, and «رعايتي».
+- **«حيّ عون»** (`app/game.tsx`): help neighbours, quick activities, coins, build and upgrade the district, daily tasks (one is real: confirming the visit). Kept on the server so it follows the person.
+- **«وقت الإبرة؟»**: the same game in a 40-second calm mode.
+- **«ممشى الحي»** (`app/walk.tsx`): the walkway route, a 30-minute walk timer, and this week's minutes (only minutes are saved).
+- **«خطة الرعاية»** (`app/care.tsx`): from booking to result.
+- **«شكل رفيدة»** (`app/avatar.tsx`): hair or hijab, ghutra or shemagh, beard, skin, expression, glasses and colours.
+- **«أنا معك»** (`app/assistant.tsx`): everything the assistant can open; tap the assistant's face on the bar.
+
 ## Sehhaty and cost
 
 The app shows the Sehhaty account (masked ID, insurance) in Settings, with a demo switcher between four profiles. Each slot and the plan show the cost: free through Sehhaty, or the private price, what insurance pays and what you pay. See the backend README for the rules.

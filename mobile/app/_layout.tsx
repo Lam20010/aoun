@@ -22,6 +22,9 @@ export default function RootLayout() {
           <Stack.Screen name="incoming" options={{ animation: 'fade', gestureEnabled: false }} />
           <Stack.Screen name="call" options={{ animation: 'fade', gestureEnabled: false }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="assistant" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="welcome" options={{ animation: 'fade', gestureEnabled: false }} />
+          <Stack.Screen name="game" options={{ animation: 'fade' }} />
         </Stack>
       </AgentSessionProvider>
     </SafeAreaProvider>

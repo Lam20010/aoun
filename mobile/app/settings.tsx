@@ -6,6 +6,8 @@ import { C, R } from '../src/theme';
 import { LANGS, useT, type Lang } from '../src/i18n';
 import { useApp, type Voice } from '../src/store';
 import { api, refresh } from '../src/api';
+import { router } from 'expo-router';
+import { Avatar } from '../src/ui/Avatar';
 
 export default function Settings() {
   const { t } = useT();
@@ -59,6 +61,10 @@ export default function Settings() {
       <Card style={{ gap: 10 }}>
         <Row gap={8}><Icon d={ICON.mic} color={C.teal} /><Txt size={16} weight="700">{t('voice')}</Txt></Row>
         <Segments<Voice> value={voice} onChange={(v) => set({ voice: v })} items={[{ key: 'f', label: t('female') }, { key: 'm', label: t('male') }]} />
+        <Pressable onPress={() => router.push('/avatar')} accessibilityRole="button" style={{ backgroundColor: C.bg, borderRadius: 16, padding: 10 }}>
+          <Row gap={10}><View style={{ width: 40, height: 40, borderRadius: 20, overflow: 'hidden' }}><Avatar size={40} /></View>
+            <Txt size={15} weight="600" style={{ flex: 1 }}>{lang === 'ar' ? (voice === 'm' ? 'خصّص شكل رفيد' : 'خصّصي شكل رفيدة') : (voice === 'm' ? 'Customize how Rafeed looks' : 'Customize how Rufaida looks')}</Txt></Row>
+        </Pressable>
       </Card>
       <Card style={{ gap: 6 }}>
         <Row gap={8}><Icon d={ICON.shield} color={C.teal} /><Txt size={16} weight="700">{t('privacy')}</Txt></Row>

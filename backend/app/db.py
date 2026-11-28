@@ -242,6 +242,53 @@ CREATE TABLE IF NOT EXISTS events (
     detail TEXT,                         -- fixed codes only, never free text from a caller
     created_at TEXT NOT NULL
 );
+-- ---------- linking the app, the doctor portal and the Ministry board ----------
+
+-- What happened, per district, with no person in it: feeds the Ministry board.
+CREATE TABLE IF NOT EXISTS activity (
+    id TEXT PRIMARY KEY,
+    district TEXT NOT NULL,
+    kind TEXT NOT NULL,                  -- booked | cancelled | barrier | result | early | referral | walk | helped | intervention
+    detail TEXT,                         -- fixed codes only
+    n INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL
+);
+
+-- Ministry interventions: proposed for a district, approved by a person, then they change what people can book.
+CREATE TABLE IF NOT EXISTS interventions (
+    id TEXT PRIMARY KEY,
+    district TEXT NOT NULL,
+    kind TEXT NOT NULL,                  -- mobile_clinic | evening_hours | transport | language | challenge
+    status TEXT NOT NULL,                -- proposed | approved
+    created_at TEXT NOT NULL,
+    approved_at TEXT,
+    approved_by TEXT,
+    slots INTEGER NOT NULL DEFAULT 0,
+    until TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ministry_sessions (
+    token_hash TEXT PRIMARY KEY,
+    staff_id TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+
+-- The person's own app state kept on the server so it follows them: the neighbourhood game and the assistant look.
+CREATE TABLE IF NOT EXISTS app_state (
+    resident_id TEXT PRIMARY KEY REFERENCES residents(id),
+    game TEXT NOT NULL DEFAULT '{}',
+    avatar TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT
+);
+
+-- Neighbourhood walks the person logs from the app (minutes only, no route or location).
+CREATE TABLE IF NOT EXISTS walks (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    minutes INTEGER NOT NULL,
+    day TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
 """
 
 

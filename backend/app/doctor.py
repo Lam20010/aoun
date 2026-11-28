@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from . import catalog
+from . import catalog, link
 from .translate import localize
 from .patient import full_record, meds_view, serve_file
 from .security import hash_token, new_id, secrets_token
@@ -269,6 +269,12 @@ def notifications(request: Request, lang: str | None = None, doc=Depends(current
         tr = localize({"body": body}, lang if lang in ("ar", "en") else None).get("translated") or body
         out.append({"kind": "message", "at": m["created_at"], "patient": m["id"], "alias": _alias(m),
                     "preview": tr[:80] + ("…" if len(tr) > 80 else "")})
+    # Ministry interventions approved for this doctor's district (new open times appear in their list).
+    district = catalog.facility(doc["facility"])["district"]
+    for iv in link.active(db, district):
+        if iv["kind"] in ("mobile_clinic", "evening_hours", "transport", "challenge"):
+            out.append({"kind": "ministry", "at": iv["approved_at"], "title_ar": iv["title_ar"], "title_en": iv["title_en"],
+                        "detail_ar": iv["detail_ar"], "detail_en": iv["detail_en"], "slots": iv["slots"]})
     out.sort(key=lambda x: x["at"], reverse=True)
     return {"items": out[:30]}
 
@@ -292,7 +298,8 @@ def patient(rid: str, request: Request, lang: str | None = None, doc=Depends(cur
                         "family_history_en": [catalog.FAMILY_HISTORY[x][1] for x in ((fam["codes"] if fam else "") or "").split(",") if x],
                         "prefs": [x for x in ((prefs["prefs"] if prefs else "") or "").split(",") if x],
                         "sehhaty": catalog.sehhaty_profile(r)},
-            **full_record(db, vault, rid), "meds": meds_view(db, vault, rid), "messages": msgs}
+            **full_record(db, vault, rid), "meds": meds_view(db, vault, rid), "messages": msgs,
+            "walks": link.walks_view(db, rid, link._today(request))}
 
 
 @router.post("/doctor/api/patients/{rid}/results")
@@ -323,6 +330,11 @@ def add_results(rid: str, body: ResultsIn, request: Request, doc=Depends(current
         c.execute("UPDATE cases SET status = 'completed' WHERE resident_id = ? AND screening = ? AND status = 'booked'",
                   (rid, body.screening))
         _log(c, rid, doc["id"], "added_result")
+        dist = c.execute("SELECT district FROM residents WHERE id = ?", (rid,)).fetchone()["district"]
+        link.record(c, dist, "result")
+        flags = [_flag(body.screening, v.test_key, v.value.strip()) for v in body.values]
+        if any(f in ("high", "positive") for f in flags):
+            link.record(c, dist, "early", body.screening)
     return {"records": ids}
 
 
@@ -420,4 +432,5 @@ def referral(rid: str, body: ReferralIn, request: Request, doc=Depends(current_d
     with request.app.state.db.tx() as c:
         c.execute("INSERT INTO referrals VALUES (?,?,?,?,?)", (new_id("ref"), rid, doc["id"], body.kind, _now().isoformat()))
         _log(c, rid, doc["id"], "referral_" + body.kind)
+        link.record(c, c.execute("SELECT district FROM residents WHERE id = ?", (rid,)).fetchone()["district"], "referral", body.kind)
     return {"ok": True}

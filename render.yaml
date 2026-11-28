@@ -31,3 +31,7 @@ services:
         sync: false
       - key: AOUN_DEMO_MODE
         value: "1"   # lets a dashboard/web test conversation use a session opened in the last 15 minutes
+      - key: AOUN_GOOGLE_MAPS_KEY
+        sync: false   # optional: real routes and travel times (server only)
+      - key: AOUN_MINISTRY_PASSWORD
+        sync: false   # optional: Ministry board password (demo mode falls back to the demo password)

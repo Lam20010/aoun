@@ -25,7 +25,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from . import catalog
+from . import catalog, link, sehhaty
 from .db import DISTRICT_AR
 from .security import hash_token, new_id, require_tool_key, secrets_token
 
@@ -363,10 +363,11 @@ def confirm_booking(body: ConfirmIn, request: Request):
 
         bid = new_id("bk")
         c.execute("INSERT INTO bookings (id,case_id,slot_id,offer_id,status,confirmed_at,sehhaty_ref) VALUES (?,?,?,?,?,?,?)",
-                  (bid, s["case_id"], slot_id, offer_id, "confirmed", _now_utc().isoformat(), catalog.new_sehhaty_ref()))
+                  (bid, s["case_id"], slot_id, offer_id, "confirmed", _now_utc().isoformat(), sehhaty.client().book(None, None)))
         c.execute("UPDATE cases SET status = 'booked' WHERE id = ?", (s["case_id"],))
         c.execute("UPDATE call_sessions SET outcome = 'booked' WHERE id = ?", (s["id"],))
         _event(c, s["case_id"], "booking_confirmed", booking_id=bid)
+        link.record(c, c.execute("SELECT r.district FROM cases x JOIN residents r ON r.id = x.resident_id WHERE x.id = ?", (s["case_id"],)).fetchone()["district"], "booked")
         slot = c.execute("SELECT * FROM slots WHERE id = ?", (slot_id,)).fetchone()
         plan = _plan(c, s["id"])
         if slot["kind"] == "home_visit" and plan["ride_mode"]:
@@ -431,6 +432,7 @@ def record_barrier(body: RecordBarrierIn, request: Request):
                      ON CONFLICT(call_id) DO UPDATE SET reason = excluded.reason""",
                   (s["id"], s["case_id"], case["district"], body.reason.value, _now_utc().isoformat()))
         _event(c, s["case_id"], "barrier_reported", detail=body.reason.value)
+        link.record(c, case["district"], "barrier", body.reason.value)
     return {"status": "recorded", "message": "Now call get_solutions with the same reason and offer its choices."}
 
 
@@ -558,6 +560,12 @@ def get_solutions(body: SolutionsIn, request: Request):
     if body.reason == Reason.cost_concern:
         extras.append("Reassure them: Ministry health centers, mobile clinics, home care and video consultations booked "
                       "through Sehhaty are free.")
+    district = _case(db, s["case_id"])["district"]
+    support = [iv["title_en"] for iv in link.active(db, district) if iv["kind"] in ("mobile_clinic", "evening_hours", "transport")]
+    if support:
+        extras.append("The Ministry has just approved for this district: " + ", ".join(support) +
+                      ". Mention it if it helps (new mobile clinic or evening times are already in the options; "
+                      "with transport support the ride is free).")
     return {
         "plan": plan,
         "options": options,

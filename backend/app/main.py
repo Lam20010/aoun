@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from . import admin, demo, doctor, location, ministry, patient, tools, webhooks
+from . import admin, demo, doctor, integrations, link, location, ministry, patient, tools, webhooks
 from .config import Settings, load_settings
 from .db import Database, seed_demo
 from .security import PhoneVault
@@ -25,6 +25,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.vault = PhoneVault(settings.phone_enc_key)
     app.state.db = Database(settings.db_path)
     seed_demo(app.state.db, app.state.vault)  # also seeds open times, doctors and past records
+    link.seed_interventions(app.state.db)
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
@@ -58,6 +59,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(location.router)
     app.include_router(demo.router)
     app.include_router(patient.router)
+    app.include_router(link.patient_router(patient.current_patient))
+    app.include_router(integrations.router)
     app.include_router(patient.files_router)
     app.include_router(doctor.router)
     return app

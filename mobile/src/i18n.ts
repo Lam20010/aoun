@@ -14,6 +14,7 @@ export const LANGS: { key: Lang; label: string; rtl: boolean; locale: string; sp
 ];
 
 const ar = {
+  wName: 'الاسم', wId: 'رقم الهوية', wPhone: 'الجوال', wReady: 'حسابك جاهز من «صحتي»، بدون أي تسجيل.', wSafe: 'بياناتك مشفّرة، وما تُشارك مع أحد', wEnter: 'الدخول إلى عون', assistantMenu: 'كل اللي أقدر أسويه لك',
   home: 'الرئيسية', notebook: 'دفتري', meds: 'أدويتي', back: 'رجوع', settings: 'الإعدادات', soon: 'قريبًا', soonBody: 'نشتغل على هالصفحة.',
   send: 'إرسال', cancel: 'إلغاء', confirm: 'تأكيد', loading: 'لحظة…', retry: 'جرّبي مرة ثانية', offline: 'ما قدرنا نوصل لعون. تأكّدي من النت.',
   hello: 'هلا يا', confirmed: 'موعد مؤكد', pending: 'بانتظار التأكيد', noBooking: 'ما عندك موعد للحين', viewPlan: 'عرض خطة الزيارة',
@@ -71,6 +72,7 @@ type Dict = typeof ar;
 export type Key = keyof Dict;
 
 const en: Dict = {
+  wName: 'Name', wId: 'ID number', wPhone: 'Mobile', wReady: 'Your account is ready from Sehhaty. No sign-up needed.', wSafe: 'Your details are encrypted and never shared', wEnter: 'Enter Aoun', assistantMenu: 'Everything I can do for you',
   home: 'Home', notebook: 'Notebook', meds: 'Medicines', back: 'Back', settings: 'Settings', soon: 'Coming soon', soonBody: 'We are working on this page.',
   send: 'Send', cancel: 'Cancel', confirm: 'Confirm', loading: 'One moment…', retry: 'Try again', offline: 'Could not reach Aoun. Check your connection.',
   hello: 'Hi', confirmed: 'Appointment confirmed', pending: 'Awaiting confirmation', noBooking: 'No appointment yet', viewPlan: 'View visit plan',

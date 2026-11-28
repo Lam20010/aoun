@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from . import catalog
+from . import catalog, link, sehhaty
 from .translate import localize
 from .security import hash_token, new_id, secrets_token
 from .tools import RIYADH, _ride_view, band, label_ar, time_ar
@@ -253,7 +253,7 @@ def me(request: Request, p=Depends(current_patient)):
                                      + catalog.routine_for(p["age_band"], p["gender"] or "f")))
     return {"patient": p["id"], "district": p["district"], "district_ar": catalog.DISTRICTS[p["district"]][0],
             "district_en": catalog.DISTRICTS[p["district"]][1], "language": p["language"], "gender": p["gender"],
-            "age_band": p["age_band"], "family_history": codes, "sehhaty": catalog.sehhaty_profile(p),
+            "age_band": p["age_band"], "family_history": codes, "sehhaty": sehhaty.client().profile(p, request.app.state.vault.decrypt(p["phone_enc"])),
             "recommended": [{"key": k, "ar": catalog.SCREENINGS[k]["ar"], "en": catalog.SCREENINGS[k]["en"],
                              "every_months": catalog.SCREENINGS[k]["every_months"]} for k in recommended],
             "plan": plan_for_case(db, case["id"]) if case else None}
@@ -336,10 +336,12 @@ def book(body: BookIn, request: Request, p=Depends(current_patient)):
             c.execute("UPDATE slots SET remaining = remaining + 1 WHERE id = ?", (h["slot_id"],))
         bid = new_id("bk")
         c.execute("INSERT INTO bookings (id,case_id,slot_id,offer_id,status,confirmed_at,sehhaty_ref) VALUES (?,?,?,?,?,?,?)",
-                  (bid, case["id"], slot["id"], "app_" + bid, "confirmed", _now().isoformat(), catalog.new_sehhaty_ref()))
+                  (bid, case["id"], slot["id"], "app_" + bid, "confirmed", _now().isoformat(), sehhaty.client().book(p, slot)))
         c.execute("UPDATE cases SET status = 'booked' WHERE id = ?", (case["id"],))
         c.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?)",
                   (new_id("ev"), case["id"], bid, "booking_confirmed" if old is None else "booking_moved", "app", None, _now().isoformat()))
+        if old is None:
+            link.record(c, p["district"], "booked")
     return plan_for_case(db, case["id"])
 
 
@@ -354,6 +356,7 @@ def cancel(request: Request, p=Depends(current_patient)):
         c.execute("UPDATE bookings SET status = 'cancelled' WHERE id = ?", (old["id"],))
         c.execute("UPDATE slots SET remaining = remaining + 1 WHERE id = ?", (old["slot_id"],))
         c.execute("UPDATE cases SET status = 'open' WHERE id = ?", (case["id"],))
+        link.record(c, p["district"], "cancelled")
     return plan_for_case(db, case["id"])
 
 
