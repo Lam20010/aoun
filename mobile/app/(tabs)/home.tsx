@@ -1,11 +1,11 @@
-// Home: «هلا يا …» over the neighbourhood, then
+// Home: a portal-style top (logo bar + a banner with three live slides), then
 //   1. «توعية»: short awareness cards (the person's own screening first),
 //   2. «جديد في حيّك»: health events near home (a mammography truck in the park, free checks after
 //      Friday prayer, a group walk) and what the Ministry approved for the district,
 //   3. «خطتك»: one line showing how far the plan has come, with the visit card,
 //   4. «رعايتي»: care plan, family, the walkway, «حيّ عون», «وقت الإبرة؟», record and messages.
-import { useCallback, useMemo, useState } from 'react';
-import { Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Image, Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -107,6 +107,26 @@ export default function Home() {
     { key: 'record', title: t('record'), sub: t('recordSub'), icon: ICON.file, bg: C.lavender, to: '/record' },
     { key: 'messages', title: t('messages'), sub: t('messagesSub'), icon: ICON.chat, bg: C.mintCard, to: '/messages' },
   ];
+  // Banner slides, like the Ministry portal: your next step, the nearest health event, the district challenge.
+  const ev0 = events[0];
+  const slides: { kicker: string; title: string; text: string; cta: string; go: () => void }[] = [
+    { kicker: `${t('hello')} ${name}${me ? ' · ' + (lang === 'ar' ? 'حي ' + me.district_ar : me.district_en) : ''}`, title: nextText,
+      text: T(`${doneN} من ${steps.length} خطوات في خطتك`, `${doneN} of ${steps.length} steps of your plan`),
+      cta: slot ? T('خطة الزيارة', 'Visit plan') : t('bookAppt'), go: () => router.push(slot ? '/plan' : '/booking') },
+    ...(ev0 ? [{ kicker: T('جديد في حيّك', 'New in your district'), title: pick(ev0 as never, 'title'),
+      text: `${pick(ev0 as never, 'place')} · ${when(ev0.start, locale, { weekday: 'long', hour: 'numeric', minute: '2-digit' })}`,
+      cta: T('التفاصيل', 'Details'), go: () => setEv(ev0) }] : []),
+    ...(challenge ? [{ kicker: T('من وزارة الصحة لحيّك', 'From the Ministry for your district'), title: pick(challenge as never, 'title'),
+      text: T(`${challenge.progress}/${challenge.goal} · كل موعد ومشي يحسب للحي`, `${challenge.progress}/${challenge.goal} · every visit and walk counts`),
+      cta: T('العبي حيّ عون', 'Play Aoun district'), go: () => router.push('/game') }] : []),
+  ];
+  const [hi, setHi] = useState(0);
+  const touched = useRef(0);
+  const n = slides.length, cur = slides[((hi % n) + n) % n];
+  const move = (d: number) => { touched.current = Date.now(); setHi((x) => x + d); };
+  useEffect(() => { const i = setInterval(() => { if (Date.now() - touched.current > 8000) setHi((x) => x + 1); }, 7000); return () => clearInterval(i); }, []);
+  const swipeX = useRef(0);
+
   const head = (title: string, sub?: string) => (
     <View style={{ paddingHorizontal: 20, marginTop: 24, marginBottom: 10 }}>
       <Txt size={21} weight="800">{title}</Txt>
@@ -117,16 +137,37 @@ export default function Home() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingBottom: 210 }}
       refreshControl={<RefreshControl refreshing={busy} onRefresh={load} />}>
-      {/* welcome over the neighbourhood */}
-      <LinearGradient colors={['#D6EEFC', '#EAF5F1', C.bg]} style={{ paddingTop: insets.top + 12, paddingHorizontal: 20 }}>
+      {/* top bar: the Aoun logo, then «أنا معك» and settings */}
+      <View style={[s.bar, { paddingTop: insets.top + 8 }]}>
         <Row style={{ justifyContent: 'space-between' }}>
-          <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel={t('settings')}><Circle size={44}><Icon d={ICON.sliders} size={20} /></Circle></Pressable>
-          <Pressable onPress={() => router.push('/assistant')} accessibilityRole="button" accessibilityLabel={t('assistantMenu')}><Circle size={44}><Icon d={ICON.heart} size={22} color={C.teal} /></Circle></Pressable>
+          <Image source={require('../../assets/aoun-lockup.png')} style={{ width: 118, height: 41 }} resizeMode="contain" accessibilityLabel={t('aoun')} />
+          <Row gap={8}>
+            <Pressable onPress={() => router.push('/assistant')} accessibilityRole="button" accessibilityLabel={t('assistantMenu')} hitSlop={6}><Circle size={40} bg={C.mintSoft}><Icon d={ICON.heart} size={20} color={C.teal} /></Circle></Pressable>
+            <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel={t('settings')} hitSlop={6}><Circle size={40} bg={C.mintSoft}><Icon d={ICON.sliders} size={19} color={C.teal} /></Circle></Pressable>
+          </Row>
         </Row>
-        <Txt size={34} weight="800" color={C.teal} style={{ marginTop: 14 }}>{t('hello')} {name}</Txt>
-        <Row gap={6}><View style={s.dot} /><Txt size={14} color={C.muted}>{me ? (lang === 'ar' ? 'حي ' + me.district_ar : me.district_en) + ' · ' + T('الرياض', 'Riyadh') : ''}</Txt></Row>
-        <View style={{ marginHorizontal: -20, marginTop: 4 }}><Skyline width="100%" height={92} variant={1} /></View>
-      </LinearGradient>
+      </View>
+
+      {/* banner: three live slides, swipe or tap the arrows */}
+      <View onTouchStart={(e) => { swipeX.current = e.nativeEvent.pageX; }}
+        onTouchEnd={(e) => { const dx = e.nativeEvent.pageX - swipeX.current; if (Math.abs(dx) > 40) move(dx > 0 === rtl ? -1 : 1); }}>
+        <LinearGradient colors={['#002336', '#0B3A55', '#1574AD']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
+          <Image source={require('../../assets/aoun-mark-white.png')} style={s.heroMark} resizeMode="contain" />
+          <Txt size={12} weight="700" color="#59C2F9">{cur.kicker}</Txt>
+          <Txt size={22} weight="800" color={C.white} lines={3} style={{ lineHeight: 32 }}>{cur.title}</Txt>
+          <Txt size={13} color="#D6EEFC" lines={2}>{cur.text}</Txt>
+          <Row style={{ justifyContent: 'space-between', marginTop: 10 }}>
+            <Pressable onPress={cur.go} accessibilityRole="button" style={s.heroBtn}><Txt size={14} weight="800" color="#002336">{cur.cta}</Txt></Pressable>
+            <Row gap={8}>
+              <Pressable onPress={() => move(-1)} accessibilityRole="button" accessibilityLabel={T('السابق', 'Previous')} style={s.heroArrow}><Icon d={rtl ? ICON.chevronRight : ICON.chevronLeft} size={18} color={C.white} /></Pressable>
+              <Pressable onPress={() => move(1)} accessibilityRole="button" accessibilityLabel={T('التالي', 'Next')} style={s.heroArrow}><Icon d={rtl ? ICON.chevronLeft : ICON.chevronRight} size={18} color={C.white} /></Pressable>
+            </Row>
+          </Row>
+          <Row gap={5} style={{ marginTop: 12 }}>
+            {slides.map((_, i) => <View key={i} style={{ width: i === ((hi % n) + n) % n ? 22 : 7, height: 6, borderRadius: 3, backgroundColor: i === ((hi % n) + n) % n ? '#59C2F9' : 'rgba(255,255,255,.35)' }} />)}
+          </Row>
+        </LinearGradient>
+      </View>
       {offline && <Card style={{ marginHorizontal: 20, backgroundColor: C.yellow }}><Txt size={14}>{t('offline')}</Txt></Card>}
 
       {/* 1. awareness */}
@@ -294,6 +335,11 @@ export default function Home() {
 
 const s = StyleSheet.create({
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.tealMid },
+  bar: { backgroundColor: C.white, paddingHorizontal: 16, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: C.line },
+  hero: { padding: 20, paddingTop: 22, gap: 6, overflow: 'hidden', minHeight: 230 },
+  heroMark: { position: 'absolute', width: 260, height: 260, left: -40, top: -10, opacity: 0.09 },
+  heroBtn: { backgroundColor: C.white, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10 },
+  heroArrow: { width: 40, height: 40, borderRadius: 8, backgroundColor: 'rgba(89,194,249,.28)', alignItems: 'center', justifyContent: 'center' },
   tip: { width: 210, borderRadius: 22, padding: 14, gap: 3 },
   tipIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,.85)', alignItems: 'center', justifyContent: 'center' },
   tag: { borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
