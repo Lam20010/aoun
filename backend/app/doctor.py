@@ -16,7 +16,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from . import catalog
+from . import catalog, link
+from .translate import localize
 from .patient import full_record, meds_view, serve_file
 from .security import hash_token, new_id, secrets_token
 
@@ -33,8 +34,9 @@ class Strict(BaseModel):
 
 
 class LoginIn(Strict):
-    doctor_id: str = Field(pattern=r"^D[0-9]{2}$")
-    code: str = Field(min_length=4, max_length=100)
+    doctor_id: str = Field(min_length=1, max_length=10)
+    password: str | None = Field(default=None, min_length=4, max_length=200)
+    code: str | None = Field(default=None, min_length=4, max_length=200)  # older clients
 
 
 class Value(Strict):
@@ -80,6 +82,38 @@ class ReferralIn(Strict):
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _password_ok(request: Request, doctor_id: str, password: str) -> bool:
+    """Each doctor's own password (PBKDF2 hashes in AOUN_DOCTOR_PASSWORDS), else the shared code."""
+    import hashlib
+    import json
+    import os
+    try:
+        hashes = json.loads(os.environ.get("AOUN_DOCTOR_PASSWORDS", "") or "{}")
+    except ValueError:
+        hashes = {}
+    stored = hashes.get(doctor_id)
+    if stored:
+        try:
+            _, iters, salt, digest = stored.split("$")
+            got = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), int(iters)).hex()
+        except ValueError:
+            return False
+        return hmac.compare_digest(got, digest)
+    code = _code(request)
+    return bool(code) and hmac.compare_digest(password.encode(), code.encode())
+
+
+def hash_password(password: str, iters: int = 200_000) -> str:
+    """Make a value for AOUN_DOCTOR_PASSWORDS: python -c 'from app.doctor import hash_password; print(hash_password("..."))'"""
+    import hashlib
+    import secrets
+    salt = secrets.token_bytes(16)
+    return f"pbkdf2_sha256${iters}${salt.hex()}${hashlib.pbkdf2_hmac('sha256', password.encode(), salt, iters).hex()}"
+
+
+_FAILS: dict[str, list[float]] = {}
 
 
 def _code(request: Request) -> str:
@@ -153,16 +187,26 @@ def portal():
 def config(request: Request):
     demo = request.app.state.settings.demo_mode
     return {"demo": demo, "demo_code": DEMO_DOCTOR_CODE if demo and not __import__("os").environ.get("AOUN_DOCTOR_CODE") else None,
-            "doctors": [{k: catalog.doctor(d[0])[k] for k in ("id", "name_ar", "name_en", "specialty_ar", "clinic_ar")}
-                        | {"facility_ar": catalog.facility(d[1])["name_ar"]} for d in catalog.DOCTORS]}
+            "doctors": [{k: catalog.doctor(d[0])[k] for k in ("id", "name_ar", "name_en", "specialty_ar", "specialty_en", "clinic_ar", "clinic_en")}
+                        | {"facility_ar": catalog.facility(d[1])["name_ar"], "facility_en": catalog.facility(d[1])["name_en"]}
+                        for d in catalog.DOCTORS]}
 
 
 @router.post("/doctor/api/login")
 def login(body: LoginIn, request: Request):
-    code = _code(request)
-    if not code or not hmac.compare_digest(body.code.encode(), code.encode()):
-        raise HTTPException(401, "unauthorized")
-    catalog.doctor(body.doctor_id)
+    import time
+    did = body.doctor_id.strip().upper()
+    now = time.time()
+    fails = [t for t in _FAILS.get(did, []) if now - t < 900]
+    if len(fails) >= 5:  # five wrong tries lock the account for 15 minutes
+        raise HTTPException(429, "too_many_attempts")
+    known = any(d[0] == did for d in catalog.DOCTORS)
+    password = body.password or body.code or ""
+    if not known or not _password_ok(request, did, password):
+        _FAILS[did] = fails + [now]
+        raise HTTPException(401, "wrong_id_or_password")  # same answer for an unknown ID
+    _FAILS.pop(did, None)
+    body = body.model_copy(update={"doctor_id": did})
     token = secrets_token() + secrets_token()
     with request.app.state.db.tx() as c:
         c.execute("DELETE FROM doctor_sessions WHERE expires_at < ?", (_now().isoformat(),))
@@ -184,7 +228,7 @@ def doctor_catalog(doc=Depends(current_doctor)):
 @router.get("/doctor/api/me")
 def me(request: Request, doc=Depends(current_doctor)):
     db = request.app.state.db
-    rows = db.all("""SELECT b.status AS bstatus, sl.start_local, sl.kind, c.screening, r.*
+    rows = db.all("""SELECT b.status AS bstatus, b.sehhaty_ref, sl.start_local, sl.kind, sl.facility_id, c.screening, r.*
                      FROM bookings b JOIN slots sl ON sl.id = b.slot_id JOIN cases c ON c.id = b.case_id
                      JOIN residents r ON r.id = c.resident_id
                      WHERE sl.doctor_id = ? AND b.status IN ('confirmed','attended') ORDER BY sl.start_local""", doc["id"])
@@ -194,12 +238,49 @@ def me(request: Request, doc=Depends(current_doctor)):
             "appointments": [{"patient": r["id"], "alias": _alias(r), "start": r["start_local"], "kind": r["kind"],
                               "status": r["bstatus"], "screening": r["screening"],
                               "screening_ar": catalog.SCREENINGS.get(r["screening"], {}).get("ar", r["screening"]),
-                              "age_band": r["age_band"], "language": r["language"], "messages": unread.get(r["id"], 0)}
+                              "screening_en": catalog.SCREENINGS.get(r["screening"], {}).get("en", r["screening"]),
+                              "age_band": r["age_band"], "language": r["language"], "messages": unread.get(r["id"], 0),
+                              "sehhaty_ref": r["sehhaty_ref"],
+                              "cost": catalog.quote(catalog.facility(r["facility_id"])["kind"] if r["facility_id"] else "phc",
+                                                    r["kind"], r["screening"], r)}
                              for r in rows]}
 
 
+@router.get("/doctor/api/notifications")
+def notifications(request: Request, lang: str | None = None, doc=Depends(current_doctor)):
+    """What the doctor should know: new bookings, patient messages, and visits in the next 24 hours."""
+    db, vault = request.app.state.db, request.app.state.vault
+    now = _now()
+    out = []
+    for r in db.all("""SELECT b.confirmed_at, b.status, sl.start_local, c.screening, r.* FROM bookings b
+                       JOIN slots sl ON sl.id = b.slot_id JOIN cases c ON c.id = b.case_id JOIN residents r ON r.id = c.resident_id
+                       WHERE sl.doctor_id = ? AND b.status IN ('confirmed','attended')
+                       ORDER BY b.confirmed_at DESC LIMIT 20""", doc["id"]):
+        base = {"patient": r["id"], "alias": _alias(r), "start": r["start_local"],
+                "screening_ar": catalog.SCREENINGS.get(r["screening"], {}).get("ar", r["screening"]),
+                "screening_en": catalog.SCREENINGS.get(r["screening"], {}).get("en", r["screening"])}
+        out.append({"kind": "booking", "at": r["confirmed_at"], **base})
+        start = datetime.fromisoformat(r["start_local"])
+        if r["status"] == "confirmed" and now <= start <= now + timedelta(hours=24):
+            out.append({"kind": "soon", "at": now.isoformat(), **base})
+    for m in db.all("""SELECT m.created_at, m.body_enc, r.* FROM messages m JOIN residents r ON r.id = m.resident_id
+                       WHERE m.doctor_id = ? AND m.sender = 'patient' ORDER BY m.created_at DESC LIMIT 20""", doc["id"]):
+        body = vault.decrypt(m["body_enc"])
+        tr = localize({"body": body}, lang if lang in ("ar", "en") else None).get("translated") or body
+        out.append({"kind": "message", "at": m["created_at"], "patient": m["id"], "alias": _alias(m),
+                    "preview": tr[:80] + ("…" if len(tr) > 80 else "")})
+    # Ministry interventions approved for this doctor's district (new open times appear in their list).
+    district = catalog.facility(doc["facility"])["district"]
+    for iv in link.active(db, district):
+        if iv["kind"] in ("mobile_clinic", "evening_hours", "transport", "challenge"):
+            out.append({"kind": "ministry", "at": iv["approved_at"], "title_ar": iv["title_ar"], "title_en": iv["title_en"],
+                        "detail_ar": iv["detail_ar"], "detail_en": iv["detail_en"], "slots": iv["slots"]})
+    out.sort(key=lambda x: x["at"], reverse=True)
+    return {"items": out[:30]}
+
+
 @router.get("/doctor/api/patients/{rid}")
-def patient(rid: str, request: Request, doc=Depends(current_doctor)):
+def patient(rid: str, request: Request, lang: str | None = None, doc=Depends(current_doctor)):
     r = _my_patient(request, doc, rid)
     db, vault = request.app.state.db, request.app.state.vault
     with db.tx() as c:
@@ -207,13 +288,18 @@ def patient(rid: str, request: Request, doc=Depends(current_doctor)):
     fam = db.one("SELECT codes FROM family_history WHERE resident_id = ?", rid)
     prefs = db.one("""SELECT p.prefs FROM call_plans p JOIN call_sessions s ON s.id = p.call_id JOIN cases c ON c.id = s.case_id
                       WHERE c.resident_id = ? ORDER BY s.created_at DESC LIMIT 1""", rid)
-    msgs = [{"id": m["id"], "sender": m["sender"], "body": vault.decrypt(m["body_enc"]), "created_at": m["created_at"]}
+    want = lang if lang in ("ar", "en") else None
+    msgs = [localize({"id": m["id"], "sender": m["sender"], "body": vault.decrypt(m["body_enc"]), "created_at": m["created_at"]}, want)
             for m in db.all("SELECT * FROM messages WHERE resident_id = ? AND doctor_id = ? ORDER BY created_at", rid, doc["id"])]
     return {"patient": {"id": r["id"], "alias": _alias(r), "age_band": r["age_band"], "gender": r["gender"],
-                        "district_ar": catalog.DISTRICTS[r["district"]][0], "language": r["language"],
+                        "district_ar": catalog.DISTRICTS[r["district"]][0], "district_en": catalog.DISTRICTS[r["district"]][1],
+                        "language": r["language"],
                         "family_history": [catalog.FAMILY_HISTORY[x][0] for x in ((fam["codes"] if fam else "") or "").split(",") if x],
-                        "prefs": [x for x in ((prefs["prefs"] if prefs else "") or "").split(",") if x]},
-            **full_record(db, vault, rid), "meds": meds_view(db, vault, rid), "messages": msgs}
+                        "family_history_en": [catalog.FAMILY_HISTORY[x][1] for x in ((fam["codes"] if fam else "") or "").split(",") if x],
+                        "prefs": [x for x in ((prefs["prefs"] if prefs else "") or "").split(",") if x],
+                        "sehhaty": catalog.sehhaty_profile(r)},
+            **full_record(db, vault, rid), "meds": meds_view(db, vault, rid), "messages": msgs,
+            "walks": link.walks_view(db, rid, link._today(request))}
 
 
 @router.post("/doctor/api/patients/{rid}/results")
@@ -244,6 +330,11 @@ def add_results(rid: str, body: ResultsIn, request: Request, doc=Depends(current
         c.execute("UPDATE cases SET status = 'completed' WHERE resident_id = ? AND screening = ? AND status = 'booked'",
                   (rid, body.screening))
         _log(c, rid, doc["id"], "added_result")
+        dist = c.execute("SELECT district FROM residents WHERE id = ?", (rid,)).fetchone()["district"]
+        link.record(c, dist, "result")
+        flags = [_flag(body.screening, v.test_key, v.value.strip()) for v in body.values]
+        if any(f in ("high", "positive") for f in flags):
+            link.record(c, dist, "early", body.screening)
     return {"records": ids}
 
 
@@ -341,4 +432,5 @@ def referral(rid: str, body: ReferralIn, request: Request, doc=Depends(current_d
     with request.app.state.db.tx() as c:
         c.execute("INSERT INTO referrals VALUES (?,?,?,?,?)", (new_id("ref"), rid, doc["id"], body.kind, _now().isoformat()))
         _log(c, rid, doc["id"], "referral_" + body.kind)
+        link.record(c, c.execute("SELECT district FROM residents WHERE id = ?", (rid,)).fetchone()["district"], "referral", body.kind)
     return {"ok": True}

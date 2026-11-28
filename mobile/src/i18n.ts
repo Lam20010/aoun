@@ -14,6 +14,7 @@ export const LANGS: { key: Lang; label: string; rtl: boolean; locale: string; sp
 ];
 
 const ar = {
+  wName: 'الاسم', wId: 'رقم الهوية', wPhone: 'الجوال', wReady: 'حسابك جاهز من «صحتي»، بدون أي تسجيل.', wSafe: 'بياناتك مشفّرة، وما تُشارك مع أحد', wEnter: 'الدخول إلى عون', assistantMenu: 'كل اللي أقدر أسويه لك',
   home: 'الرئيسية', notebook: 'دفتري', meds: 'أدويتي', back: 'رجوع', settings: 'الإعدادات', soon: 'قريبًا', soonBody: 'نشتغل على هالصفحة.',
   send: 'إرسال', cancel: 'إلغاء', confirm: 'تأكيد', loading: 'لحظة…', retry: 'جرّبي مرة ثانية', offline: 'ما قدرنا نوصل لعون. تأكّدي من النت.',
   hello: 'هلا يا', confirmed: 'موعد مؤكد', pending: 'بانتظار التأكيد', noBooking: 'ما عندك موعد للحين', viewPlan: 'عرض خطة الزيارة',
@@ -55,6 +56,12 @@ const ar = {
   couldNotCall: 'ما قدرت أفتح المكالمة. تأكّدي من النت والمايك، وجرّبي مرة ثانية.',
   locTitle: 'السماح لـ«عون» باستخدام موقعك؟', locBody: 'نستخدمه مرة وحدة عشان نرتّب أقرب مكان. ما تُحفظ إحداثياتك.', allow: 'السماح', dontAllow: 'عدم السماح',
   assistantHint: 'تسمعك · اطلبي أي شي', assistantCall: '«يا {name}»', typeHere: 'اكتبي طلبك…',
+  free: 'مجاني', freeSehhaty: 'مجاني · محجوز عبر صحتي', youPay: 'عليك {n} ريال', priceLbl: 'السعر', insurancePays: 'يغطيه التأمين', youPayLbl: 'عليك',
+  privateClinic: 'عيادة خاصة', costTitle: 'التكلفة', sehhatyRef: 'رقم الموعد في صحتي', sehhatyAccount: 'حسابي في صحتي', linked: 'مربوط',
+  idType: 'الهوية', insurance: 'التأمين', noInsurance: 'ما فيه تأمين مسجّل', insClass: 'فئة {c} · نسبة التحمّل {p}٪ (بحد أقصى {cap} ريال)', validUntil: 'ساري حتى {d}',
+  demoProfile: 'جرّبي كـ (نسخة تجريبية)', pCitizen: 'مواطنة بدون تأمين', pCitizenIns: 'مواطنة مع تأمين', pResidentIns: 'مقيمة مع تأمين', pResidentNo: 'مقيمة بدون تأمين',
+  sehhatyNote: 'المواعيد تنحجز في صحتي، وبياناتك تجي من صحتي. ما نطلب منك رقم هويتك أبد.', virtualConsult: 'استشارة فيديو مع طبيبة قبل الفحص (مجانية عبر صحتي)', showPrivate: 'أظهري العيادات الخاصة (مدفوعة)',
+  translatedLbl: 'مترجمة', showOriginal: 'عرض الأصل', showTranslation: 'عرض الترجمة',
   tips: 'نصائح', fromDistrict: 'من حيّك', noPrefs: 'ما فيه تفضيلات مسجّلة', save: 'حفظ', saved: 'تم الحفظ', steps: 'الخطوات',
   reminderSet: 'تم ضبط {n} تذكير على جوالك', remindersOff: 'التذكيرات طافية', myDistrict: 'حيّي', allDistricts: 'كل الأحياء',
   byDoctor: 'من {name}', nextDue: 'الجاي', lastDone: 'آخر مرة {d}', thread: 'المحادثة', you: 'أنتِ', noMessages: 'ابدئي المحادثة مع طبيبك.',
@@ -65,6 +72,7 @@ type Dict = typeof ar;
 export type Key = keyof Dict;
 
 const en: Dict = {
+  wName: 'Name', wId: 'ID number', wPhone: 'Mobile', wReady: 'Your account is ready from Sehhaty. No sign-up needed.', wSafe: 'Your details are encrypted and never shared', wEnter: 'Enter Aoun', assistantMenu: 'Everything I can do for you',
   home: 'Home', notebook: 'Notebook', meds: 'Medicines', back: 'Back', settings: 'Settings', soon: 'Coming soon', soonBody: 'We are working on this page.',
   send: 'Send', cancel: 'Cancel', confirm: 'Confirm', loading: 'One moment…', retry: 'Try again', offline: 'Could not reach Aoun. Check your connection.',
   hello: 'Hi', confirmed: 'Appointment confirmed', pending: 'Awaiting confirmation', noBooking: 'No appointment yet', viewPlan: 'View visit plan',
@@ -106,6 +114,12 @@ const en: Dict = {
   couldNotCall: 'Could not start the call. Check your connection and microphone, then try again.',
   locTitle: 'Allow “Aoun” to use your location?', locBody: 'Used once to find the nearest place. Your coordinates are not stored.', allow: 'Allow', dontAllow: 'Don’t allow',
   assistantHint: 'is listening · ask anything', assistantCall: '“Hey {name}”', typeHere: 'Type your request…',
+  free: 'Free', freeSehhaty: 'Free · booked through Sehhaty', youPay: 'You pay SAR {n}', priceLbl: 'Price', insurancePays: 'Insurance pays', youPayLbl: 'You pay',
+  privateClinic: 'Private clinic', costTitle: 'Cost', sehhatyRef: 'Sehhaty appointment no.', sehhatyAccount: 'My Sehhaty account', linked: 'Linked',
+  idType: 'Identity', insurance: 'Insurance', noInsurance: 'No insurance on record', insClass: 'Class {c} · {p}% co-pay (up to SAR {cap})', validUntil: 'valid until {d}',
+  demoProfile: 'Try as (demo)', pCitizen: 'Citizen, no insurance', pCitizenIns: 'Citizen with insurance', pResidentIns: 'Resident with insurance', pResidentNo: 'Resident, no insurance',
+  sehhatyNote: 'Appointments are booked in Sehhaty and your details come from Sehhaty. We never ask for your ID number.', virtualConsult: 'Video consultation with a doctor before the test (free through Sehhaty)', showPrivate: 'Show private clinics (paid)',
+  translatedLbl: 'Translated', showOriginal: 'Show original', showTranslation: 'Show translation',
   tips: 'Tips', fromDistrict: 'From your district', noPrefs: 'No preferences saved', save: 'Save', saved: 'Saved', steps: 'Steps',
   reminderSet: '{n} reminders set on your phone', remindersOff: 'Reminders are off', myDistrict: 'My district', allDistricts: 'All districts',
   byDoctor: 'from {name}', nextDue: 'Next', lastDone: 'Last done {d}', thread: 'Conversation', you: 'You', noMessages: 'Start the conversation with your doctor.',

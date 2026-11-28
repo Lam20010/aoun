@@ -44,7 +44,7 @@ export const ICON = {
   tree: 'M12 21v-7M12 14c-3-1-5-3.5-5-6.5a5 5 0 0 1 10 0c0 3-2 5.5-5 6.5zM8 21h8',
 };
 
-export function Icon({ d, size = 20, color = '#173F42', width = 1.8 }: { d: string; size?: number; color?: string; width?: number }) {
+export function Icon({ d, size = 20, color = '#0E2E45', width = 1.8 }: { d: string; size?: number; color?: string; width?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d={d} stroke={color} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />

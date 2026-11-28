@@ -3,7 +3,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { API_BASE } from './config';
 import { useApp } from './store';
-import type { Catalog, Me, Med, Msg, Plan, Records, Slot } from './types';
+import type { Catalog, DistrictNews, Me, Med, Msg, Plan, Records, Route, Slot, Walks } from './types';
 
 const TOKEN_KEY = 'aoun_patient_token';
 let token: string | null = null;
@@ -51,8 +51,9 @@ export const api = {
   me: () => req<Me>('/patient/me'),
   catalog: () => req<Catalog>('/patient/catalog', { auth: false }),
   plan: () => req<Plan>('/patient/plan'),
-  slots: (opts: { days?: number; female?: boolean; district?: string }) =>
-    req<{ district: string; slots: Slot[] }>(`/patient/slots?days=${opts.days ?? 14}&female=${opts.female ? 'true' : 'false'}${opts.district ? '&district=' + encodeURIComponent(opts.district) : ''}`),
+  slots: (opts: { days?: number; female?: boolean; district?: string; private?: boolean }) =>
+    req<{ district: string; slots: Slot[] }>(`/patient/slots?days=${opts.days ?? 14}&female=${opts.female ? 'true' : 'false'}&private=${opts.private === false ? 'false' : 'true'}${opts.district ? '&district=' + encodeURIComponent(opts.district) : ''}`),
+  sehhatyProfile: (profile: string) => req('/patient/sehhaty-profile', { method: 'PATCH', body: { profile } }),
   book: (slot_id: string) => req<Plan>('/patient/book', { body: { slot_id } }),
   cancel: () => req<Plan>('/patient/cancel', { body: {} }),
   language: (language: string) => req('/patient/language', { method: 'PATCH', body: { language } }),
@@ -62,6 +63,15 @@ export const api = {
   meds: () => req<{ meds: Med[] }>('/patient/meds'),
   messages: () => req<{ doctors: { id: string; name_ar: string; name_en: string; specialty_ar: string; specialty_en: string }[]; messages: Msg[] }>('/patient/messages'),
   sendMessage: (body: string, doctor_id?: string) => req('/patient/messages', { body: doctor_id ? { body, doctor_id } : { body } }),
+  appState: () => req<{ game: Record<string, unknown>; avatar: Record<string, unknown> }>('/patient/app-state'),
+  saveState: (body: { game?: unknown; avatar?: unknown; helped?: number }) => req('/patient/app-state', { method: 'PUT', body }),
+  calls: (on: boolean) => req<{ calls_ok: boolean }>('/patient/calls', { method: 'PATCH', body: { on } }),
+  walks: () => req<Walks>('/patient/walks'),
+  addWalk: (minutes: number) => req<Walks>('/patient/walks', { body: { minutes } }),
+  district: () => req<DistrictNews>('/patient/district'),
+  route: (to: 'plan' | 'walk', mode: 'walking' | 'driving' | 'transit', lat?: number, lon?: number) =>
+    req<Route>(`/patient/route?to=${to}&mode=${mode}${lat !== undefined && lon !== undefined ? `&lat=${lat}&lon=${lon}` : ''}`),
+  calendarLink: async () => API_BASE + (await req<{ path: string }>('/patient/calendar/link')).path,
   accessLog: () => req<{ entries: { doctor_ar: string; doctor_en: string; action: string; at: string }[] }>('/patient/access-log'),
 
   // the booking call (demo server)
@@ -78,4 +88,29 @@ export async function refresh(): Promise<void> {
   await ensurePatient();
   const me = await api.me();
   useApp.getState().set({ me, plan: me.plan });
+  if (!synced) { synced = true; pullState().catch(() => { synced = false; }); }
+}
+
+// The game and the assistant's look live on the server too, so they follow the person to another phone.
+let synced = false;
+async function pullState() {
+  const st = await api.appState();
+  const local = useApp.getState();
+  const patch: Record<string, unknown> = {};
+  if (st.game && Object.keys(st.game).length) patch.game = st.game; else if (local.game) api.saveState({ game: local.game }).catch(() => {});
+  if (st.avatar && Object.keys(st.avatar).length) patch.avatar = st.avatar; else if (Object.keys(local.avatar).length) api.saveState({ avatar: local.avatar }).catch(() => {});
+  if (Object.keys(patch).length) local.set(patch as never);
+}
+
+let saveT: ReturnType<typeof setTimeout> | null = null;
+let helpedPending = 0;
+/** Save the game or the look a moment after the last change. `helped` = neighbours newly helped. */
+export function saveSoon(what: { game?: boolean; avatar?: boolean; helped?: number }) {
+  helpedPending += what.helped ?? 0;
+  if (saveT) clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    const s = useApp.getState();
+    const helped = Math.min(4, helpedPending); helpedPending = 0;
+    api.saveState({ game: s.game ?? undefined, avatar: s.avatar, helped }).catch(() => {});
+  }, 800);
 }

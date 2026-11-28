@@ -35,6 +35,7 @@ FACILITIES = [
     ("H-CENTRAL", "hospital", "Al-Olaya", "مستشفى الرياض المركزي", "Riyadh Central Hospital", 0.010, 0.006, 1, 1),
     ("C-NAKHEEL", "private_clinic", "Al-Rawdah", "عيادات النخيل الطبية", "Al-Nakheel Medical Clinics", -0.004, 0.004, 1, 1),
     ("C-SHIFA", "private_clinic", "Al-Malqa", "مجمع الشفاء الطبي", "Al-Shifa Medical Complex", 0.006, 0.004, 1, 1),
+    ("H-RAAYA", "private_hospital", "Al-Olaya", "مستشفى الرعاية الأهلي", "Al-Raaya Private Hospital", -0.007, 0.009, 1, 1),
     ("L-RAZI", "lab", "Al-Olaya", "مختبرات الرازي", "Al-Razi Laboratories", -0.006, -0.004, 1, 1),
 ]
 
@@ -59,7 +60,20 @@ DOCTORS = [
     ("D10", "F-RAW", "f", "د. منيرة الشمري", "Dr. Munira Al-Shammari", "طب الأسرة", "Family medicine", "early", "1"),
     ("D11", "F-AZI", "m", "د. سلطان العنزي", "Dr. Sultan Al-Anazi", "طب الأسرة", "Family medicine", "early", "2"),
     ("D12", "F-SUW", "f", "د. أمل الرشيدي", "Dr. Amal Al-Rashidi", "طب الأسرة", "Family medicine", "early", "3"),
+    # private clinics (paid; insurance may cover part)
+    ("D13", "C-NAKHEEL", "f", "د. جواهر القرني", "Dr. Jawaher Al-Qarni", "طب الأسرة", "Family medicine", "early", "12"),
+    ("D14", "C-SHIFA", "m", "د. ناصر البقمي", "Dr. Nasser Al-Buqami", "الباطنة", "Internal medicine", "chronic", "8"),
+    ("D15", "C-SHIFA", "f", "د. هند العمري", "Dr. Hind Al-Omari", "صحة المرأة", "Women's health", "women", "9"),
+    # Ministry hospitals: screening clinics, free through Sehhaty
+    ("D16", "H-EAST", "f", "د. عبير الحارثي", "Dr. Abeer Al-Harthi", "الأشعة وصحة الثدي", "Breast imaging", "women", "B12"),
+    ("D17", "H-EAST", "m", "د. بندر السهلي", "Dr. Bandar Al-Sahli", "الباطنة", "Internal medicine", "chronic", "A4"),
+    ("D18", "H-NORTH", "m", "د. يوسف الشهراني", "Dr. Yousef Al-Shahrani", "الجهاز الهضمي", "Gastroenterology", "early", "C7"),
+    ("D19", "H-CENTRAL", "f", "د. مها الدخيل", "Dr. Maha Al-Dakheel", "طب الأسرة", "Family medicine", "early", "2-14"),
+    # private hospital (paid; insurance may cover part)
+    ("D20", "H-RAAYA", "f", "د. شهد المالكي", "Dr. Shahad Al-Malki", "صحة المرأة", "Women's health", "women", "305"),
+    ("D21", "H-RAAYA", "m", "د. تركي الفيفي", "Dr. Turki Al-Faifi", "الباطنة", "Internal medicine", "chronic", "210"),
 ]
+PAID_FACILITIES = {f[0] for f in FACILITIES if f[1] in ("private_clinic", "private_hospital")}
 
 # ---------- the screening programme ----------
 # Each test: key, ar, en, unit, low, high (normal range), borderline high (None if not used)
@@ -249,3 +263,69 @@ def routine_for(age_band: str, gender: str) -> list[str]:
         if lo >= 65:
             out.append("osteoporosis")
     return out
+
+
+# ---------- Sehhaty (simulated integration) ----------
+# Aoun reads the person's Sehhaty profile (identity type, last 4 digits of the ID, insurance) and books
+# through Sehhaty. Ministry health centers, mobile clinics, home care and video consultations booked
+# through Sehhaty are free of charge. Private clinics are paid; insurance pays its share.
+# Insurers and prices below are invented demo values.
+INSURERS = {
+    "WAHA": ("الواحة للتأمين الصحي", "Al-Waha Health Insurance"),
+    "SANABEL": ("سنابل للتأمين", "Sanabel Insurance"),
+}
+INSURANCE_CLASS = {"A": (10, 50), "B": (20, 75), "C": (20, 100)}  # class: (copay %, copay cap SAR per visit)
+PRIVATE_PRICE = {  # SAR, the screening visit at a private clinic, including the lab test
+    "diabetes": 120, "hypertension": 80, "cholesterol": 150, "obesity": 60, "vitamin_d": 180, "anemia": 90,
+    "thyroid": 160, "colorectal": 140, "breast": 450, "cervical": 300, "osteoporosis": 400,
+}
+FREE_KINDS = ("phc", "hospital", "mobile_clinic", "home_visit", "virtual")
+DEMO_PROFILES = {  # what the demo patient's Sehhaty account looks like
+    "citizen": {"id_type": "citizen", "insurer": "", "insurance_class": ""},
+    "citizen_insured": {"id_type": "citizen", "insurer": "WAHA", "insurance_class": "A"},
+    "resident_insured": {"id_type": "resident", "insurer": "SANABEL", "insurance_class": "B"},
+    "resident_uninsured": {"id_type": "resident", "insurer": "", "insurance_class": ""},
+}
+
+
+def insurance(row) -> dict | None:
+    code = row["insurer"] if "insurer" in row.keys() else ""
+    if not code:
+        return None
+    pct, cap = INSURANCE_CLASS.get(row["insurance_class"] or "B", (20, 75))
+    ar, en = INSURERS[code]
+    return {"insurer": code, "name_ar": ar, "name_en": en, "class": row["insurance_class"], "copay_pct": pct,
+            "copay_cap": cap, "valid_until": row["insurance_until"] or "2027-06-30"}
+
+
+def quote(facility_kind: str, slot_kind: str, screening: str, row) -> dict:
+    """What this visit costs this person. Free at Ministry places booked through Sehhaty."""
+    if slot_kind in ("mobile_clinic", "home_visit") or facility_kind in FREE_KINDS:
+        return {"free": True, "price": 0, "insurance_pays": 0, "you_pay": 0, "basis": "moh_free",
+                "say_ar": "مجاني", "say_en": "Free",
+                "note_ar": "حكومي، محجوز عبر صحتي ومجاني", "note_en": "Ministry of Health, booked through Sehhaty, free of charge"}
+    price = PRIVATE_PRICE.get(screening, 150)
+    ins = insurance(row) if row is not None else None
+    if ins:
+        you = min(round(price * ins["copay_pct"] / 100), ins["copay_cap"])
+        return {"free": False, "price": price, "insurance_pays": price - you, "you_pay": you, "basis": "insurance",
+                "say_ar": f"{you} ريال عليك", "say_en": f"You pay SAR {you}",
+                "note_ar": f"السعر {price} ريال، تأمين {ins['name_ar']} يغطي {price - you} وعليك {you} ريال (نسبة التحمل {ins['copay_pct']}٪)",
+                "note_en": f"Price SAR {price}; {ins['name_en']} pays {price - you}, you pay SAR {you} ({ins['copay_pct']}% co-pay)"}
+    return {"free": False, "price": price, "insurance_pays": 0, "you_pay": price, "basis": "cash",
+            "say_ar": f"{price} ريال", "say_en": f"SAR {price}",
+            "note_ar": f"عيادة خاصة، السعر {price} ريال (ما عندك تأمين مسجّل في صحتي)",
+            "note_en": f"Private clinic, SAR {price} (no insurance on your Sehhaty record)"}
+
+
+def sehhaty_profile(row) -> dict:
+    """The person's Sehhaty details as Aoun shows them: never the full ID number."""
+    ins = insurance(row)
+    t = row["id_type"] if "id_type" in row.keys() else "citizen"
+    return {"id_type": t, "id_type_ar": "مواطن" if t == "citizen" else "مقيم", "id_type_en": "Citizen" if t == "citizen" else "Resident",
+            "id_masked": "••••••" + (row["id_last4"] or "0000"), "insurance": ins, "linked": True}
+
+
+def new_sehhaty_ref() -> str:
+    import secrets
+    return "SH-" + "".join(secrets.choice("0123456789") for _ in range(8))

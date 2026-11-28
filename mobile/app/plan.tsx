@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Linking, Platform, View } from 'react-native';
 import { router } from 'expo-router';
 import { Screen } from '../src/ui/Screen';
 import { Button, Card, Circle, Pill, Row, Txt } from '../src/ui/kit';
@@ -11,6 +11,7 @@ import { useT, when, type Key } from '../src/i18n';
 import { useApp } from '../src/store';
 import { api, refresh } from '../src/api';
 import { googleDirections, openDarb, placeName, planRows, uberTo } from '../src/data/plan';
+import type { Route } from '../src/types';
 import { scheduleAll } from '../src/notify';
 
 const STEPS: [Key, Key][] = [
@@ -26,6 +27,15 @@ export default function PlanScreen() {
   const slot = plan?.slot ?? null;
   const rows = plan ? planRows(plan, t, pick, lang) : [];
   const place = slot ? placeName(slot, t, lang) : '';
+  const [drive, setDrive] = useState<Route | null>(null);
+  const [transitR, setTransitR] = useState<Route | null>(null);
+  useEffect(() => {
+    if (!plan?.confirmed || !slot || slot.kind === 'home_visit') return;
+    api.route('plan', 'driving').then(setDrive).catch(() => {});
+    api.route('plan', 'transit').then(setTransitR).catch(() => {});
+  }, [plan?.confirmed, slot?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const T = (ar: string, en: string) => (lang === 'ar' ? ar : en);
+  const addToCalendar = async () => { try { await Linking.openURL(await api.calendarLink()); } catch { Alert.alert(t('offline')); } };
 
   useReadable(slot ? [when(slot.iso, locale), ...rows.map((r) => r.text)] : [t('noBooking')]);
 
@@ -79,10 +89,37 @@ export default function PlanScreen() {
         </Card>
       )}
 
+      {slot.cost && (
+        <Card style={{ gap: 8 }}>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <Txt size={17} weight="800">{t('costTitle')}</Txt>
+            <Pill text={slot.cost.free ? t('free') : t('privateClinic')} tone={slot.cost.free ? 'mint' : 'amber'} />
+          </Row>
+          {slot.cost.free ? (
+            <Txt size={14} color={C.inkSoft}>{lang === 'ar' ? slot.cost.note_ar : slot.cost.note_en}</Txt>
+          ) : (
+            <View style={{ gap: 4 }}>
+              <Row style={{ justifyContent: 'space-between' }}><Txt size={14} color={C.inkSoft}>{t('priceLbl')}</Txt><Txt size={14} weight="600">{slot.cost.price} SAR</Txt></Row>
+              <Row style={{ justifyContent: 'space-between' }}><Txt size={14} color={C.inkSoft}>{t('insurancePays')}</Txt><Txt size={14} weight="600">{slot.cost.insurance_pays} SAR</Txt></Row>
+              <Row style={{ justifyContent: 'space-between' }}><Txt size={15} weight="700">{t('youPayLbl')}</Txt><Txt size={17} weight="800" color={C.teal}>{slot.cost.you_pay} SAR</Txt></Row>
+            </View>
+          )}
+          {!!plan!.sehhaty_ref && <Txt size={13} color={C.muted}>{t('sehhatyRef')}: {plan!.sehhaty_ref}</Txt>}
+        </Card>
+      )}
+
       {reach && (
         <>
           <PlanMap slot={slot} title={place} />
           <Txt size={18} weight="800">{t('tripTitle')}</Txt>
+          {(drive || transitR) && (
+            <Row gap={10}>
+              {drive && <Card style={{ flex: 1, gap: 2 }}><Row gap={6}><Icon d={ICON.car} size={16} color={C.teal} /><Txt size={13} color={C.inkSoft}>{T('بالسيارة', 'By car')}</Txt></Row>
+                <Txt size={20} weight="800">{drive.duration_min} {T('د', 'min')}</Txt><Txt size={12} color={C.muted}>{drive.distance_km} {T('كم', 'km')}{drive.source === 'estimate' ? T(' · تقدير', ' · estimate') : ' · Google'}</Txt></Card>}
+              {transitR && <Card style={{ flex: 1, gap: 2 }}><Row gap={6}><Icon d={ICON.train} size={16} color={C.teal} /><Txt size={13} color={C.inkSoft}>{T('مترو وباص', 'Metro and bus')}</Txt></Row>
+                <Txt size={20} weight="800">{transitR.duration_min} {T('د', 'min')}</Txt><Txt size={12} color={C.muted}>{transitR.source === 'estimate' ? T('تقدير', 'estimate') : 'Google'}</Txt></Card>}
+            </Row>
+          )}
           <View style={{ gap: 10 }}>
             <Button title={t('directions')} onPress={() => googleDirections(slot, 'driving')} icon={<Icon d={ICON.map} color={C.white} size={16} />} />
             <Button title={t('uber')} tone="mint" onPress={() => uberTo(slot, place)} icon={<Icon d={ICON.car} size={16} />} />
@@ -90,9 +127,15 @@ export default function PlanScreen() {
               <View style={{ flex: 1 }}><Button title={t('transit')} tone="ghost" onPress={() => googleDirections(slot, 'transit')} icon={<Icon d={ICON.train} size={16} />} /></View>
               <View style={{ flex: 1 }}><Button title={t('darb')} tone="ghost" onPress={openDarb} icon={<Icon d={ICON.train} size={16} />} /></View>
             </Row>
+            <Row gap={10}>
+              {Platform.OS === 'ios' && <View style={{ flex: 1 }}><Button title={T('خرائط آبل', 'Apple Maps')} tone="ghost" onPress={() => Linking.openURL(`https://maps.apple.com/?daddr=${slot.lat},${slot.lon}&dirflg=d`)} icon={<Icon d={ICON.map} size={16} />} /></View>}
+              <View style={{ flex: 1 }}><Button title={T('كريم', 'Careem')} tone="ghost" onPress={() => Linking.openURL('https://app.careem.com/rides')} icon={<Icon d={ICON.car} size={16} />} /></View>
+            </Row>
           </View>
         </>
       )}
+
+      {plan!.confirmed && <Button title={T('أضيفي الموعد للتقويم', 'Add to my calendar')} tone="ghost" onPress={addToCalendar} icon={<Icon d={ICON.calendar} size={16} />} />}
 
       <Txt size={18} weight="800">{t('steps')}</Txt>
       <Card style={{ gap: 12 }}>

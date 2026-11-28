@@ -4,15 +4,20 @@ export interface Slot {
   id: string; iso: string; kind: 'center' | 'mobile_clinic' | 'home_visit'; band: string;
   center_ar: string; center_en?: string; district: string; district_ar: string; lat: number; lon: number;
   female_staff: boolean; wheelchair: boolean; remaining: number; facility_id?: string; doctor?: Doctor & { clinic_ar: string; clinic_en: string };
+  facility_kind?: string; cost?: Cost;
 }
+export interface Cost { free: boolean; price: number; insurance_pays: number; you_pay: number; basis: 'moh_free' | 'insurance' | 'cash'; say_ar: string; say_en: string; note_ar: string; note_en: string }
+export interface Sehhaty { id_type: string; id_type_ar: string; id_type_en: string; id_masked: string; linked: boolean;
+  first_name_ar?: string; first_name_en?: string; name_ar?: string; name_en?: string; phone_masked?: string; mode?: string;
+  insurance: { insurer: string; name_ar: string; name_en: string; class: string; copay_pct: number; copay_cap: number; valid_until: string } | null }
 export interface Ride { mode: 'car' | 'metro'; party?: string; pickup_at?: string; pickup_minutes?: number }
 export interface Plan {
   confirmed: boolean; slot: Slot | null; ride: Ride | null; prefs: string[];
-  screening: string; screening_ar: string; screening_en: string; case_status: string; language?: string;
+  screening: string; screening_ar: string; screening_en: string; case_status: string; language?: string; sehhaty_ref?: string | null;
 }
 export interface Me {
   patient: string; district: string; district_ar: string; district_en: string; language: string; gender: 'f' | 'm';
-  age_band: string; family_history: string[]; recommended: { key: string; ar: string; en: string; every_months: number }[]; plan: Plan | null;
+  age_band: string; family_history: string[]; recommended: { key: string; ar: string; en: string; every_months: number }[]; plan: Plan | null; sehhaty?: Sehhaty; calls_ok?: boolean;
 }
 export interface FileRef { id: string; record_id: string | null; filename: string; mime: string; size: number; created_at: string; doctor: string }
 export interface Rec {
@@ -28,10 +33,18 @@ export interface Med {
   start_date: string; with_food: boolean; instructions_ar: string; instructions_en: string; active: boolean;
   facility_ar: string; facility_en: string; doctor: { name_ar: string; name_en: string } | null;
 }
-export interface Msg { id: string; sender: 'doctor' | 'patient'; doctor_id: string; body: string; created_at: string }
+export interface Msg { id: string; sender: 'doctor' | 'patient'; doctor_id: string; body: string; created_at: string; lang?: string; translated?: string }
 export interface Catalog {
   family_history: { key: string; ar: string; en: string }[];
   symptoms: { key: string; ar: string; en: string; screening: string; urgency: 'soon' | 'urgent' | 'emergency' }[];
   hereditary: { key: string; ar: string; en: string }[];
   districts: { key: string; ar: string; en: string }[];
+}
+export interface Walks { week_minutes: number; goal_minutes: number; today_minutes: number; days: { day: string; minutes: number }[] }
+export interface Intervention { id: string; kind: string; title_ar: string; title_en: string; detail_ar: string; detail_en: string; approved_at: string; slots: number; progress?: number; goal?: number }
+export interface DistrictNews { district: string; district_ar: string; district_en: string; interventions: Intervention[] }
+export interface Route {
+  source: 'google' | 'estimate'; duration_min: number; distance_km: number; points: [number, number][]; steps: string[]; mode: string; to: string;
+  origin: [number, number]; dest: [number, number]; name_ar: string; name_en: string;
+  links: { google: string; apple: string; uber: string; careem: string; darb_ios: string; darb_android: string; transit: string };
 }

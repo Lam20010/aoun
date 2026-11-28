@@ -1,0 +1,947 @@
+[
+  {
+    "id": "tool_2701m8d9q7djevyt67y3xf56vk80",
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_appointment",
+      "description": "Call right after the person says it is a good time to talk. Returns the appointment already held for them (center, day, time). Tell them it is held and ask if they confirm.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/get_appointment",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_1301m8d9007rfnq90w32b9nrhz19",
+    "tool_config": {
+      "type": "webhook",
+      "name": "confirm_booking",
+      "description": "Book the appointment the person clearly agreed to. Use choice 'held' for the appointment from get_appointment, or the choice value of an option from get_solutions. Only after reading it back and hearing a clear yes. Always pass language: the language the person is speaking.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/confirm_booking",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id",
+            "choice",
+            "language"
+          ],
+          "properties": {
+            "choice": {
+              "type": "string",
+              "description": "'held' for the held appointment, or the exact choice value (of_ followed by 12 characters) of the option the person accepted.",
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "language": {
+              "type": "string",
+              "description": "The language the person is speaking in this call: ar (any Arabic dialect), en, ur, hi, bn, fil or id. Their confirmation message and their app will use it.",
+              "enum": [
+                "ar",
+                "en",
+                "ur",
+                "hi",
+                "bn",
+                "fil",
+                "id"
+              ],
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_9201m8d90408fc280z76kca6wskh",
+    "tool_config": {
+      "type": "webhook",
+      "name": "record_barrier",
+      "description": "Whenever the person gives a reason for not doing the check-up now (the time does not suit, wants it sooner, still unsure after the explanation, already did it elsewhere, busy right now, or doubts the call), record the ONE closest reason. Only the code is kept, counted per neighbourhood for the Ministry; never pass their words.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/record_barrier",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id",
+            "reason"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "reason": {
+              "type": "string",
+              "description": "transport = no one to take them, no car (ما عندي مشوار); far = the place is far (المكان بعيد); work_hours = the time does not suit, work (الوقت ما يناسب); sooner = wants an earlier appointment (أبي أقرب موعد); fear = afraid of the test, needles, blood or the result (خايف); no_need = feels fine, sees no need (ما أشوف له داعي); needs_companion = needs a companion or mahram; embarrassment = shy or embarrassed; cost_concern = thinks it costs money; language = language difficulty; childcare = no one to look after children or dependants; already_screened = did this check recently somewhere else (سويته قبل); call_later = busy right now, call another time (مشغول الحين); mistrust = not sure the call or the check is genuine (مين أنتم؟ هذي حقيقة؟); other = anything else.",
+              "enum": [
+                "transport",
+                "far",
+                "work_hours",
+                "sooner",
+                "fear",
+                "no_need",
+                "needs_companion",
+                "embarrassment",
+                "cost_concern",
+                "language",
+                "childcare",
+                "already_screened",
+                "call_later",
+                "mistrust",
+                "other"
+              ],
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_2601m8d9q9b4fz2v67jsatj51cc4",
+    "tool_config": {
+      "type": "webhook",
+      "name": "send_location_link",
+      "description": "Only after the person agrees to share their location: texts them a one-time link. Their location is used once to find the nearest center or mobile clinic and is not stored.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/send_location_link",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_5401m8d9qb5bfg5r6bfdkxdzmhty",
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_solutions",
+      "description": "Right after record_barrier, with the same reason: the choices that remove it, each with its cost (cost, cost_say, you_pay_sar). transport = keep the held time and arrange a car or metro; far = mobile clinic by the mosque or a home test (Sehhaty home care); work_hours = early morning, evening or weekend (one option each, see time_band), plus a paid private-clinic time late at night or on Friday; sooner = the earliest free Ministry time and the earliest paid private-clinic time; fear = keep the time, female doctor added; no_need = keep the time; cost_concern = reassure: free through Sehhaty; already_screened = no new appointment, thank them; call_later = agree a time to call back; mistrust = explain it is the Ministry service in Sehhaty, offer a video consult first. Do not book yet.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/get_solutions",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id",
+            "reason"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "reason": {
+              "type": "string",
+              "description": "The same reason code recorded with record_barrier.",
+              "enum": [
+                "transport",
+                "far",
+                "work_hours",
+                "sooner",
+                "fear",
+                "no_need",
+                "needs_companion",
+                "embarrassment",
+                "cost_concern",
+                "language",
+                "childcare",
+                "already_screened",
+                "call_later",
+                "mistrust",
+                "other"
+              ],
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_5001m8d906mhf58bjbhtm9d3ke9b",
+    "tool_config": {
+      "type": "webhook",
+      "name": "request_transport",
+      "description": "Reason transport (no one to take them): add the trip to the plan. Ask first: a car to the door or the metro? For a car ask how many are going (alone, with someone, a wheelchair) and the pickup time. It is held tentatively and goes through when the booking is confirmed. Can be called before confirm_booking.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/request_transport",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id",
+            "mode"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "mode": {
+              "type": "string",
+              "description": "car = a car to the door and back; metro = Riyadh Metro from the nearest station with a Darb ticket.",
+              "enum": [
+                "car",
+                "metro"
+              ],
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "party": {
+              "type": "string",
+              "description": "Car only. alone = only them; group = one or more people with them (family car); wheelchair = a wheelchair-ready car.",
+              "enum": [
+                "alone",
+                "group",
+                "wheelchair"
+              ],
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "pickup": {
+              "type": "string",
+              "description": "Car only. on_time = 30 minutes before the appointment; early = 60 minutes before. Use the times get_solutions gave.",
+              "enum": [
+                "on_time",
+                "early"
+              ],
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_5301m8e9gmnzen8t5yrnpr63sz0z",
+    "tool_config": {
+      "type": "webhook",
+      "name": "set_preferences",
+      "description": "After the reason is solved (or straight after the location step if they said yes): ask 'anything that would make your day easier?' offering: a wheelchair-ready center, a test at home, a family companion who gets the reminders, a female doctor, or a free video consultation with a doctor through Sehhaty before the test. Send what they chose (empty list if nothing). Never ask for a companion's name or number.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/set_preferences",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id",
+            "prefs"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "prefs": {
+              "description": "What they chose; can be empty.",
+              "dynamic_variable": "",
+              "is_omitted": false,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "wheelchair_center = center ready for a wheelchair; home_test = test at home (Sehhaty home care); companion_reminders = a family companion gets reminders only; female_doctor = a female doctor; virtual_consult = a free video consultation through Sehhaty the evening before the test.",
+                "enum": [
+                  "wheelchair_center",
+                  "home_test",
+                  "companion_reminders",
+                  "female_doctor",
+                  "virtual_consult"
+                ],
+                "is_system_provided": false,
+                "dynamic_variable": "",
+                "allowed_values_dynamic_variable": "",
+                "constant_value": "",
+                "is_omitted": false
+              }
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_5801m8d90abpek3ajbmtxhd7rvkk",
+    "tool_config": {
+      "type": "webhook",
+      "name": "request_nurse_callback",
+      "description": "Schedule a nurse to call the person back. Use when they are afraid and accept a nurse call, ask any medical question, or ask for a human.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/request_nurse_callback",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id",
+            "topic"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            },
+            "topic": {
+              "type": "string",
+              "description": "Why the nurse should call: fear of the test or result, a medical question, or the person asked for a human.",
+              "enum": [
+                "fear",
+                "medical_question",
+                "wants_human"
+              ],
+              "is_system_provided": false,
+              "dynamic_variable": "",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_0801m8d90ekzeg1rhhpwkmm8bknr",
+    "tool_config": {
+      "type": "webhook",
+      "name": "opt_out",
+      "description": "Stop all future calls to this person. Use only when they clearly ask not to be called again.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate",
+      "api_schema": {
+        "request_headers": {
+          "X-Aoun-Key": {
+            "secret_id": "<YOUR_ELEVENLABS_SECRET_ID_FOR_AOUN_TOOL_KEY>"
+          }
+        },
+        "kind": "webhook",
+        "url": "https://aoun-voice-tools.onrender.com/tools/opt_out",
+        "method": "POST",
+        "path_params_schema": {},
+        "request_body_schema": {
+          "description": "",
+          "dynamic_variable": "",
+          "is_omitted": false,
+          "type": "object",
+          "required": [
+            "conversation_id"
+          ],
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "",
+              "is_system_provided": false,
+              "dynamic_variable": "system__conversation_id",
+              "allowed_values_dynamic_variable": "",
+              "constant_value": "",
+              "is_omitted": false
+            }
+          }
+        },
+        "content_type": "application/json",
+        "auth_resolved_params": [],
+        "mtls_on_token_request": false
+      },
+      "follow_redirects": false,
+      "follow_redirects_allowed_domains": []
+    }
+  },
+  {
+    "id": "tool_5601m8ef796hemyrydgb2wjxhq3d",
+    "tool_config": {
+      "type": "client",
+      "name": "open_screen",
+      "description": "Open a screen in the Aoun app the person asked for. home = main page; plan = the full visit plan (time, center, doctor, clinic, trip, cost); map = the plan on the map with Google Maps, Uber and Darb; booking = open appointment times to book or move the appointment; notebook = the screening notebook; results = results and doctor notes; record = the full health record from all hospitals and clinics; medicines = medicines and vitamins with reminder times; messages = messages with the doctor; family = family tree and history; preferences = visit preferences; settings = settings; game = the neighbourhood game «حيّ عون»; needle = calm mode «وقت الإبرة؟», a short game to take the mind off a needle or a wait; walk = the district walkway «ممشى الحي» with a walk timer; care = the care plan from booking to result; avatar = change how the assistant looks.",
+      "response_timeout_secs": 10,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "parameters": {
+        "description": "",
+        "dynamic_variable": "",
+        "is_omitted": false,
+        "type": "object",
+        "required": [
+          "screen"
+        ],
+        "properties": {
+          "screen": {
+            "type": "string",
+            "description": "Which screen to open.",
+            "enum": [
+              "home",
+              "plan",
+              "map",
+              "booking",
+              "notebook",
+              "results",
+              "record",
+              "medicines",
+              "messages",
+              "family",
+              "preferences",
+              "settings",
+              "game",
+              "needle",
+              "walk",
+              "care",
+              "avatar"
+            ],
+            "is_system_provided": false,
+            "dynamic_variable": "",
+            "allowed_values_dynamic_variable": "",
+            "constant_value": "",
+            "is_omitted": false
+          }
+        }
+      },
+      "expects_response": true,
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate"
+    }
+  },
+  {
+    "id": "tool_5601m8ef7n7neectwnz3qk5nwz9h",
+    "tool_config": {
+      "type": "client",
+      "name": "read_screen",
+      "description": "Read something to the person with the phone's own voice: the open screen, or their own data. Use it whenever they ask you to read, tell them or go over their appointment, results, diagnoses, doctor's messages, medicines, health record, or everything. what = screen (whatever is open), plan (the appointment and its cost), results (screening results and doctor notes), diagnoses (results with a flag, diagnoses, doctor notes and referrals), messages (the latest messages from their doctor), medicines (active medicines with dose, times and instructions), record (the whole health record), everything (plan, diagnoses, medicines and messages). The phone opens the matching screen and reads it; stay silent until it returns. You never see the contents, so do not guess or repeat them; afterwards ask if they want anything explained by their doctor.",
+      "response_timeout_secs": 120,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "parameters": {
+        "description": "",
+        "dynamic_variable": "",
+        "is_omitted": false,
+        "type": "object",
+        "required": [],
+        "properties": {
+          "what": {
+            "type": "string",
+            "description": "What to read. Default screen.",
+            "enum": [
+              "screen",
+              "plan",
+              "results",
+              "diagnoses",
+              "messages",
+              "medicines",
+              "record",
+              "everything"
+            ],
+            "is_system_provided": false,
+            "dynamic_variable": "",
+            "allowed_values_dynamic_variable": "",
+            "constant_value": "",
+            "is_omitted": false
+          }
+        }
+      },
+      "expects_response": true,
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate"
+    }
+  },
+  {
+    "id": "tool_0501m8ef7bk9fexaggbksz5zfa1z",
+    "tool_config": {
+      "type": "client",
+      "name": "set_text_size",
+      "description": "Make the app's text bigger or smaller, or back to normal.",
+      "response_timeout_secs": 10,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "parameters": {
+        "description": "",
+        "dynamic_variable": "",
+        "is_omitted": false,
+        "type": "object",
+        "required": [
+          "size"
+        ],
+        "properties": {
+          "size": {
+            "type": "string",
+            "description": "bigger, smaller, or normal.",
+            "enum": [
+              "bigger",
+              "smaller",
+              "normal"
+            ],
+            "is_system_provided": false,
+            "dynamic_variable": "",
+            "allowed_values_dynamic_variable": "",
+            "constant_value": "",
+            "is_omitted": false
+          }
+        }
+      },
+      "expects_response": true,
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate"
+    }
+  },
+  {
+    "id": "tool_6701m8ef7dhkfytswkjbx4ksctyw",
+    "tool_config": {
+      "type": "client",
+      "name": "set_app_language",
+      "description": "Change the language of the whole app (screens, plan, records) when the person asks, or as soon as they speak a language other than Arabic. ar = Arabic, en = English, ur = Urdu, hi = Hindi, bn = Bengali, fil = Filipino, id = Indonesian.",
+      "response_timeout_secs": 10,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "parameters": {
+        "description": "",
+        "dynamic_variable": "",
+        "is_omitted": false,
+        "type": "object",
+        "required": [
+          "language"
+        ],
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "The language code.",
+            "enum": [
+              "ar",
+              "en",
+              "ur",
+              "hi",
+              "bn",
+              "fil",
+              "id"
+            ],
+            "is_system_provided": false,
+            "dynamic_variable": "",
+            "allowed_values_dynamic_variable": "",
+            "constant_value": "",
+            "is_omitted": false
+          }
+        }
+      },
+      "expects_response": true,
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate"
+    }
+  },
+  {
+    "id": "tool_4101m8ef7f79f4n8ckq88q36yqd0",
+    "tool_config": {
+      "type": "client",
+      "name": "show_on_map",
+      "description": "Show something on the map. plan = the appointment plan and the trip to it; walk = the nearest walkway in the neighbourhood.",
+      "response_timeout_secs": 10,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "parameters": {
+        "description": "",
+        "dynamic_variable": "",
+        "is_omitted": false,
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "plan or walk.",
+            "enum": [
+              "plan",
+              "walk"
+            ],
+            "is_system_provided": false,
+            "dynamic_variable": "",
+            "allowed_values_dynamic_variable": "",
+            "constant_value": "",
+            "is_omitted": false
+          }
+        }
+      },
+      "expects_response": true,
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate"
+    }
+  },
+  {
+    "id": "tool_1501m8ef7h0qe0kth7we584zwzwg",
+    "tool_config": {
+      "type": "client",
+      "name": "start_call",
+      "description": "When the person wants to book, change or cancel an appointment, or arrange a ride: end this chat and start the Aoun call, which handles appointments. Say a short line first, for example that you will call them now.",
+      "response_timeout_secs": 20,
+      "disable_interruptions": false,
+      "interruption_mode": "allow",
+      "force_pre_tool_speech": false,
+      "pre_tool_speech": "auto",
+      "assignments": [],
+      "tool_call_sound_behavior": "auto",
+      "tool_error_handling_mode": "auto",
+      "parameters": {
+        "description": "",
+        "dynamic_variable": "",
+        "is_omitted": false,
+        "type": "object",
+        "required": [],
+        "properties": {}
+      },
+      "expects_response": false,
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "execution_mode": "immediate"
+    }
+  }
+]

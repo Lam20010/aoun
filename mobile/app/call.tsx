@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Avatar } from '../src/ui/Avatar';
 import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -54,7 +55,7 @@ export default function Call() {
 
         <View style={{ alignItems: 'center', gap: 4 }}>
           {revealed && persona ? (
-            <Image source={persona.avatar} style={s.avatar} />
+            <View style={[s.avatar, { overflow: 'hidden' }]}><Avatar size={64} talking={session.speaking} /></View>
           ) : (
             <Image source={require('../assets/aoun-icon.png')} style={{ width: 40, height: 40, tintColor: C.white }} />
           )}

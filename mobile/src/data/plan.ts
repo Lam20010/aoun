@@ -11,7 +11,8 @@ type Pick = (o: Record<string, unknown> | null | undefined, base: string) => str
 export function placeName(s: Slot, t: T, lang: Lang): string {
   if (s.kind === 'home_visit') return t('homeVisit');
   if (s.kind === 'mobile_clinic') return t('mobileClinic');
-  return lang === 'ar' ? s.center_ar : s.center_en ?? s.center_ar;
+  const name = lang === 'ar' ? s.center_ar : s.center_en ?? s.center_ar;
+  return s.facility_kind === 'private_clinic' ? name + ' (' + t('privateClinic') + ')' : name;
 }
 
 export function planRows(p: Plan, t: T, pick: Pick, lang: Lang): Row[] {
@@ -22,6 +23,8 @@ export function planRows(p: Plan, t: T, pick: Pick, lang: Lang): Row[] {
     { icon: ICON.pin, text: placeName(s, t, lang) + (s.kind === 'center' ? (lang === 'ar' ? ' · حي ' + s.district_ar : '') : '') },
   ];
   if (s.doctor) rows.push({ icon: ICON.people, text: pick(s.doctor as never, 'name') + ' · ' + pick(s.doctor as never, 'clinic') });
+  if (s.cost) rows.push({ icon: ICON.shield, accent: !s.cost.free, text: s.cost.free ? t('freeSehhaty') : (lang === 'ar' ? s.cost.note_ar : s.cost.note_en) });
+  if (p.prefs.includes('virtual_consult')) rows.push({ icon: ICON.chat, text: t('virtualConsult') });
   if (p.ride && s.kind !== 'home_visit') {
     rows.push({ icon: ICON.car, accent: true, text: p.ride.mode === 'metro' ? t('rideMetro') : t('rideCar', { t: pickupTime(s.iso, p.ride.pickup_minutes ?? 30, lang) }) });
   }

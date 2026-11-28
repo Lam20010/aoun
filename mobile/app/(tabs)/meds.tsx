@@ -90,7 +90,7 @@ export default function Meds() {
               {!!note && <Txt size={12} color={C.muted}>{note}</Txt>}
             </View>
           </Row>
-          <Switch value={remindersOn} onValueChange={toggle} trackColor={{ true: C.teal, false: C.line }} accessibilityLabel={t('enableReminders')} />
+          <Switch value={remindersOn} onValueChange={toggle} trackColor={{ true: C.teal, false: C.line }} thumbColor={C.white} ios_backgroundColor={C.line} {...({ activeThumbColor: C.white } as object)} accessibilityLabel={t('enableReminders')} />
         </Row>
       </Card>
       <Txt size={18} weight="800">{t('active')}</Txt>

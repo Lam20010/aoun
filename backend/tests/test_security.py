@@ -98,7 +98,9 @@ def test_refusal_gets_solutions_and_switching_releases_the_hold(client):
     before = db.one("SELECT remaining FROM slots WHERE id=?", held_slot)["remaining"]
     assert tool(client, "record_barrier", tok, reason="work_hours").status_code == 200
     sol = tool(client, "get_solutions", tok, reason="work_hours").json()
-    assert [o["time_band"] for o in sol["options"]] == ["morning", "evening", "weekend"]
+    assert [o["time_band"] for o in sol["options"]][:3] == ["morning", "evening", "weekend"]
+    assert all(o["cost"] == "free" for o in sol["options"][:3])
+    assert sol["options"][-1]["cost"] == "paid" and sol["options"][-1]["private_clinic"]  # a paid late/Friday choice
     assert all(o["choice"].startswith("of_") for o in sol["options"])
     r = tool(client, "confirm_booking", tok, choice=sol["options"][0]["choice"])
     assert r.status_code == 200
@@ -364,3 +366,19 @@ def test_demo_page_refusal_is_respected(demo_client):
 def test_demo_assets_block_path_tricks(demo_client):
     assert demo_client.get("/app/assets/..%2Fdemo.py").status_code == 404
     assert demo_client.get("/app/assets/2fead806ca15d60ced69c62384b06c14.png").status_code == 200
+
+
+def test_call_leaves_only_district_counts_for_the_ministry(client):
+    tok = start(client)
+    tool(client, "get_appointment", tok)
+    tool(client, "get_appointment", tok)  # answered is counted once per call
+    tool(client, "record_barrier", tok, reason="transport")
+    opts = tool(client, "get_solutions", tok, reason="transport").json()["options"]
+    tool(client, "set_preferences", tok, prefs=["female_doctor"])
+    tool(client, "confirm_booking", tok, choice=opts[0]["choice"])
+    rows = client.app.state.db.all("SELECT kind, detail, n FROM activity")
+    kinds = {(r["kind"], r["detail"]) for r in rows}
+    assert ("answered", None) in kinds and ("barrier", "transport") in kinds and ("pref", "female_doctor") in kinds
+    assert any(k == "resolved" and d.startswith("transport:") for k, d in kinds)
+    assert sum(r["n"] for r in rows if r["kind"] == "answered") == 1
+    assert all(set(r.keys()) == {"kind", "detail", "n"} for r in rows)

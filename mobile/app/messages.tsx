@@ -21,6 +21,7 @@ export default function Messages() {
   const [doc, setDoc] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const [orig, setOrig] = useState<Record<string, boolean>>({});
   const scroll = useRef<{ scrollToEnd: (o?: { animated?: boolean }) => void } | null>(null);
 
   const load = useCallback(() => api.messages().then((r) => {
@@ -44,11 +45,11 @@ export default function Messages() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: C.bg }}>
       <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 20, gap: 10 }}>
-        <Row style={{ justifyContent: 'space-between' }}>
-          <Txt size={26} weight="800">{t('messagesTitle')}</Txt>
-          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} accessibilityRole="button" accessibilityLabel={t('back')}>
+        <Row gap={12}>
+          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={8}>
             <Circle size={42}><Icon d={rtl ? ICON.chevronRight : ICON.chevronLeft} /></Circle>
           </Pressable>
+          <Txt size={26} weight="800" style={{ flex: 1 }} lines={1}>{t('messagesTitle')}</Txt>
         </Row>
         {docs && docs.length > 1 && (
           <Row gap={8} style={{ flexWrap: 'wrap' }}>
@@ -80,10 +81,16 @@ export default function Messages() {
               const mine = m.sender === 'patient';
               const start = rtl ? 'flex-end' : 'flex-start';
               const end = rtl ? 'flex-start' : 'flex-end';
+              const tr = !!m.translated && !orig[m.id];
               return (
                 <View key={m.id} style={{ alignSelf: mine ? end : start, maxWidth: '82%', backgroundColor: mine ? C.dark : C.white, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 9 }}>
-                  <Txt size={15} color={mine ? C.white : C.ink}>{m.body}</Txt>
+                  <Txt size={15} color={mine ? C.white : C.ink}>{tr ? m.translated : m.body}</Txt>
                   <Txt size={11} color={mine ? 'rgba(255,255,255,.6)' : C.muted}>{when(m.created_at, locale, { hour: 'numeric', minute: '2-digit', day: 'numeric', month: 'short' })}</Txt>
+                  {!!m.translated && (
+                    <Pressable onPress={() => setOrig((o) => ({ ...o, [m.id]: !o[m.id] }))} accessibilityRole="button">
+                      <Txt size={11} weight="700" color={mine ? C.mint : C.teal}>{(tr ? t('translatedLbl') + ' · ' + t('showOriginal') : t('showTranslation'))}</Txt>
+                    </Pressable>
+                  )}
                 </View>
               );
             })}

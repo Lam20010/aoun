@@ -42,8 +42,82 @@ Built for the agentX hackathon, Ministry of Health track. All data here is ficti
 - **Messages.** A private thread with the person's doctor.
 - **Encrypted at rest.** Notes, messages, files, record titles and summaries, and medicine instructions use the same
   Fernet key as phone numbers. Patient and doctor tokens are stored only as SHA-256 hashes.
-- **Doctor sign-in.** `AOUN_DOCTOR_CODE` sets the code. In demo mode it defaults to `aoun-demo-2026` and the page shows it;
-  set a real code before any real use.
+- **Doctor sign-in.** Each doctor signs in with their doctor ID (D01–D12) and password. Set each password as a PBKDF2 hash in
+  `AOUN_DOCTOR_PASSWORDS` (JSON, e.g. `{"D03": "<hash>"}`; make a hash with
+  `python -c 'from app.doctor import hash_password; print(hash_password("..."))'`). Doctors without their own hash use
+  `AOUN_DOCTOR_CODE`; in demo mode that defaults to `aoun-demo-2026` and the page shows it. Five wrong tries lock an ID for 15 minutes.
+- **Portal.** Arabic and English, a notifications panel (new bookings, patient messages, visits in the next 24 hours).
+- **Messages in each reader's language.** With `ANTHROPIC_API_KEY` set on the server, a message written in another language
+  is shown translated (doctor: Arabic or English; patient: their app language), with "show original". Translations stay in memory
+  only. Without the key, messages show as written.
+
+## One platform: the app, the doctor portal and the Ministry board
+
+All three read and write the same server, so a change in one shows in the others:
+
+| Happens in | Shows in |
+|---|---|
+| The person books, moves or cancels (app or call) | The doctor's list and notifications; the Ministry's district counts and live feed |
+| The person tells Rufaida why they have not been screened | The Ministry's "why people don't get screened" chart for that district |
+| The doctor enters a result or a referral | The person's record; the Ministry's results and early-detection counts |
+| The person logs a walk in «ممشى الحي» | The doctor sees this week's minutes; the Ministry sees district minutes |
+| The person helps a neighbour in «حيّ عون» | The Ministry feed (count only) |
+| The Ministry approves a mobile clinic or evening hours | New open times in the app and in the call agents' options; doctors of that district get a notification |
+| The Ministry approves transport support or a "healthy district" challenge | The agents mention it; the challenge shows on the person's home and in the game |
+
+The Ministry only ever sees counts per district (`activity` table): no person, name, number or condition text.
+
+- Board: `GET /ministry/board` (sign in with a staff ID and `AOUN_MINISTRY_PASSWORD`; in demo mode `aoun-ministry-2026`). Five wrong tries lock for 15 minutes.
+- API: `POST /ministry/api/login`, `GET /ministry/api/live`, `GET /ministry/api/insights`, `POST /ministry/api/interventions`, `POST /ministry/api/interventions/{id}/approve`.
+- The board page is built from the presentation design: `python board/build.py` (source `board/Ministry.dc.html` + `board/live.js`). The rest of the Kingdom on the map stays the board's simulation; the pilot districts in Riyadh add the live counts.
+
+### صوت الأحياء: why people don't get screened, per district
+
+The tab shows, for each neighbourhood, why people didn't get screened, what got them to book in the end, and what they asked for.
+
+**What each call leaves behind.** Each call by Rufaida or Rafeed leaves only fixed codes, counted per district in `activity`. Nothing is linked to the person, and nothing they said is kept. The codes are:
+- answered;
+- the one reason they gave (`record_barrier`): transport, work_hours, far, fear, no_need, cost_concern, childcare, language, sooner, already_screened, call_later, mistrust and others;
+- what they chose (`resolved`: reason → solution, such as after-work time, ride, mobile clinic, home visit, female doctor, private clinic or same time);
+- preferences, ride type and call language;
+- booked, opted out and nurse callback.
+
+**What the Ministry board shows.** The board reads all this from `GET /ministry/api/insights?range=week|month|quarter|year` (staff sign-in required). It shows:
+- city KPIs;
+- the top reasons across Riyadh;
+- the reason × district heatmap;
+- "what worked" for each reason;
+- one card per district, with its funnel, top three reasons, what people asked for, and a suggested intervention you can approve on the spot.
+
+**Small groups are hidden.** Any count from 1 to 4 is returned as `null`, and the board shows it as "<5".
+
+**Demo data.** In demo mode the server seeds 16 weeks of aggregated history for the eight pilot districts, so the board has something to show. It does this only when the table is empty.
+
+## Integrations
+
+- **Google Maps**: set `AOUN_GOOGLE_MAPS_KEY` (server only) and `/patient/route` returns the real route, time and steps (driving, walking, transit incl. the Riyadh Metro). Without it, a straight-line estimate marked `estimate`.
+- **Uber**: opens the Uber app with the destination filled in (documented universal link). Booking a ride for someone needs Uber's business API agreement.
+- **Careem, Apple Maps**: open with the destination. **Darb**: no public API; transit directions in Google Maps plus the Darb app for tickets.
+- **Calendar**: `/patient/calendar/link` gives a one-time `.ics` link with reminders a day and two hours before.
+- **Sehhaty**: `app/sehhaty.py` is the one place that talks to Sehhaty. `SimulatedSehhaty` today; a real connection needs an MOH agreement (and Nafath sign-in), then `AOUN_SEHHATY_MODE=live`.
+
+## Sehhaty integration (simulated)
+
+The demo assumes Aoun is linked to Sehhaty. Nothing here calls the real Sehhaty; it behaves the way the integration would:
+
+- **Bookings live in Sehhaty.** Every confirmed booking gets a Sehhaty reference (`SH-` + 8 digits) shown in the plan and the doctor portal.
+- **Identity and insurance come from Sehhaty.** The resident row holds the ID type (citizen / resident), only the last 4 digits of the ID, and the insurer, class and expiry. The agent is told never to ask for an ID or insurance; it only hears the cost.
+- **Cost is part of the plan.** `catalog.quote()` decides:
+  - Health centers, mobile clinics, home visits and video consultations → **free** (MOH primary care booked through Sehhaty).
+  - Private clinics (C-NAKHEEL, C-SHIFA) → listed price; with insurance the patient pays the class copay (A 10% up to 50 SAR, B 20% up to 75, C 20% up to 100); without insurance the full price.
+- **The agent adapts to Sehhaty's options** through `get_solutions`:
+  - `sooner` → the earliest free slot plus the earliest private slot, with its price.
+  - `work_hours` → evening/Friday free options first, then a late or Friday private slot.
+  - fear / no need / embarrassment → offers a free video consultation first.
+  - `cost_concern` → reminds that the visit is free at the health center.
+- **Demo profiles** (`citizen`, `citizen_insured`, `resident_insured`, `resident_uninsured`) are switchable from the app settings or `PATCH /patient/sehhaty-profile` (demo mode only).
+
+Insurer names, classes and private prices are invented for the demo.
 
 ## The call, step by step
 

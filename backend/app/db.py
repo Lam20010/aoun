@@ -18,7 +18,13 @@ CREATE TABLE IF NOT EXISTS residents (
     language TEXT NOT NULL,              -- preferred language code, never nationality
     phone_enc TEXT NOT NULL,             -- Fernet-encrypted phone number
     contact_permission INTEGER NOT NULL, -- 1 allowed, 0 declined / opted out
-    gender TEXT NOT NULL DEFAULT 'f'      -- picks the agent voice (Rufaida for women, Rafeed for men)
+    gender TEXT NOT NULL DEFAULT 'f',     -- picks the agent voice (Rufaida for women, Rafeed for men)
+    -- from Sehhaty (simulated): identity type, the last 4 digits only, and insurance
+    id_type TEXT NOT NULL DEFAULT 'citizen',
+    id_last4 TEXT,
+    insurer TEXT NOT NULL DEFAULT '',
+    insurance_class TEXT NOT NULL DEFAULT '',
+    insurance_until TEXT
 );
 
 CREATE TABLE IF NOT EXISTS cases (
@@ -92,7 +98,8 @@ CREATE TABLE IF NOT EXISTS bookings (
     slot_id TEXT NOT NULL REFERENCES slots(id),
     offer_id TEXT NOT NULL UNIQUE,       -- one offer can become at most one booking (idempotency)
     status TEXT NOT NULL,                -- confirmed | cancelled | missed | attended
-    confirmed_at TEXT NOT NULL
+    confirmed_at TEXT NOT NULL,
+    sehhaty_ref TEXT                     -- the appointment number in Sehhaty (simulated)
 );
 
 CREATE TABLE IF NOT EXISTS support_requests (
@@ -235,6 +242,53 @@ CREATE TABLE IF NOT EXISTS events (
     detail TEXT,                         -- fixed codes only, never free text from a caller
     created_at TEXT NOT NULL
 );
+-- ---------- linking the app, the doctor portal and the Ministry board ----------
+
+-- What happened, per district, with no person in it: feeds the Ministry board.
+CREATE TABLE IF NOT EXISTS activity (
+    id TEXT PRIMARY KEY,
+    district TEXT NOT NULL,
+    kind TEXT NOT NULL,                  -- booked | cancelled | barrier | result | early | referral | walk | helped | intervention
+    detail TEXT,                         -- fixed codes only
+    n INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL
+);
+
+-- Ministry interventions: proposed for a district, approved by a person, then they change what people can book.
+CREATE TABLE IF NOT EXISTS interventions (
+    id TEXT PRIMARY KEY,
+    district TEXT NOT NULL,
+    kind TEXT NOT NULL,                  -- mobile_clinic | evening_hours | transport | language | challenge
+    status TEXT NOT NULL,                -- proposed | approved
+    created_at TEXT NOT NULL,
+    approved_at TEXT,
+    approved_by TEXT,
+    slots INTEGER NOT NULL DEFAULT 0,
+    until TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ministry_sessions (
+    token_hash TEXT PRIMARY KEY,
+    staff_id TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+
+-- The person's own app state kept on the server so it follows them: the neighbourhood game and the assistant look.
+CREATE TABLE IF NOT EXISTS app_state (
+    resident_id TEXT PRIMARY KEY REFERENCES residents(id),
+    game TEXT NOT NULL DEFAULT '{}',
+    avatar TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT
+);
+
+-- Neighbourhood walks the person logs from the app (minutes only, no route or location).
+CREATE TABLE IF NOT EXISTS walks (
+    id TEXT PRIMARY KEY,
+    resident_id TEXT NOT NULL REFERENCES residents(id),
+    minutes INTEGER NOT NULL,
+    day TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
 """
 
 
@@ -332,9 +386,7 @@ def generated_slots(start_day: str, days: int = 21) -> list[tuple]:
     d0 = date.fromisoformat(start_day)
     for di in range(days):
         day = d0 + _td(days=di)
-        if day.weekday() == 4:  # Friday
-            continue
-        for dist in DISTRICTS:
+        for dist in (DISTRICTS if day.weekday() != 4 else ()):  # health centers close on Friday
             fid = phc_for(dist)
             f = _fac_info(fid)
             docs = doctors_at(fid)
@@ -344,6 +396,27 @@ def generated_slots(start_day: str, days: int = 21) -> list[tuple]:
                 places = 1 + (di * 7 + ti * 3 + len(dist)) % 3
                 out.append((f"G{fid[2:]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], dist, "general",
                             f"{day.isoformat()}T{t}:00+03:00", places, int(f["wheelchair"]), 1, "center",
+                            int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
+        # Ministry hospitals' screening clinics: Sunday to Thursday, free
+        if day.weekday() not in (4, 5):
+            for fid in ("H-EAST", "H-NORTH", "H-CENTRAL"):
+                f = _fac_info(fid)
+                docs = doctors_at(fid)
+                for ti, t in enumerate(["08:30", "11:00", "13:30"]):
+                    doc = docs[(ti + di) % len(docs)]
+                    info = _doc(doc)
+                    out.append((f"H{fid[2:6]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], f["district"], "general",
+                                f"{day.isoformat()}T{t}:00+03:00", 3, int(f["wheelchair"]), 1, "center",
+                                int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
+        # private clinics and hospital: earlier, later and on Fridays, but paid
+        for fid in ("C-NAKHEEL", "C-SHIFA", "H-RAAYA"):
+            f = _fac_info(fid)
+            docs = doctors_at(fid)
+            for ti, t in enumerate(["07:00", "13:00", "21:00", "22:30"]):
+                doc = docs[(ti + di) % len(docs)]
+                info = _doc(doc)
+                out.append((f"P{fid[2:5]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], f["district"], "general",
+                            f"{day.isoformat()}T{t}:00+03:00", 2, int(f["wheelchair"]), 1, "center",
                             int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
     return out
 

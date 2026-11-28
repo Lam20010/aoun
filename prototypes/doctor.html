@@ -1,0 +1,718 @@
+<title>بوابة طبيب عون</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: dark-teal sidebar at the start edge; top bar with language and notifications; summary row;
+   appointments beside the selected patient; the patient workspace below. One typeface (IBM Plex Sans Arabic,
+   which carries Arabic and Latin), one type scale: 12 / 13 / 14 / 16 / 20 / 24. Colours are the Aoun app's. */
+:root{
+  --bg:#F3F8FB;--card:#FFFFFF;--ink:#0E2E45;--soft:#4A5A66;--muted:#7D8B96;--line:#E2EBF1;--line-2:#EDF1F3;
+  --dark:#002336;--dark-2:#0E2E45;--teal:#1574AD;--teal-mid:#3BA6E0;--mint:#59C2F9;--mint-soft:#D6EEFC;--mint-card:#E8F2F7;
+  --lav:#E3EDF6;--lav-ink:#3F698C;--yellow:#FFF1D1;--yellow-ink:#7A4E00;--lime:#F2B33D;
+  --red:#B42318;--red-soft:#FDE8E4;--amber:#7A4E00;--amber-soft:#FEEECF;
+  --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --fs-xs:12px;--fs-sm:13px;--fs-md:14px;--fs-lg:16px;--fs-xl:20px;--fs-2xl:24px;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 var(--fs-md)/1.6 var(--font);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.hide{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+.ico{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* controls */
+.btn{border:1px solid transparent;border-radius:10px;padding:8px 14px;background:var(--dark);color:#fff;font-weight:600;font-size:var(--fs-md);display:inline-flex;align-items:center;gap:8px;line-height:1.4}
+.btn:hover{background:var(--dark-2)}
+.btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--bg)}
+.btn.small{padding:5px 10px;font-size:var(--fs-sm)}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff;font-size:var(--fs-md)}
+input:focus,select:focus,textarea:focus{border-color:var(--teal-mid);outline:none;box-shadow:0 0 0 3px rgba(59,166,224,.18)}
+textarea{min-height:84px;resize:vertical}
+label{display:block;font-size:var(--fs-sm);font-weight:500;color:var(--soft);margin:12px 0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.pad{padding:20px}
+
+/* login */
+#login{min-height:100%;display:grid;place-items:center;padding:24px 16px}
+.login-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);width:100%;max-width:960px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.login-art{background:linear-gradient(160deg,var(--dark),var(--dark-2));color:#E6EEF2;padding:40px 36px;display:flex;flex-direction:column;gap:14px}
+.login-art img{width:52px;height:52px;background:#fff;border-radius:14px;padding:6px}
+.login-art h2{margin:10px 0 0;font-size:var(--fs-2xl);font-weight:600;color:#fff;line-height:1.35}
+.login-art p{margin:0;color:#B8CAD3;font-size:var(--fs-md)}
+.login-art ul{margin:8px 0 0;padding-inline-start:18px;color:#D5E2E8;font-size:var(--fs-md);display:flex;flex-direction:column;gap:6px}
+.login-art li::marker{color:var(--mint)}
+.login-form{border:0;border-radius:0;padding:32px}
+.ltitle{margin:26px 0 2px;font-size:var(--fs-xl);font-weight:600}
+.lsub{color:var(--muted);font-size:var(--fs-sm)}
+.pw{position:relative}
+.pw input{padding-right:64px}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--teal);font-size:var(--fs-sm);font-weight:600;padding:4px 8px}
+.lerr{margin-top:10px;background:var(--red-soft);color:var(--red);border-radius:10px;padding:8px 12px;font-size:var(--fs-sm)}
+.lfoot{margin-top:16px;color:var(--muted);font-size:var(--fs-xs);line-height:1.6}
+@media (max-width:820px){.login-wrap{grid-template-columns:1fr}.login-art{display:none}}
+.lhead{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.lhead img{width:44px;height:44px}
+.lhead h1{margin:0;font-size:var(--fs-xl);font-weight:600}
+.lhead div div{color:var(--muted);font-size:var(--fs-sm)}
+.hint{background:var(--yellow);color:var(--yellow-ink);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);margin-top:14px}
+.lang-sw{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.lang-sw button{border:0;background:transparent;padding:6px 12px;font-size:var(--fs-sm);font-weight:600;color:var(--soft)}
+.lang-sw button.on{background:var(--dark);color:#fff}
+
+/* shell */
+#app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%}
+.side{background:var(--dark);color:#E6EEF2;padding:20px 16px;display:flex;flex-direction:column;gap:20px;position:sticky;top:0;height:100vh}
+.side .brand{display:flex;align-items:center;gap:10px;padding:0 8px}
+.side .brand{flex-direction:column;align-items:flex-start;gap:4px}.side .brand img.lock{height:34px;width:auto}.lhead img.lock{height:40px;width:auto}
+.side .brand b{font-size:var(--fs-lg);font-weight:600;color:#fff}
+.side .brand small{display:block;font-size:var(--fs-xs);color:#9CB1BB;font-weight:400}
+.doc{display:flex;align-items:center;gap:12px;padding:14px 12px;border-radius:var(--r);background:rgba(255,255,255,.06)}
+.doc .av{width:44px;height:44px;border-radius:50%;background:var(--mint);color:var(--dark);display:grid;place-items:center;font-size:var(--fs-lg);font-weight:700;flex:none}
+.doc b{display:block;font-size:var(--fs-md);font-weight:600;color:#fff}
+.doc span{display:block;font-size:var(--fs-xs);color:#9CB1BB;line-height:1.5}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav .cap{font-size:var(--fs-xs);color:#7E96A2;padding:0 12px 6px;letter-spacing:.02em}
+.nav button{display:flex;align-items:center;gap:10px;background:transparent;border:0;color:#C8D7DF;padding:9px 12px;border-radius:10px;text-align:start;font-size:var(--fs-md);font-weight:500;position:relative}
+.nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav button.on{background:rgba(89,194,249,.14);color:#fff}
+.nav button.on::before{content:"";position:absolute;inset-inline-start:0;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--mint)}
+.nav .badge{margin-inline-start:auto;background:var(--lime);color:var(--dark);border-radius:999px;font-size:11px;padding:0 7px;font-weight:700;line-height:18px}
+.side .foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.side .foot small{font-size:var(--fs-xs);color:#7E96A2;padding:0 12px;line-height:1.5}
+
+.main{display:flex;flex-direction:column;gap:20px;padding:20px 28px 40px;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top h1{margin:0;font-size:var(--fs-2xl);font-weight:600;line-height:1.3}
+.top .sub{font-size:var(--fs-sm);color:var(--muted)}
+.acts{display:flex;align-items:center;gap:10px;position:relative}
+.iconbtn{position:relative;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink)}
+.iconbtn:hover{background:var(--bg)}
+.iconbtn .dot{position:absolute;top:-5px;inset-inline-end:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--teal);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px;border:2px solid var(--bg)}
+
+/* notifications */
+.panel{position:absolute;top:46px;inset-inline-end:0;width:360px;max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:0 18px 40px rgba(0,35,54,.14);z-index:20;overflow:hidden}
+.panel .ph{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.panel .ph b{font-size:var(--fs-lg);font-weight:600}
+.panel .ph button{border:0;background:none;color:var(--teal);font-size:var(--fs-sm);font-weight:600}
+.panel .items{max-height:420px;overflow:auto}
+.nitem{display:flex;gap:12px;width:100%;border:0;background:#fff;text-align:start;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.nitem:hover{background:var(--bg)}
+.nitem.new{background:var(--mint-card)}
+.nitem .ni{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.nitem .nt{font-size:var(--fs-md);font-weight:500;line-height:1.45}
+.nitem .ns{font-size:var(--fs-xs);color:var(--muted);margin-top:2px}
+.nitem .np{font-size:var(--fs-sm);color:var(--soft);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+
+/* summary */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.stat{display:flex;align-items:center;gap:14px;padding:16px 18px}
+.stat .i{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+.stat small{display:block;color:var(--muted);font-size:var(--fs-sm)}
+.stat b{display:block;font-size:var(--fs-2xl);font-weight:600;line-height:1.25}
+.k-teal{background:var(--mint-soft);color:var(--teal)}
+.k-lav{background:var(--lav);color:var(--lav-ink)}
+.k-yel{background:var(--yellow);color:var(--yellow-ink)}
+.k-dark{background:var(--dark);color:var(--mint)}
+
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+.sec{display:flex;justify-content:space-between;align-items:baseline;padding:16px 18px 10px}
+.sec h2{margin:0;font-size:var(--fs-lg);font-weight:600}
+.sec small{color:var(--muted);font-size:var(--fs-sm)}
+
+/* appointments table */
+.thead,.appt{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr) 96px 104px;gap:12px;align-items:center}
+.thead{padding:8px 18px;font-size:var(--fs-xs);color:var(--muted);font-weight:500;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg)}
+.list{max-height:420px;overflow:auto}
+.appt{width:100%;border:0;border-bottom:1px solid var(--line-2);background:#fff;text-align:start;padding:11px 18px}
+.appt:hover{background:var(--bg)}
+.appt.on{background:var(--mint-card)}
+.appt .who{display:flex;align-items:center;gap:10px;min-width:0}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:600;font-size:var(--fs-sm)}
+.appt .t{font-weight:600;font-size:var(--fs-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appt .s{font-size:var(--fs-xs);color:var(--muted)}
+.appt .scr{font-size:var(--fs-sm);color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appt .cst{display:block;font-size:var(--fs-xs);color:var(--teal);font-weight:500}
+.appt .cst.paid{color:var(--amber)}
+.sehref{display:flex;gap:8px;align-items:center;margin:0 18px;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:var(--fs-sm);color:var(--soft)}
+.appt .tm{font-weight:600;font-size:var(--fs-md)}
+.appt .tm small{display:block;font-weight:400;font-size:var(--fs-xs);color:var(--muted)}
+
+/* patient card */
+.pc-top{padding:18px;background:var(--mint-card);border-bottom:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;display:flex;gap:14px;align-items:center}
+.pc-top .av{width:52px;height:52px;font-size:var(--fs-lg);background:#fff!important}
+.pc-top h3{margin:0;font-size:var(--fs-xl);font-weight:600;line-height:1.3}
+.pc-top .s{font-size:var(--fs-sm);color:var(--soft)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 12px;padding:18px}
+.facts small{display:block;color:var(--muted);font-size:var(--fs-xs)}
+.facts b{font-size:var(--fs-md);font-weight:600}
+.tags{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px}
+.tag{border-radius:8px;padding:2px 10px;font-size:var(--fs-xs);font-weight:600;line-height:22px}
+.pacts{display:flex;gap:8px;flex-wrap:wrap;padding:16px 18px 18px}
+
+.pill{display:inline-block;border-radius:999px;padding:0 10px;font-size:var(--fs-xs);font-weight:600;line-height:22px;background:var(--mint-soft);color:var(--teal);white-space:nowrap}
+.pill.amber{background:var(--amber-soft);color:var(--amber)}
+.pill.red{background:var(--red-soft);color:var(--red)}
+.pill.gray{background:#EEF1F2;color:var(--soft)}
+.pill.lav{background:var(--lav);color:var(--lav-ink)}
+
+/* workspace */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:0 12px}
+.tabs button{border:0;background:transparent;padding:14px 10px;font-weight:500;font-size:var(--fs-md);color:var(--soft);border-bottom:2px solid transparent;margin-bottom:-1px;display:inline-flex;gap:8px;align-items:center}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--teal)}
+#pane{padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:14px 0;border-bottom:1px solid var(--line-2)}
+.rec:last-child{border-bottom:0}
+.rec .tt{font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rec .ds{color:var(--soft);font-size:var(--fs-md)}
+.rec .v{font-weight:600;font-size:var(--fs-lg);text-align:end}
+.rec .v small{display:block;font-size:var(--fs-xs);color:var(--muted);font-weight:400}
+.rec .src{font-size:var(--fs-xs);color:var(--muted)}
+.msgs{display:flex;flex-direction:column;gap:8px;max-height:380px;overflow:auto;padding:4px}
+.msg{max-width:75%;padding:9px 12px;border-radius:12px;background:var(--mint-soft);font-size:var(--fs-md)}
+.msg.me{align-self:flex-start;background:var(--dark);color:#fff}
+.msg.them{align-self:flex-end}
+.msg small{display:block;opacity:.7;font-size:var(--fs-xs)}
+.trbtn{border:0;background:none;padding:0;margin-top:2px;font-size:var(--fs-xs);font-weight:600;color:var(--teal)}
+.msg.me .trbtn{color:var(--mint)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:var(--fs-sm);background:#fff}
+.chip:hover{border-color:var(--teal-mid)}
+.chip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.empty{color:var(--muted);text-align:center;padding:36px 10px;font-size:var(--fs-md)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:10px;font-weight:500;z-index:30}
+.note{background:var(--yellow);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.note small{color:var(--yellow-ink);font-size:var(--fs-xs)}
+h4{margin:22px 0 8px;font-size:var(--fs-lg);font-weight:600}
+.info{display:flex;gap:10px;align-items:flex-start;background:var(--lav);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:var(--fs-sm);margin-bottom:6px}
+
+@media (max-width:1180px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}}
+@media (max-width:860px){#app{grid-template-columns:1fr}.side{position:static;height:auto;gap:14px}.nav{flex-direction:row;flex-wrap:wrap}.nav .cap,.side .foot small,.doc{display:none}.side .foot{margin-top:0}.main{padding:16px}}
+@media (max-width:560px){.grid2,.facts{grid-template-columns:1fr 1fr}.thead{display:none}.appt{grid-template-columns:minmax(0,1fr) auto}.appt .scr,.appt .st{display:none}}
+</style>
+
+<script>document.documentElement.dir="rtl";document.documentElement.lang="ar";</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5c2.2.6 3.5 2.4 3.5 5.5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+  <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5a5 5 0 0 1-7-7l6-6a5 5 0 0 1 7 7zM7 10l7 7"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+</svg>
+
+<section id="login" class="hide">
+  <div class="login-wrap">
+    <div class="login-art">
+      <img src="data:image/png;base64,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" alt="">
+      <h2 data-t="artTitle"></h2>
+      <p data-t="artBody"></p>
+      <ul><li data-t="art1"></li><li data-t="art2"></li><li data-t="art3"></li></ul>
+    </div>
+    <form class="card login-form" id="loginForm" novalidate>
+      <div class="row" style="justify-content:space-between">
+        <div class="lhead" style="margin:0"><img class="lock" src="data:image/png;base64,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" alt="عون"><div><h1 data-t="portal"></h1><div data-t="ministry"></div></div></div>
+        <div class="lang-sw" data-langsw></div>
+      </div>
+      <h3 class="ltitle" data-t="signInTitle"></h3>
+      <div class="lsub" data-t="loginNote"></div>
+      <label for="docId" data-t="doctorId"></label>
+      <input id="docId" autocomplete="username" spellcheck="false" placeholder="D03" dir="ltr" required>
+      <label for="code" data-t="password"></label>
+      <div class="pw"><input id="code" type="password" autocomplete="current-password" dir="ltr" required><button type="button" id="pwShow" data-t="show"></button></div>
+      <div class="lerr hide" id="loginErr" role="alert"></div>
+      <button class="btn" id="loginBtn" type="submit" style="width:100%;justify-content:center;margin-top:18px;padding:11px 14px" data-t="signIn"></button>
+      <div class="lfoot" data-t="loginFoot"></div>
+    </form>
+  </div>
+</section>
+
+<main id="app" class="hide">
+  <aside class="side">
+    <div class="brand"><img class="lock" src="data:image/png;base64,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" alt="عون"><small data-t="portal"></small></div>
+    <div class="doc"><div class="av" id="docAv"></div><div><b id="docName"></b><span id="docSpec"></span><span id="docPlace"></span></div></div>
+    <nav class="nav" id="nav">
+      <div class="cap" data-t="menu"></div>
+      <button data-v="dash" class="on"><svg class="ico"><use href="#i-grid"/></svg><span data-t="today"></span></button>
+      <button data-v="appts"><svg class="ico"><use href="#i-cal"/></svg><span data-t="appointments"></span></button>
+      <button data-v="record"><svg class="ico"><use href="#i-heart"/></svg><span data-t="record"></span></button>
+      <button data-v="chat"><svg class="ico"><use href="#i-chat"/></svg><span data-t="messages"></span><span class="badge hide" id="navMsgs"></span></button>
+      <button data-v="meds"><svg class="ico"><use href="#i-pill"/></svg><span data-t="meds"></span></button>
+    </nav>
+    <div class="foot">
+      <small data-t="privacy"></small>
+      <div class="nav"><button id="logout"><svg class="ico"><use href="#i-out"/></svg><span data-t="signOut"></span></button></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="top">
+      <div><h1 data-t="today"></h1><div class="sub num" id="todayDate"></div></div>
+      <div class="acts">
+        <div class="lang-sw" data-langsw></div>
+        <button class="iconbtn" id="bell" aria-haspopup="true" aria-expanded="false"><svg class="ico"><use href="#i-bell"/></svg><span class="dot hide num" id="bellDot"></span></button>
+        <div class="panel hide" id="panel" role="dialog">
+          <div class="ph"><b data-t="notifications"></b><button id="readAll" data-t="markRead"></button></div>
+          <div class="items" id="nItems"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="card stat"><div class="i k-teal"><svg class="ico"><use href="#i-users"/></svg></div><div><small data-t="sPatients"></small><b class="num" id="sPat">0</b></div></div>
+      <div class="card stat"><div class="i k-lav"><svg class="ico"><use href="#i-cal"/></svg></div><div><small data-t="sUpcoming"></small><b class="num" id="sUp">0</b></div></div>
+      <div class="card stat"><div class="i k-dark"><svg class="ico"><use href="#i-check"/></svg></div><div><small data-t="sDone"></small><b class="num" id="sDone">0</b></div></div>
+      <div class="card stat"><div class="i k-yel"><svg class="ico"><use href="#i-chat"/></svg></div><div><small data-t="sMsgs"></small><b class="num" id="sMsg">0</b></div></div>
+    </div>
+
+    <div class="grid">
+      <div class="card" id="apptCard">
+        <div class="sec"><h2 data-t="myAppointments"></h2><small class="num" id="apptCount"></small></div>
+        <div class="thead"><span data-t="colPatient"></span><span data-t="colScreening"></span><span data-t="colTime"></span><span data-t="colStatus"></span></div>
+        <div class="list" id="appts"></div>
+      </div>
+      <div class="card" id="pcard"><div class="empty" data-t="pickPatient"></div></div>
+    </div>
+
+    <div class="card" id="work"><div class="empty" data-t="pickPatientWork"></div></div>
+  </div>
+</main>
+<div id="toast" class="toast hide" role="status"></div>
+
+<script>
+// PROTOTYPE ONLY: answers the doctor portal's API in the browser from demo data (invented patients).
+(function(){
+// The prototype always opens on the sign-in page.
+try { sessionStorage.removeItem('aoun_dr'); } catch (e) {}
+try { sessionStorage.getItem('x'); } catch (e) { try { Object.defineProperty(window, 'sessionStorage', {value:{getItem(){return null}, setItem(){}, removeItem(){}}}); } catch (e2) {} }
+const D = {"config": {"demo": true, "demo_code": "aoun-demo-2026", "doctors": [{"id": "D01", "name_ar": "د. نورة العتيبي", "name_en": "Dr. Noura Al-Otaibi", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 3", "clinic_en": "Early Screening Clinic - Room 3", "facility_ar": "مركز صحي النسيم", "facility_en": "Al-Naseem Health Center"}, {"id": "D02", "name_ar": "د. فهد القحطاني", "name_en": "Dr. Fahad Al-Qahtani", "specialty_ar": "الباطنة", "specialty_en": "Internal medicine", "clinic_ar": "عيادة الأمراض المزمنة - غرفة 5", "clinic_en": "Chronic Care Clinic - Room 5", "facility_ar": "مركز صحي النسيم", "facility_en": "Al-Naseem Health Center"}, {"id": "D03", "name_ar": "د. ريم الشهري", "name_en": "Dr. Reem Al-Shehri", "specialty_ar": "صحة المرأة", "specialty_en": "Women's health", "clinic_ar": "عيادة صحة المرأة - غرفة 7", "clinic_en": "Women's Health Clinic - Room 7", "facility_ar": "مركز صحي النسيم", "facility_en": "Al-Naseem Health Center"}, {"id": "D04", "name_ar": "د. هيفاء الدوسري", "name_en": "Dr. Haifa Al-Dosari", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 2", "clinic_en": "Early Screening Clinic - Room 2", "facility_ar": "مركز صحي قرطبة", "facility_en": "Qurtubah Health Center"}, {"id": "D05", "name_ar": "د. عبدالله الحربي", "name_en": "Dr. Abdullah Al-Harbi", "specialty_ar": "الباطنة", "specialty_en": "Internal medicine", "clinic_ar": "عيادة الأمراض المزمنة - غرفة 4", "clinic_en": "Chronic Care Clinic - Room 4", "facility_ar": "مركز صحي قرطبة", "facility_en": "Qurtubah Health Center"}, {"id": "D06", "name_ar": "د. سارة المطيري", "name_en": "Dr. Sarah Al-Mutairi", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 1", "clinic_en": "Early Screening Clinic - Room 1", "facility_ar": "مركز صحي اليرموك", "facility_en": "Al-Yarmouk Health Center"}, {"id": "D07", "name_ar": "د. خالد الزهراني", "name_en": "Dr. Khalid Al-Zahrani", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الأمراض المزمنة - غرفة 3", "clinic_en": "Chronic Care Clinic - Room 3", "facility_ar": "مركز صحي اليرموك", "facility_en": "Al-Yarmouk Health Center"}, {"id": "D08", "name_ar": "د. لطيفة السبيعي", "name_en": "Dr. Latifa Al-Subaie", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 2", "clinic_en": "Early Screening Clinic - Room 2", "facility_ar": "مركز صحي الملقا", "facility_en": "Al-Malqa Health Center"}, {"id": "D09", "name_ar": "د. ماجد الغامدي", "name_en": "Dr. Majed Al-Ghamdi", "specialty_ar": "الباطنة", "specialty_en": "Internal medicine", "clinic_ar": "عيادة الأمراض المزمنة - غرفة 6", "clinic_en": "Chronic Care Clinic - Room 6", "facility_ar": "مركز صحي العليا", "facility_en": "Al-Olaya Health Center"}, {"id": "D10", "name_ar": "د. منيرة الشمري", "name_en": "Dr. Munira Al-Shammari", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 1", "clinic_en": "Early Screening Clinic - Room 1", "facility_ar": "مركز صحي الروضة", "facility_en": "Al-Rawdah Health Center"}, {"id": "D11", "name_ar": "د. سلطان العنزي", "name_en": "Dr. Sultan Al-Anazi", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 2", "clinic_en": "Early Screening Clinic - Room 2", "facility_ar": "مركز صحي العزيزية", "facility_en": "Al-Aziziyah Health Center"}, {"id": "D12", "name_ar": "د. أمل الرشيدي", "name_en": "Dr. Amal Al-Rashidi", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 3", "clinic_en": "Early Screening Clinic - Room 3", "facility_ar": "مركز صحي السويدي", "facility_en": "Al-Suwaidi Health Center"}, {"id": "D13", "name_ar": "د. جواهر القرني", "name_en": "Dr. Jawaher Al-Qarni", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 12", "clinic_en": "Early Screening Clinic - Room 12", "facility_ar": "عيادات النخيل الطبية", "facility_en": "Al-Nakheel Medical Clinics"}, {"id": "D14", "name_ar": "د. ناصر البقمي", "name_en": "Dr. Nasser Al-Buqami", "specialty_ar": "الباطنة", "specialty_en": "Internal medicine", "clinic_ar": "عيادة الأمراض المزمنة - غرفة 8", "clinic_en": "Chronic Care Clinic - Room 8", "facility_ar": "مجمع الشفاء الطبي", "facility_en": "Al-Shifa Medical Complex"}, {"id": "D15", "name_ar": "د. هند العمري", "name_en": "Dr. Hind Al-Omari", "specialty_ar": "صحة المرأة", "specialty_en": "Women's health", "clinic_ar": "عيادة صحة المرأة - غرفة 9", "clinic_en": "Women's Health Clinic - Room 9", "facility_ar": "مجمع الشفاء الطبي", "facility_en": "Al-Shifa Medical Complex"}, {"id": "D16", "name_ar": "د. عبير الحارثي", "name_en": "Dr. Abeer Al-Harthi", "specialty_ar": "الأشعة وصحة الثدي", "specialty_en": "Breast imaging", "clinic_ar": "عيادة صحة المرأة - غرفة B12", "clinic_en": "Women's Health Clinic - Room B12", "facility_ar": "مستشفى شرق الرياض العام", "facility_en": "East Riyadh General Hospital"}, {"id": "D17", "name_ar": "د. بندر السهلي", "name_en": "Dr. Bandar Al-Sahli", "specialty_ar": "الباطنة", "specialty_en": "Internal medicine", "clinic_ar": "عيادة الأمراض المزمنة - غرفة A4", "clinic_en": "Chronic Care Clinic - Room A4", "facility_ar": "مستشفى شرق الرياض العام", "facility_en": "East Riyadh General Hospital"}, {"id": "D18", "name_ar": "د. يوسف الشهراني", "name_en": "Dr. Yousef Al-Shahrani", "specialty_ar": "الجهاز الهضمي", "specialty_en": "Gastroenterology", "clinic_ar": "عيادة الفحص المبكر - غرفة C7", "clinic_en": "Early Screening Clinic - Room C7", "facility_ar": "مستشفى شمال الرياض التخصصي", "facility_en": "North Riyadh Specialist Hospital"}, {"id": "D19", "name_ar": "د. مها الدخيل", "name_en": "Dr. Maha Al-Dakheel", "specialty_ar": "طب الأسرة", "specialty_en": "Family medicine", "clinic_ar": "عيادة الفحص المبكر - غرفة 2-14", "clinic_en": "Early Screening Clinic - Room 2-14", "facility_ar": "مستشفى الرياض المركزي", "facility_en": "Riyadh Central Hospital"}, {"id": "D20", "name_ar": "د. شهد المالكي", "name_en": "Dr. Shahad Al-Malki", "specialty_ar": "صحة المرأة", "specialty_en": "Women's health", "clinic_ar": "عيادة صحة المرأة - غرفة 305", "clinic_en": "Women's Health Clinic - Room 305", "facility_ar": "مستشفى الرعاية الأهلي", "facility_en": "Al-Raaya Private Hospital"}, {"id": "D21", "name_ar": "د. تركي الفيفي", "name_en": "Dr. Turki Al-Faifi", "specialty_ar": "الباطنة", "specialty_en": "Internal medicine", "clinic_ar": "عيادة الأمراض المزمنة - غرفة 210", "clinic_en": "Chronic Care Clinic - Room 210", "facility_ar": "مستشفى الرعاية الأهلي", "facility_en": "Al-Raaya Private Hospital"}]}, "catalog": {"screenings": [{"key": "diabetes", "ar": "فحص السكر التراكمي", "en": "Diabetes (HbA1c)", "tests": [{"key": "hba1c", "ar": "السكر التراكمي", "en": "HbA1c", "unit": "%", "low": 4.0, "high": 5.6}, {"key": "fbg", "ar": "سكر صائم", "en": "Fasting glucose", "unit": "mg/dL", "low": 70, "high": 99}]}, {"key": "hypertension", "ar": "فحص ضغط الدم", "en": "Blood pressure", "tests": [{"key": "sbp", "ar": "الضغط الانقباضي", "en": "Systolic", "unit": "mmHg", "low": 90, "high": 119}, {"key": "dbp", "ar": "الضغط الانبساطي", "en": "Diastolic", "unit": "mmHg", "low": 60, "high": 79}]}, {"key": "cholesterol", "ar": "فحص الدهون والكوليسترول", "en": "Cholesterol (lipid panel)", "tests": [{"key": "ldl", "ar": "الكوليسترول الضار", "en": "LDL", "unit": "mg/dL", "low": 0, "high": 99}, {"key": "hdl", "ar": "الكوليسترول النافع", "en": "HDL", "unit": "mg/dL", "low": 40, "high": 100}, {"key": "tg", "ar": "الدهون الثلاثية", "en": "Triglycerides", "unit": "mg/dL", "low": 0, "high": 149}]}, {"key": "obesity", "ar": "مؤشر كتلة الجسم", "en": "Body mass index", "tests": [{"key": "bmi", "ar": "مؤشر كتلة الجسم", "en": "BMI", "unit": "kg/m²", "low": 18.5, "high": 24.9}]}, {"key": "vitamin_d", "ar": "فيتامين د", "en": "Vitamin D", "tests": [{"key": "vitd", "ar": "فيتامين د", "en": "25-OH Vitamin D", "unit": "ng/mL", "low": 30, "high": 100}]}, {"key": "anemia", "ar": "فحص فقر الدم", "en": "Anaemia (haemoglobin)", "tests": [{"key": "hb", "ar": "الهيموغلوبين", "en": "Haemoglobin", "unit": "g/dL", "low": 12.0, "high": 15.5}]}, {"key": "thyroid", "ar": "فحص الغدة الدرقية", "en": "Thyroid (TSH)", "tests": [{"key": "tsh", "ar": "هرمون الغدة الدرقية", "en": "TSH", "unit": "mIU/L", "low": 0.4, "high": 4.0}]}, {"key": "colorectal", "ar": "فحص سرطان القولون", "en": "Colorectal cancer (FIT)", "tests": [{"key": "fit", "ar": "فحص الدم الخفي في البراز", "en": "Faecal immunochemical test", "unit": "", "low": null, "high": null}]}, {"key": "breast", "ar": "فحص سرطان الثدي", "en": "Breast cancer (mammogram)", "tests": [{"key": "mammo", "ar": "تصوير الثدي", "en": "Mammogram (BI-RADS)", "unit": "", "low": null, "high": null}]}, {"key": "cervical", "ar": "فحص سرطان عنق الرحم", "en": "Cervical cancer", "tests": [{"key": "pap", "ar": "مسحة عنق الرحم", "en": "Pap / HPV", "unit": "", "low": null, "high": null}]}, {"key": "osteoporosis", "ar": "فحص هشاشة العظام", "en": "Osteoporosis (DEXA)", "tests": [{"key": "tscore", "ar": "كثافة العظام", "en": "DEXA T-score", "unit": "", "low": -1.0, "high": 4.0}]}], "hereditary": [{"key": "sickle_cell", "ar": "فقر الدم المنجلي", "en": "Sickle cell disease"}, {"key": "thalassemia", "ar": "الثلاسيميا", "en": "Thalassaemia"}, {"key": "g6pd", "ar": "نقص إنزيم G6PD", "en": "G6PD deficiency"}, {"key": "familial_hypercholesterolemia", "ar": "ارتفاع الكوليسترول العائلي", "en": "Familial hypercholesterolaemia"}], "medicines": [{"key": "metformin", "kind": "medication", "ar": "ميتفورمين", "en": "Metformin", "dose": "500 mg", "times": ["08:00", "20:00"]}, {"key": "atorvastatin", "kind": "medication", "ar": "أتورفاستاتين", "en": "Atorvastatin", "dose": "20 mg", "times": ["21:00"]}, {"key": "amlodipine", "kind": "medication", "ar": "أملوديبين", "en": "Amlodipine", "dose": "5 mg", "times": ["08:00"]}, {"key": "levothyroxine", "kind": "medication", "ar": "ليفوثيروكسين", "en": "Levothyroxine", "dose": "50 mcg", "times": ["06:30"]}, {"key": "vitd_daily", "kind": "vitamin", "ar": "فيتامين د3", "en": "Vitamin D3", "dose": "1000 IU", "times": ["13:00"]}, {"key": "vitd_weekly", "kind": "vitamin", "ar": "فيتامين د3 أسبوعي", "en": "Vitamin D3 weekly", "dose": "50,000 IU", "times": ["13:00"]}, {"key": "iron", "kind": "supplement", "ar": "حبوب الحديد", "en": "Ferrous sulfate", "dose": "325 mg", "times": ["10:00"]}, {"key": "folic", "kind": "vitamin", "ar": "حمض الفوليك", "en": "Folic acid", "dose": "5 mg", "times": ["09:00"]}, {"key": "calcium", "kind": "supplement", "ar": "كالسيوم مع فيتامين د", "en": "Calcium + D3", "dose": "600 mg", "times": ["14:00"]}, {"key": "omega3", "kind": "supplement", "ar": "أوميغا 3", "en": "Omega-3", "dose": "1000 mg", "times": ["14:00"]}]}, "me": {"doctor": {"id": "D03", "facility": "F-NAS", "gender": "f", "name_ar": "د. ريم الشهري", "name_en": "Dr. Reem Al-Shehri", "specialty_ar": "صحة المرأة", "specialty_en": "Women's health", "clinic_ar": "عيادة صحة المرأة - غرفة 7", "clinic_en": "Women's Health Clinic - Room 7"}, "facility": {"id": "F-NAS", "kind": "phc", "district": "Al-Naseem", "district_ar": "النسيم", "district_en": "Al-Naseem", "name_ar": "مركز صحي النسيم", "name_en": "Al-Naseem Health Center", "lat": 24.736, "lon": 46.833, "wheelchair": true, "female_staff": true}, "appointments": [{"patient": "R9HYHK8G", "alias": "مراجِعة #HK8G", "start": "2026-11-28T09:00:00+03:00", "kind": "center", "status": "attended", "screening": "diabetes", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)", "age_band": "45-54", "language": "ar", "messages": 1, "sehhaty_ref": "SH-97313685", "cost": {"free": true, "price": 0, "insurance_pays": 0, "you_pay": 0, "basis": "moh_free", "say_ar": "مجاني", "say_en": "Free", "note_ar": "حكومي، محجوز عبر صحتي ومجاني", "note_en": "Ministry of Health, booked through Sehhaty, free of charge"}}, {"patient": "R9GTBEQM", "alias": "مراجِعة #BEQM", "start": "2026-11-28T17:30:00+03:00", "kind": "center", "status": "confirmed", "screening": "diabetes", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)", "age_band": "45-54", "language": "en", "messages": 1, "sehhaty_ref": "SH-46604449", "cost": {"free": true, "price": 0, "insurance_pays": 0, "you_pay": 0, "basis": "moh_free", "say_ar": "مجاني", "say_en": "Free", "note_ar": "حكومي، محجوز عبر صحتي ومجاني", "note_en": "Ministry of Health, booked through Sehhaty, free of charge"}}, {"patient": "R9XOCZUB", "alias": "مراجِعة #CZUB", "start": "2026-11-29T08:00:00+03:00", "kind": "center", "status": "confirmed", "screening": "diabetes", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)", "age_band": "45-54", "language": "ur", "messages": 0, "sehhaty_ref": "SH-18604031", "cost": {"free": true, "price": 0, "insurance_pays": 0, "you_pay": 0, "basis": "moh_free", "say_ar": "مجاني", "say_en": "Free", "note_ar": "حكومي، محجوز عبر صحتي ومجاني", "note_en": "Ministry of Health, booked through Sehhaty, free of charge"}}, {"patient": "R92JCAUO", "alias": "مراجِعة #CAUO", "start": "2026-11-29T16:00:00+03:00", "kind": "center", "status": "confirmed", "screening": "diabetes", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)", "age_band": "45-54", "language": "ar", "messages": 0, "sehhaty_ref": "SH-34080710", "cost": {"free": true, "price": 0, "insurance_pays": 0, "you_pay": 0, "basis": "moh_free", "say_ar": "مجاني", "say_en": "Free", "note_ar": "حكومي، محجوز عبر صحتي ومجاني", "note_en": "Ministry of Health, booked through Sehhaty, free of charge"}}]}, "notifications": {"items": [{"kind": "soon", "at": "2026-11-28T10:44:35.209092+00:00", "patient": "R9XOCZUB", "alias": "مراجِعة #CZUB", "start": "2026-11-29T08:00:00+03:00", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)"}, {"kind": "soon", "at": "2026-11-28T10:44:35.209092+00:00", "patient": "R9GTBEQM", "alias": "مراجِعة #BEQM", "start": "2026-11-28T17:30:00+03:00", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)"}, {"kind": "message", "at": "2026-11-28T10:44:35.199933+00:00", "patient": "R9GTBEQM", "alias": "مراجِعة #BEQM", "preview": "Hello doctor, should I fast before the test?"}, {"kind": "message", "at": "2026-11-28T10:44:35.197433+00:00", "patient": "R9HYHK8G", "alias": "مراجِعة #HK8G", "preview": "الله يعطيك العافية دكتورة، متى أعيد الفحص؟"}, {"kind": "booking", "at": "2026-11-28T10:44:35.162646+00:00", "patient": "R92JCAUO", "alias": "مراجِعة #CAUO", "start": "2026-11-29T16:00:00+03:00", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)"}, {"kind": "booking", "at": "2026-11-28T10:44:35.139265+00:00", "patient": "R9XOCZUB", "alias": "مراجِعة #CZUB", "start": "2026-11-29T08:00:00+03:00", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)"}, {"kind": "booking", "at": "2026-11-28T10:44:35.112406+00:00", "patient": "R9GTBEQM", "alias": "مراجِعة #BEQM", "start": "2026-11-28T17:30:00+03:00", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)"}, {"kind": "booking", "at": "2026-11-28T10:44:35.087278+00:00", "patient": "R9HYHK8G", "alias": "مراجِعة #HK8G", "start": "2026-11-28T09:00:00+03:00", "screening_ar": "فحص السكر التراكمي", "screening_en": "Diabetes (HbA1c)"}]}, "patients": {"R9HYHK8G": {"patient": {"id": "R9HYHK8G", "alias": "مراجِعة #HK8G", "age_band": "45-54", "gender": "f", "district_ar": "النسيم", "district_en": "Al-Naseem", "language": "ar", "family_history": [], "family_history_en": [], "prefs": [], "sehhaty": {"id_type": "citizen", "id_type_ar": "مواطن", "id_type_en": "Citizen", "id_masked": "••••••8005", "insurance": {"insurer": "WAHA", "name_ar": "الواحة للتأمين الصحي", "name_en": "Al-Waha Health Insurance", "class": "A", "copay_pct": 10, "copay_cap": 50, "valid_until": "2027-06-30"}, "linked": true}}, "records": [{"id": "rec_b5c1748ee63e", "kind": "lab", "screening": "diabetes", "test_key": "hba1c", "value": "6.1", "unit": "%", "flag": "borderline", "range": {"low": 4.0, "high": 5.6}, "title_ar": "السكر التراكمي", "title_en": "HbA1c", "summary_ar": "السكر التراكمي في الحد الفاصل. نعيد الفحص بعد ٦ أشهر.", "summary_en": "السكر التراكمي في الحد الفاصل. نعيد الفحص بعد ٦ أشهر.", "taken_at": "2026-11-28", "source": "aoun", "facility": {"id": "F-NAS", "kind": "phc", "name_ar": "مركز صحي النسيم", "name_en": "Al-Naseem Health Center"}, "doctor": {"name_ar": "د. ريم الشهري", "name_en": "Dr. Reem Al-Shehri"}, "files": []}, {"id": "rec_b9694ba5032e", "kind": "lab", "screening": "thyroid", "test_key": "tsh", "value": "2.1", "unit": "mIU/L", "flag": "normal", "range": {"low": 0.4, "high": 4.0}, "title_ar": "هرمون الغدة الدرقية", "title_en": "TSH", "summary_ar": "طبيعي.", "summary_en": "Normal.", "taken_at": "2026-08-10", "source": "history", "facility": {"id": "L-RAZI", "kind": "lab", "name_ar": "مختبرات الرازي", "name_en": "Al-Razi Laboratories"}, "doctor": null, "files": []}, {"id": "rec_a1d15f8fae4a", "kind": "lab", "screening": "anemia", "test_key": "hb", "value": "11.4", "unit": "g/dL", "flag": "low", "range": {"low": 12.0, "high": 15.5}, "title_ar": "الهيموغلوبين", "title_en": "Haemoglobin", "summary_ar": "فقر دم بسيط، يُنصح بالحديد ومتابعة بعد ٣ أشهر.", "summary_en": "Mild anaemia; iron advised, recheck in 3 months.", "taken_at": "2026-07-09", "source": "history", "facility": {"id": "C-SHIFA", "kind": "private_clinic", "name_ar": "مجمع الشفاء الطبي", "name_en": "Al-Shifa Medical Complex"}, "doctor": null, "files": []}, {"id": "rec_14b1d690c8e8", "kind": "report", "screening": null, "test_key": null, "value": null, "unit": null, "flag": null, "range": null, "title_ar": "تقرير زيارة طوارئ", "title_en": "Emergency visit report", "summary_ar": "التهاب حلق فيروسي، صُرف خافض حرارة، لا يحتاج متابعة.", "summary_en": "Viral sore throat; fever reducer given; no follow-up needed.", "taken_at": "2026-06-13", "source": "history", "facility": {"id": "H-CENTRAL", "kind": "hospital", "name_ar": "مستشفى الرياض المركزي", "name_en": "Riyadh Central Hospital"}, "doctor": null, "files": []}, {"id": "rec_25a7060412fb", "kind": "visit", "screening": "hypertension", "test_key": "sbp", "value": "134", "unit": "mmHg", "flag": "borderline", "range": {"low": 90, "high": 119}, "title_ar": "قياس ضغط الدم", "title_en": "Blood pressure reading", "summary_ar": "زيارة عيادة: ضغط 134/86، يُعاد القياس.", "summary_en": "Clinic visit: BP 134/86, recheck advised.", "taken_at": "2026-04-10", "source": "history", "facility": {"id": "H-NORTH", "kind": "hospital", "name_ar": "مستشفى شمال الرياض التخصصي", "name_en": "North Riyadh Specialist Hospital"}, "doctor": null, "files": []}, {"id": "rec_09e1c9be5d31", "kind": "visit", "screening": "hypertension", "test_key": "dbp", "value": "86", "unit": "mmHg", "flag": "borderline", "range": {"low": 60, "high": 79}, "title_ar": "الضغط الانبساطي", "title_en": "Diastolic", "summary_ar": "", "summary_en": "", "taken_at": "2026-04-04", "source": "history", "facility": {"id": "H-NORTH", "kind": "hospital", "name_ar": "مستشفى شمال الرياض التخصصي", "name_en": "North Riyadh Specialist Hospital"}, "doctor": null, "files": []}, {"id": "rec_fb56ab7973d1", "kind": "lab", "screening": "vitamin_d", "test_key": "vitd", "value": "17", "unit": "ng/mL", "flag": "low", "range": {"low": 30, "high": 100}, "title_ar": "فيتامين د", "title_en": "Vitamin D", "summary_ar": "نقص فيتامين د، صُرف علاج لمدة ٨ أسابيع.", "summary_en": "Vitamin D deficiency; 8-week treatment prescribed.", "taken_at": "2026-02-19", "source": "history", "facility": {"id": "C-NAKHEEL", "kind": "private_clinic", "name_ar": "عيادات النخيل الطبية", "name_en": "Al-Nakheel Medical Clinics"}, "doctor": null, "files": []}, {"id": "rec_aed54bacc488", "kind": "lab", "screening": "cholesterol", "test_key": "ldl", "value": "142", "unit": "mg/dL", "flag": "borderline", "range": {"low": 0, "high": 99}, "title_ar": "الكوليسترول الضار", "title_en": "LDL cholesterol", "summary_ar": "أعلى بقليل من المطلوب.", "summary_en": "Slightly above target.", "taken_at": "2025-12-19", "source": "history", "facility": {"id": "L-RAZI", "kind": "lab", "name_ar": "مختبرات الرازي", "name_en": "Al-Razi Laboratories"}, "doctor": null, "files": []}, {"id": "rec_38ba26d59339", "kind": "lab", "screening": "diabetes", "test_key": "hba1c", "value": "5.6", "unit": "%", "flag": "normal", "range": {"low": 4.0, "high": 5.6}, "title_ar": "السكر التراكمي", "title_en": "HbA1c", "summary_ar": "ضمن الطبيعي.", "summary_en": "Within the normal range.", "taken_at": "2024-09-20", "source": "history", "facility": {"id": "H-EAST", "kind": "hospital", "name_ar": "مستشفى شرق الرياض العام", "name_en": "East Riyadh General Hospital"}, "doctor": null, "files": []}], "files": [], "notes": [{"id": "note_6fc4d792b6b6", "body": "قلّلي السكريات وامشي ٣٠ دقيقة يوميًا.", "created_at": "2026-11-28T10:44:35.187281+00:00", "doctor": {"id": "D03", "name_ar": "د. ريم الشهري", "name_en": "Dr. Reem Al-Shehri"}}], "referrals": [], "meds": [{"id": "med_56228cc62026", "kind": "vitamin", "name_ar": "فيتامين د3", "name_en": "Vitamin D3", "dose": "1000 IU", "times": ["13:00"], "days": 60, "start_date": "2026-11-28", "with_food": true, "instructions_ar": "بعد الغداء", "instructions_en": "بعد الغداء", "active": true, "facility_ar": "مركز صحي النسيم", "facility_en": "Al-Naseem Health Center", "doctor": {"name_ar": "د. ريم الشهري", "name_en": "Dr. Reem Al-Shehri"}}, {"id": "med_37ebe73b42ea", "kind": "vitamin", "name_ar": "فيتامين د3 أسبوعي", "name_en": "Vitamin D3 weekly", "dose": "50,000 IU", "times": ["13:00"], "days": 56, "start_date": "2026-02-10", "with_food": true, "instructions_ar": "مرة في الأسبوع بعد الغداء", "instructions_en": "Once a week after lunch", "active": false, "facility_ar": "عيادات النخيل الطبية", "facility_en": "Al-Nakheel Medical Clinics", "doctor": null}], "messages": [{"id": "msg_19b6572f8151", "sender": "doctor", "body": "هلا، شفت نتيجتك. إذا عندك سؤال أنا موجودة.", "created_at": "2026-11-28T10:44:35.194705+00:00", "lang": "ar"}, {"id": "msg_760d6d7de8dd", "sender": "patient", "body": "الله يعطيك العافية دكتورة، متى أعيد الفحص؟", "created_at": "2026-11-28T10:44:35.197433+00:00", "lang": "ar"}], "walks": {"week_minutes": 0, "goal_minutes": 150, "today_minutes": 0, "days": [{"day": "2026-11-20", "minutes": 0}, {"day": "2026-11-21", "minutes": 0}, {"day": "2026-11-22", "minutes": 0}, {"day": "2026-11-23", "minutes": 0}, {"day": "2026-11-24", "minutes": 0}, {"day": "2026-11-25", "minutes": 0}, {"day": "2026-11-26", "minutes": 0}]}}, "R9GTBEQM": {"patient": {"id": "R9GTBEQM", "alias": "مراجِعة #BEQM", "age_band": "45-54", "gender": "f", "district_ar": "النسيم", "district_en": "Al-Naseem", "language": "en", "family_history": ["السكري", "سرطان الثدي"], "family_history_en": ["Diabetes", "Breast cancer"], "prefs": [], "sehhaty": {"id_type": "citizen", "id_type_ar": "مواطن", "id_type_en": "Citizen", "id_masked": "••••••1956", "insurance": {"insurer": "WAHA", "name_ar": "الواحة للتأمين الصحي", "name_en": "Al-Waha Health Insurance", "class": "A", "copay_pct": 10, "copay_cap": 50, "valid_until": "2027-06-30"}, "linked": true}}, "records": [{"id": "rec_180457caf5f0", "kind": "lab", "screening": "obesity", "test_key": "bmi", "value": "28.4", "unit": "kg/m²", "flag": "borderline", "range": {"low": 18.5, "high": 24.9}, "title_ar": "مؤشر كتلة الجسم", "title_en": "BMI", "summary_ar": "وزن زائد، يُنصح بالنشاط اليومي.", "summary_en": "Overweight; daily activity advised.", "taken_at": "2026-09-14", "source": "history", "facility": {"id": "C-SHIFA", "kind": "private_clinic", "name_ar": "مجمع الشفاء الطبي", "name_en": "Al-Shifa Medical Complex"}, "doctor": null, "files": []}, {"id": "rec_2ef404404cfe", "kind": "lab", "screening": "thyroid", "test_key": "tsh", "value": "2.1", "unit": "mIU/L", "flag": "normal", "range": {"low": 0.4, "high": 4.0}, "title_ar": "هرمون الغدة الدرقية", "title_en": "TSH", "summary_ar": "طبيعي.", "summary_en": "Normal.", "taken_at": "2026-08-18", "source": "history", "facility": {"id": "L-RAZI", "kind": "lab", "name_ar": "مختبرات الرازي", "name_en": "Al-Razi Laboratories"}, "doctor": null, "files": []}, {"id": "rec_c607f0c83108", "kind": "lab", "screening": "anemia", "test_key": "hb", "value": "11.4", "unit": "g/dL", "flag": "low", "range": {"low": 12.0, "high": 15.5}, "title_ar": "الهيموغلوبين", "title_en": "Haemoglobin", "summary_ar": "فقر دم بسيط، يُنصح بالحديد ومتابعة بعد ٣ أشهر.", "summary_en": "Mild anaemia; iron advised, recheck in 3 months.", "taken_at": "2026-07-06", "source": "history", "facility": {"id": "C-SHIFA", "kind": "private_clinic", "name_ar": "مجمع الشفاء الطبي", "name_en": "Al-Shifa Medical Complex"}, "doctor": null, "files": []}, {"id": "rec_4efb6e2b21f7", "kind": "visit", "screening": "hypertension", "test_key": "dbp", "value": "86", "unit": "mmHg", "flag": "borderline", "range": {"low": 60, "high": 79}, "title_ar": "الضغط الانبساطي", "title_en": "Diastolic", "summary_ar": "", "summary_en": "", "taken_at": "2026-04-10", "source": "history", "facility": {"id": "H-NORTH", "kind": "hospital", "name_ar": "مستشفى شمال الرياض التخصصي", "name_en": "North Riyadh Specialist Hospital"}, "doctor": null, "files": []}, {"id": "rec_4d7540e3c68a", "kind": "lab", "screening": "diabetes", "test_key": "hba1c", "value": "5.9", "unit": "%", "flag": "borderline", "range": {"low": 4.0, "high": 5.6}, "title_ar": "السكر التراكمي", "title_en": "HbA1c", "summary_ar": "مرحلة ما قبل السكري، يُنصح بالمتابعة بعد سنة مع تعديل الغذاء والمشي.", "summary_en": "Prediabetes range; repeat in a year with diet changes and walking.", "taken_at": "2025-09-16", "source": "history", "facility": {"id": "C-NAKHEEL", "kind": "private_clinic", "name_ar": "عيادات النخيل الطبية", "name_en": "Al-Nakheel Medical Clinics"}, "doctor": null, "files": []}], "files": [], "notes": [], "referrals": [], "meds": [{"id": "med_8e314da1d388", "kind": "vitamin", "name_ar": "فيتامين د3 أسبوعي", "name_en": "Vitamin D3 weekly", "dose": "50,000 IU", "times": ["13:00"], "days": 56, "start_date": "2026-02-10", "with_food": true, "instructions_ar": "مرة في الأسبوع بعد الغداء", "instructions_en": "Once a week after lunch", "active": false, "facility_ar": "عيادات النخيل الطبية", "facility_en": "Al-Nakheel Medical Clinics", "doctor": null}], "messages": [{"id": "msg_59550b9c892b", "sender": "patient", "body": "Hello doctor, should I fast before the test?", "created_at": "2026-11-28T10:44:35.199933+00:00", "lang": "en"}], "walks": {"week_minutes": 0, "goal_minutes": 150, "today_minutes": 0, "days": [{"day": "2026-11-20", "minutes": 0}, {"day": "2026-11-21", "minutes": 0}, {"day": "2026-11-22", "minutes": 0}, {"day": "2026-11-23", "minutes": 0}, {"day": "2026-11-24", "minutes": 0}, {"day": "2026-11-25", "minutes": 0}, {"day": "2026-11-26", "minutes": 0}]}}, "R9XOCZUB": {"patient": {"id": "R9XOCZUB", "alias": "مراجِعة #CZUB", "age_band": "45-54", "gender": "f", "district_ar": "النسيم", "district_en": "Al-Naseem", "language": "ur", "family_history": [], "family_history_en": [], "prefs": [], "sehhaty": {"id_type": "citizen", "id_type_ar": "مواطن", "id_type_en": "Citizen", "id_masked": "••••••8723", "insurance": {"insurer": "WAHA", "name_ar": "الواحة للتأمين الصحي", "name_en": "Al-Waha Health Insurance", "class": "A", "copay_pct": 10, "copay_cap": 50, "valid_until": "2027-06-30"}, "linked": true}}, "records": [{"id": "rec_b6b5d739fd9f", "kind": "lab", "screening": "obesity", "test_key": "bmi", "value": "28.4", "unit": "kg/m²", "flag": "borderline", "range": {"low": 18.5, "high": 24.9}, "title_ar": "مؤشر كتلة الجسم", "title_en": "BMI", "summary_ar": "وزن زائد، يُنصح بالنشاط اليومي.", "summary_en": "Overweight; daily activity advised.", "taken_at": "2026-09-16", "source": "history", "facility": {"id": "C-SHIFA", "kind": "private_clinic", "name_ar": "مجمع الشفاء الطبي", "name_en": "Al-Shifa Medical Complex"}, "doctor": null, "files": []}, {"id": "rec_fa033cf0741d", "kind": "lab", "screening": "thyroid", "test_key": "tsh", "value": "2.1", "unit": "mIU/L", "flag": "normal", "range": {"low": 0.4, "high": 4.0}, "title_ar": "هرمون الغدة الدرقية", "title_en": "TSH", "summary_ar": "طبيعي.", "summary_en": "Normal.", "taken_at": "2026-08-10", "source": "history", "facility": {"id": "L-RAZI", "kind": "lab", "name_ar": "مختبرات الرازي", "name_en": "Al-Razi Laboratories"}, "doctor": null, "files": []}, {"id": "rec_2f28848214b0", "kind": "lab", "screening": "anemia", "test_key": "hb", "value": "11.4", "unit": "g/dL", "flag": "low", "range": {"low": 12.0, "high": 15.5}, "title_ar": "الهيموغلوبين", "title_en": "Haemoglobin", "summary_ar": "فقر دم بسيط، يُنصح بالحديد ومتابعة بعد ٣ أشهر.", "summary_en": "Mild anaemia; iron advised, recheck in 3 months.", "taken_at": "2026-07-16", "source": "history", "facility": {"id": "C-SHIFA", "kind": "private_clinic", "name_ar": "مجمع الشفاء الطبي", "name_en": "Al-Shifa Medical Complex"}, "doctor": null, "files": []}, {"id": "rec_ea095fef0c90", "kind": "visit", "screening": "hypertension", "test_key": "dbp", "value": "86", "unit": "mmHg", "flag": "borderline", "range": {"low": 60, "high": 79}, "title_ar": "الضغط الانبساطي", "title_en": "Diastolic", "summary_ar": "", "summary_en": "", "taken_at": "2026-04-21", "source": "history", "facility": {"id": "H-NORTH", "kind": "hospital", "name_ar": "مستشفى شمال الرياض التخصصي", "name_en": "North Riyadh Specialist Hospital"}, "doctor": null, "files": []}, {"id": "rec_42fe0a3086ba", "kind": "visit", "screening": "hypertension", "test_key": "sbp", "value": "134", "unit": "mmHg", "flag": "borderline", "range": {"low": 90, "high": 119}, "title_ar": "قياس ضغط الدم", "title_en": "Blood pressure reading", "summary_ar": "زيارة عيادة: ضغط 134/86، يُعاد القياس.", "summary_en": "Clinic visit: BP 134/86, recheck advised.", "taken_at": "2026-04-12", "source": "history", "facility": {"id": "H-NORTH", "kind": "hospital", "name_ar": "مستشفى شمال الرياض التخصصي", "name_en": "North Riyadh Specialist Hospital"}, "doctor": null, "files": []}, {"id": "rec_92c1956f81bf", "kind": "lab", "screening": "vitamin_d", "test_key": "vitd", "value": "17", "unit": "ng/mL", "flag": "low", "range": {"low": 30, "high": 100}, "title_ar": "فيتامين د", "title_en": "Vitamin D", "summary_ar": "نقص فيتامين د، صُرف علاج لمدة ٨ أسابيع.", "summary_en": "Vitamin D deficiency; 8-week treatment prescribed.", "taken_at": "2026-02-12", "source": "history", "facility": {"id": "C-NAKHEEL", "kind": "private_clinic", "name_ar": "عيادات النخيل الطبية", "name_en": "Al-Nakheel Medical Clinics"}, "doctor": null, "files": []}, {"id": "rec_5479cc367858", "kind": "lab", "screening": "cholesterol", "test_key": "tg", "value": "168", "unit": "mg/dL", "flag": "borderline", "range": {"low": 0, "high": 149}, "title_ar": "الدهون الثلاثية", "title_en": "Triglycerides", "summary_ar": "مرتفعة قليلًا.", "summary_en": "Slightly raised.", "taken_at": "2025-12-04", "source": "history", "facility": {"id": "L-RAZI", "kind": "lab", "name_ar": "مختبرات الرازي", "name_en": "Al-Razi Laboratories"}, "doctor": null, "files": []}, {"id": "rec_0bf1881bc053", "kind": "lab", "screening": "diabetes", "test_key": "hba1c", "value": "5.6", "unit": "%", "flag": "normal", "range": {"low": 4.0, "high": 5.6}, "title_ar": "السكر التراكمي", "title_en": "HbA1c", "summary_ar": "ضمن الطبيعي.", "summary_en": "Within the normal range.", "taken_at": "2024-09-20", "source": "history", "facility": {"id": "H-EAST", "kind": "hospital", "name_ar": "مستشفى شرق الرياض العام", "name_en": "East Riyadh General Hospital"}, "doctor": null, "files": []}], "files": [], "notes": [], "referrals": [], "meds": [{"id": "med_f48d4c4cc103", "kind": "vitamin", "name_ar": "فيتامين د3 أسبوعي", "name_en": "Vitamin D3 weekly", "dose": "50,000 IU", "times": ["13:00"], "days": 56, "start_date": "2026-02-10", "with_food": true, "instructions_ar": "مرة في الأسبوع بعد الغداء", "instructions_en": "Once a week after lunch", "active": false, "facility_ar": "عيادات النخيل الطبية", "facility_en": "Al-Nakheel Medical Clinics", "doctor": null}], "messages": [], "walks": {"week_minutes": 0, "goal_minutes": 150, "today_minutes": 0, "days": [{"day": "2026-11-20", "minutes": 0}, {"day": "2026-11-21", "minutes": 0}, {"day": "2026-11-22", "minutes": 0}, {"day": "2026-11-23", "minutes": 0}, {"day": "2026-11-24", "minutes": 0}, {"day": "2026-11-25", "minutes": 0}, {"day": "2026-11-26", "minutes": 0}]}}, "R92JCAUO": {"patient": {"id": "R92JCAUO", "alias": "مراجِعة #CAUO", "age_band": "45-54", "gender": "f", "district_ar": "النسيم", "district_en": "Al-Naseem", "language": "ar", "family_history": [], "family_history_en": [], "prefs": [], "sehhaty": {"id_type": "citizen", "id_type_ar": "مواطن", "id_type_en": "Citizen", "id_masked": "••••••0356", "insurance": {"insurer": "WAHA", "name_ar": "الواحة للتأمين الصحي", "name_en": "Al-Waha Health Insurance", "class": "A", "copay_pct": 10, "copay_cap": 50, "valid_until": "2027-06-30"}, "linked": true}}, "records": [{"id": "rec_b221125ddc13", "kind": "lab", "screening": "obesity", "test_key": "bmi", "value": "28.4", "unit": "kg/m²", "flag": "borderline", "range": {"low": 18.5, "high": 24.9}, "title_ar": "مؤشر كتلة الجسم", "title_en": "BMI", "summary_ar": "وزن زائد، يُنصح بالنشاط اليومي.", "summary_en": "Overweight; daily activity advised.", "taken_at": "2026-09-03", "source": "history", "facility": {"id": "C-SHIFA", "kind": "private_clinic", "name_ar": "مجمع الشفاء الطبي", "name_en": "Al-Shifa Medical Complex"}, "doctor": null, "files": []}, {"id": "rec_b8617dcdb681", "kind": "lab", "screening": "thyroid", "test_key": "tsh", "value": "2.1", "unit": "mIU/L", "flag": "normal", "range": {"low": 0.4, "high": 4.0}, "title_ar": "هرمون الغدة الدرقية", "title_en": "TSH", "summary_ar": "طبيعي.", "summary_en": "Normal.", "taken_at": "2026-08-02", "source": "history", "facility": {"id": "L-RAZI", "kind": "lab", "name_ar": "مختبرات الرازي", "name_en": "Al-Razi Laboratories"}, "doctor": null, "files": []}, {"id": "rec_7dbc2d292aa2", "kind": "visit", "screening": "hypertension", "test_key": "sbp", "value": "134", "unit": "mmHg", "flag": "borderline", "range": {"low": 90, "high": 119}, "title_ar": "قياس ضغط الدم", "title_en": "Blood pressure reading", "summary_ar": "زيارة عيادة: ضغط 134/86، يُعاد القياس.", "summary_en": "Clinic visit: BP 134/86, recheck advised.", "taken_at": "2026-04-09", "source": "history", "facility": {"id": "H-NORTH", "kind": "hospital", "name_ar": "مستشفى شمال الرياض التخصصي", "name_en": "North Riyadh Specialist Hospital"}, "doctor": null, "files": []}, {"id": "rec_2766b0aa33e7", "kind": "visit", "screening": "hypertension", "test_key": "dbp", "value": "86", "unit": "mmHg", "flag": "borderline", "range": {"low": 60, "high": 79}, "title_ar": "الضغط الانبساطي", "title_en": "Diastolic", "summary_ar": "", "summary_en": "", "taken_at": "2026-04-04", "source": "history", "facility": {"id": "H-NORTH", "kind": "hospital", "name_ar": "مستشفى شمال الرياض التخصصي", "name_en": "North Riyadh Specialist Hospital"}, "doctor": null, "files": []}, {"id": "rec_362fd9c228a2", "kind": "lab", "screening": "cholesterol", "test_key": "ldl", "value": "142", "unit": "mg/dL", "flag": "borderline", "range": {"low": 0, "high": 99}, "title_ar": "الكوليسترول الضار", "title_en": "LDL cholesterol", "summary_ar": "أعلى بقليل من المطلوب.", "summary_en": "Slightly above target.", "taken_at": "2025-12-10", "source": "history", "facility": {"id": "L-RAZI", "kind": "lab", "name_ar": "مختبرات الرازي", "name_en": "Al-Razi Laboratories"}, "doctor": null, "files": []}, {"id": "rec_51eb537bf7b4", "kind": "lab", "screening": "diabetes", "test_key": "hba1c", "value": "5.9", "unit": "%", "flag": "borderline", "range": {"low": 4.0, "high": 5.6}, "title_ar": "السكر التراكمي", "title_en": "HbA1c", "summary_ar": "مرحلة ما قبل السكري، يُنصح بالمتابعة بعد سنة مع تعديل الغذاء والمشي.", "summary_en": "Prediabetes range; repeat in a year with diet changes and walking.", "taken_at": "2025-09-16", "source": "history", "facility": {"id": "C-NAKHEEL", "kind": "private_clinic", "name_ar": "عيادات النخيل الطبية", "name_en": "Al-Nakheel Medical Clinics"}, "doctor": null, "files": []}, {"id": "rec_d22983377022", "kind": "lab", "screening": "diabetes", "test_key": "hba1c", "value": "5.6", "unit": "%", "flag": "normal", "range": {"low": 4.0, "high": 5.6}, "title_ar": "السكر التراكمي", "title_en": "HbA1c", "summary_ar": "ضمن الطبيعي.", "summary_en": "Within the normal range.", "taken_at": "2024-09-02", "source": "history", "facility": {"id": "H-EAST", "kind": "hospital", "name_ar": "مستشفى شرق الرياض العام", "name_en": "East Riyadh General Hospital"}, "doctor": null, "files": []}], "files": [], "notes": [], "referrals": [], "meds": [{"id": "med_add039d28400", "kind": "vitamin", "name_ar": "فيتامين د3 أسبوعي", "name_en": "Vitamin D3 weekly", "dose": "50,000 IU", "times": ["13:00"], "days": 56, "start_date": "2026-02-10", "with_food": true, "instructions_ar": "مرة في الأسبوع بعد الغداء", "instructions_en": "Once a week after lunch", "active": false, "facility_ar": "عيادات النخيل الطبية", "facility_en": "Al-Nakheel Medical Clinics", "doctor": null}], "messages": [], "walks": {"week_minutes": 0, "goal_minutes": 150, "today_minutes": 0, "days": [{"day": "2026-11-20", "minutes": 0}, {"day": "2026-11-21", "minutes": 0}, {"day": "2026-11-22", "minutes": 0}, {"day": "2026-11-23", "minutes": 0}, {"day": "2026-11-24", "minutes": 0}, {"day": "2026-11-25", "minutes": 0}, {"day": "2026-11-26", "minutes": 0}]}}}};
+D.config.demo_code = 'aoun-demo-2026';
+const HERED = new Set((D.catalog.hereditary||[]).map(h=>h.key));
+const TESTS = {}; (D.catalog.screenings||[]).forEach(s=>(s.tests||[]).forEach(t=>TESTS[t.key]={...t, screening:s.key}));
+const now = () => new Date().toISOString();
+const id = (p) => p + '_' + Math.random().toString(16).slice(2, 14);
+const me = D.me, doc = me.doctor;
+// Demo translations (the live server translates with a model when ANTHROPIC_API_KEY is set).
+const TR = {
+  'الله يعطيك العافية دكتورة، متى أعيد الفحص؟': 'Thank you, doctor. When should I repeat the test?',
+  'Hello doctor, should I fast before the test?': 'مرحبًا دكتورة، هل لازم أصوم قبل الفحص؟',
+  'هلا، شفت نتيجتك. إذا عندك سؤال أنا موجودة.': 'Hi, I have seen your result. If you have any questions, I am here.',
+};
+const tr = (text, L) => { const lg = /[؀-ۿ]/.test(text) ? 'ar' : 'en'; if (lg === L) return null; return TR[text] || null; };
+const shiftT = Date.now() - Math.max(...D.notifications.items.map(i => new Date(i.at).getTime()));
+D.notifications.items.forEach(i => { if (i.kind !== 'soon') i.at = new Date(new Date(i.at).getTime() + shiftT - 600000).toISOString(); });
+const docRef = {id: doc.id, name_ar: doc.name_ar, name_en: doc.name_en};
+const ok = (j, s=200) => Promise.resolve(new Response(JSON.stringify(j), {status:s, headers:{'content-type':'application/json'}}));
+const realFetch = window.fetch.bind(window);
+window.fetch = async (url, opts={}) => {
+  const u = String(url); if (!u.startsWith('/doctor/api')) return realFetch(url, opts);
+  const [path, qs] = u.slice('/doctor/api'.length).split('?'); const L = new URLSearchParams(qs||'').get('lang') || 'ar'; const body = opts.body ? JSON.parse(opts.body) : {};
+  if (path === '/config') return ok(D.config);
+  if (path === '/login') return (String(body.doctor_id).toUpperCase() === doc.id && (body.password || body.code) === 'aoun-demo-2026') ? ok({token:'demo'}) : ok({detail:'wrong_id_or_password'}, 401);
+  if (path === '/notifications') return ok({items: D.notifications.items.map(i => i.kind === 'message' ? {...i, preview: tr(i.preview.replace(/…$/, ''), L) || i.preview} : i)});
+  if (path === '/catalog') return ok(D.catalog);
+  if (path === '/me') return ok(me);
+  const m = path.match(/^\/patients\/([^/]+)(?:\/(.*))?$/); if (!m) return ok({detail:'not_found'}, 404);
+  const P = D.patients[m[1]]; if (!P) return ok({detail:'not_your_patient'}, 403);
+  const act = m[2] || '';
+  if (!act) return ok({...P, messages: P.messages.map(x => { const lg = /[؀-ۿ]/.test(x.body) ? 'ar' : 'en'; const t2 = lg !== L ? tr(x.body, L) : null; return t2 ? {...x, lang: lg, translated: t2} : {...x, lang: lg}; })});
+  if (act === 'results') {
+    if (HERED.has(body.screening)) return ok({detail:'genetic_results_are_not_stored'}, 422);
+    const ids = [];
+    for (const v of body.values || []) {
+      const t = TESTS[v.test_key] || {ar:v.test_key, en:v.test_key, unit:''}; const x = parseFloat(v.value);
+      let flag = null; if (!isNaN(x) && t.low != null) flag = x < t.low ? 'low' : x <= t.high ? 'normal' : x <= t.high * 1.15 ? 'borderline' : 'high';
+      const r = {id:id('rec'), kind:'lab', screening:body.screening, test_key:v.test_key, value:String(v.value), unit:t.unit, flag,
+        range:t.low!=null?{low:t.low, high:t.high}:null, title_ar:t.ar, title_en:t.en, summary_ar:body.summary||'', summary_en:body.summary||'',
+        taken_at:now().slice(0,10), source:'aoun', facility:me.facility, doctor:docRef, files:[]};
+      P.records.unshift(r); ids.push(r.id);
+    }
+    const a = me.appointments.find(a=>a.patient===m[1]); if (a) a.status = 'attended';
+    return ok({records: ids});
+  }
+  if (act === 'notes') { P.notes.unshift({id:id('note'), body:body.body, created_at:now(), doctor:docRef}); return ok({ok:true}); }
+  if (act === 'referral') { P.referrals.unshift({kind:body.kind, created_at:now(), doctor:doc.name_ar}); return ok({ok:true}); }
+  if (act === 'messages') { P.messages.push({id:id('msg'), sender:'doctor', body:body.body, created_at:now()}); return ok({ok:true}); }
+  if (act === 'files') {
+    const f = {id:id('file'), record_id:body.record_id||null, filename:body.filename, mime:body.mime, size:Math.round((body.data_b64||'').length*0.75), created_at:now(), doctor:doc.name_ar};
+    P.files.unshift(f); const r = P.records.find(r=>r.id===body.record_id); if (r) r.files.push(f); return ok({id:f.id});
+  }
+  if (act === 'meds') {
+    P.meds.unshift({id:id('med'), kind:body.kind, name_ar:body.name_ar, name_en:body.name_en||body.name_ar, dose:body.dose, times:(body.times||[]).slice().sort(),
+      days:body.days, start_date:now().slice(0,10), with_food:!!body.with_food, instructions_ar:body.instructions||'', instructions_en:body.instructions||'',
+      active:true, facility_ar:me.facility.name_ar, facility_en:me.facility.name_en, doctor:{name_ar:doc.name_ar, name_en:doc.name_en}});
+    return ok({ok:true});
+  }
+  const st = act.match(/^meds\/([^/]+)\/stop$/); if (st) { const x = P.meds.find(x=>x.id===st[1]); if (x) x.active = false; return ok({ok:true}); }
+  if (act.startsWith('files/')) return ok({detail:'demo'}, 404);
+  return ok({detail:'not_found'}, 404);
+};
+})();
+</script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ss = { get(k){ try { return sessionStorage.getItem(k) || ''; } catch(e){ return ''; } }, set(k,v){ try { sessionStorage.setItem(k,v); } catch(e){} }, del(k){ try { sessionStorage.removeItem(k); } catch(e){} } };
+const ls = { get(k){ try { return localStorage.getItem(k) || ''; } catch(e){ return ''; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
+
+const T = {
+  ar: {
+    aoun:'عون', portal:'بوابة الطبيب', ministry:'عون · وزارة الصحة', loginNote:'ادخل برقمك الوظيفي في عون وكلمة المرور.', doctorId:'رقم الطبيب', password:'كلمة المرور', signIn:'تسجيل الدخول', signInTitle:'تسجيل الدخول', show:'إظهار', hide:'إخفاء',
+    demo:'حساب تجريبي ببيانات وهمية: رقم الطبيب {id} · كلمة المرور {pw}', useDemo:'استخدم الحساب التجريبي', loginFoot:'تشوف بس المراجعين المحجوزين عندك. خمس محاولات خاطئة توقف الدخول ١٥ دقيقة.', eLogin:'رقم الطبيب أو كلمة المرور غير صحيحة.', eLocked:'محاولات كثيرة. جرّب بعد ١٥ دقيقة.', eMissing:'اكتب رقم الطبيب وكلمة المرور.',
+    artTitle:'كل مراجعينك وسجلاتهم في مكان واحد', artBody:'بوابة عون للأطباء في مراكز الرعاية الأولية.', art1:'سجل المراجع من كل المستشفيات والعيادات والمختبرات', art2:'نتائج وملاحظات وأدوية توصل لتطبيق المراجع فورًا', art3:'كل فتح للسجل يُسجَّل ويشوفه المراجع', menu:'القائمة', today:'لوحة اليوم', appointments:'المواعيد', record:'سجل المراجع', messages:'الرسائل', meds:'الأدوية',
+    privacy:'كل فتح للسجل يُسجَّل ويشوفه المراجع في تطبيقه.', signOut:'تسجيل الخروج', notifications:'التنبيهات', markRead:'تعليم الكل كمقروء', noNotifications:'ما فيه تنبيهات جديدة.',
+    nBooking:'حجز جديد: {a}', nMinistry:'من الوزارة: {a}', walks:'المشي هذا الأسبوع', walkMin:'{n} من {g} دقيقة', nMessage:'رسالة من {a}', nSoon:'موعد قريب: {a}', sPatients:'المراجعين', sUpcoming:'مواعيد قادمة', sDone:'تمت زيارتهم', sMsgs:'رسائل المراجعين',
+    myAppointments:'مواعيدي', countAppts:'{n} مواعيد', colPatient:'المراجع', colScreening:'الفحص', colTime:'الوقت', colStatus:'الحالة', booked:'محجوز', attended:'تمت الزيارة',
+    noAppts:'ما عندك مواعيد محجوزة الحين.', pickPatient:'اختر مراجعًا من القائمة.', pickPatientWork:'اختر مراجعًا لعرض سجله وإضافة النتائج.', pickFirst:'اختر مراجعًا من القائمة أول',
+    district:'حي {d}', age:'العمر', gender:'الجنس', female:'أنثى', male:'ذكر', language:'اللغة', appointment:'الموعد', lastResult:'آخر نتيجة من عون', activeMeds:'أدوية حالية',
+    noTags:'ما فيه تفضيلات أو تاريخ عائلي', addResult:'إضافة نتيجة', attachments:'المرفقات', message:'مراسلة',
+    tRecord:'السجل الصحي', tResult:'إضافة نتيجة', tNotes:'الملاحظات والمرفقات', tMeds:'الأدوية والفيتامينات', tChat:'المراسلة',
+    recordInfo:'السجل يجمع نتائج المراجع من كل المستشفيات والعيادات والمختبرات. فتحك له ينسجل ويشوفه المراجع في تطبيقه.', noRecords:'ما فيه سجلات سابقة.',
+    referrals:'الإحالات', refGenetic:'إحالة لاستشارة وراثية', refSpecialist:'إحالة لمختص', screening:'الفحص', normalRange:'الطبيعي {a}–{b}', qualPh:'سلبي / إيجابي / BI-RADS 1',
+    summary:'ملخص للمراجع (يطلع له في «نتائجي»)', summaryPh:'مثال: النتيجة ضمن مرحلة ما قبل السكري، نعيد الفحص بعد ٦ أشهر.', saveResult:'حفظ النتيجة وإرسالها للمراجع',
+    genetic:'الأمراض الوراثية', geneticNote:'نتائج الفحوص الجينية ما تنحفظ في عون ولا تطلع في التطبيق. إذا احتاج المراجع، أرسل إحالة لاستشارة وراثية.',
+    noteLabel:'ملاحظة الطبيب (تطلع للمراجع في «ملاحظات الطبيب»)', addNote:'إضافة الملاحظة', attach:'إرفاق تقرير أو صورة', fileLabel:'الملف (PDF أو صورة، حتى 5 ميجا)',
+    linkResult:'ربطه بنتيجة (اختياري)', none:'— بدون —', upload:'رفع الملف', prevNotes:'الملاحظات السابقة', noNotes:'ما فيه ملاحظات.',
+    nameAr:'الاسم بالعربي', nameEn:'الاسم بالإنجليزي', kind:'النوع', medication:'دواء', vitamin:'فيتامين', supplement:'مكمّل', dose:'الجرعة', days:'المدة بالأيام (0 = مستمر)',
+    food:'مع الأكل؟', anyTime:'لا يهم', afterFood:'بعد الأكل', times:'أوقات الأخذ (يصل المراجع تذكير في كل وقت)', addTime:'إضافة وقت', instructions:'تعليمات',
+    addMed:'إضافة للخطة العلاجية', medsList:'الأدوية الحالية والسابقة', ongoing:'مستمر', ended:'منتهي', nDays:'{n} يوم', stop:'إيقاف', noMeds:'ما فيه أدوية.',
+    startChat:'ابدأ المحادثة مع المراجع.', typeMsg:'اكتب رسالة…', send:'إرسال',
+    tSaved:'انحفظت النتيجة ووصلت لتطبيق المراجع', tRef:'أُرسلت الإحالة', tNote:'انحفظت الملاحظة', tFile:'انرفع الملف ووصل للمراجع', tMed:'انضاف، وبتوصل المراجع تذكيرات بمواعيده',
+    eValue:'اكتب قيمة وحدة على الأقل', eFile:'اختر ملف', eBig:'الملف أكبر من 5 ميجا', eMed:'اكتب الاسم والجرعة ووقت واحد على الأقل', eOpen:'ما قدرت أفتح الملف', eGeneric:'صار خطأ، جرّب مرة ثانية',
+    eGenetic:'النتائج الجينية ما تنحفظ. أرسل إحالة لاستشارة وراثية.', eType:'PDF أو صورة فقط', eNotYours:'هذا المراجع مو محجوز عندك',
+    hospital:'مستشفى', private_clinic:'عيادة خاصة', lab:'مختبر', phc:'مركز صحي',
+    normal:'طبيعي', borderline:'حدّي', high:'مرتفع', low:'منخفض', positive:'إيجابي', negative:'سلبي',
+    identity:'الهوية (من صحتي)', insurance:'التأمين', insClass:'فئة {c} · تحمّل {p}٪', noInsurance:'بدون تأمين', cost:'تكلفة الزيارة', free:'مجاني', youPay:'{n} ريال على المراجع', sehhatyRef:'رقم الموعد في صحتي', freeSehhaty:'مجاني · صحتي', privatePaid:'خاص · {n} ريال', translatedLbl:'مترجمة', showOriginal:'عرض الأصل', showTranslation:'عرض الترجمة', female_doctor:'طبيبة', wheelchair_center:'يدعم الكرسي المتحرك', home_test:'فحص منزلي', companion_reminders:'مرافق يستلم التذكير', now:'الآن', minAgo:'قبل {n} د', hrAgo:'قبل {n} س',
+  },
+  en: {
+    aoun:'Aoun', portal:'Doctor portal', ministry:'Aoun · Ministry of Health', loginNote:'Sign in with your Aoun doctor ID and password.', doctorId:'Doctor ID', password:'Password', signIn:'Sign in', signInTitle:'Sign in', show:'Show', hide:'Hide',
+    demo:'Demo account with invented data: doctor ID {id} · password {pw}', useDemo:'Use the demo account', loginFoot:'You only see the patients booked with you. Five wrong tries lock sign-in for 15 minutes.', eLogin:'Wrong doctor ID or password.', eLocked:'Too many tries. Try again in 15 minutes.', eMissing:'Enter your doctor ID and password.',
+    artTitle:'All your patients and their records in one place', artBody:'The Aoun portal for doctors in primary care centers.', art1:'The patient record from every hospital, clinic and lab', art2:'Results, notes and medicines reach the patient’s app at once', art3:'Every opening of a record is logged and shown to the patient', menu:'Menu', today:'Today', appointments:'Appointments', record:'Patient record', messages:'Messages', meds:'Medicines',
+    privacy:'Every time a record is opened, it is logged and shown to the patient.', signOut:'Sign out', notifications:'Notifications', markRead:'Mark all as read', noNotifications:'No new notifications.',
+    nBooking:'New booking: {a}', nMinistry:'From the Ministry: {a}', walks:'Walking this week', walkMin:'{n} of {g} min', nMessage:'Message from {a}', nSoon:'Coming up: {a}', sPatients:'Patients', sUpcoming:'Upcoming', sDone:'Seen', sMsgs:'Patient messages',
+    myAppointments:'My appointments', countAppts:'{n} appointments', colPatient:'Patient', colScreening:'Screening', colTime:'Time', colStatus:'Status', booked:'Booked', attended:'Seen',
+    noAppts:'No booked appointments right now.', pickPatient:'Choose a patient from the list.', pickPatientWork:'Choose a patient to see their record and add results.', pickFirst:'Choose a patient from the list first',
+    district:'{d}', age:'Age', gender:'Sex', female:'Female', male:'Male', language:'Language', appointment:'Appointment', lastResult:'Last Aoun result', activeMeds:'Current medicines',
+    noTags:'No preferences or family history', addResult:'Add result', attachments:'Attachments', message:'Message',
+    tRecord:'Health record', tResult:'Add result', tNotes:'Notes and files', tMeds:'Medicines and vitamins', tChat:'Messages',
+    recordInfo:'The record brings together the patient’s results from every hospital, clinic and lab. Opening it is logged and shown to the patient in their app.', noRecords:'No earlier records.',
+    referrals:'Referrals', refGenetic:'Refer to genetic counselling', refSpecialist:'Refer to a specialist', screening:'Screening', normalRange:'normal {a}–{b}', qualPh:'Negative / Positive / BI-RADS 1',
+    summary:'Summary for the patient (shown in “My results”)', summaryPh:'e.g. The result is in the pre-diabetes range; we will repeat the test in 6 months.', saveResult:'Save and send to the patient',
+    genetic:'Hereditary conditions', geneticNote:'Genetic test results are never stored in Aoun or shown in the app. If the patient needs it, send a genetic counselling referral.',
+    noteLabel:'Doctor’s note (shown to the patient in “Doctor’s notes”)', addNote:'Add note', attach:'Attach a report or image', fileLabel:'File (PDF or image, up to 5 MB)',
+    linkResult:'Link to a result (optional)', none:'— None —', upload:'Upload file', prevNotes:'Earlier notes', noNotes:'No notes.',
+    nameAr:'Name in Arabic', nameEn:'Name in English', kind:'Type', medication:'Medicine', vitamin:'Vitamin', supplement:'Supplement', dose:'Dose', days:'Days (0 = ongoing)',
+    food:'With food?', anyTime:'Any time', afterFood:'After food', times:'Times (the patient gets a reminder at each)', addTime:'Add time', instructions:'Instructions',
+    addMed:'Add to the treatment plan', medsList:'Current and past medicines', ongoing:'Ongoing', ended:'Ended', nDays:'{n} days', stop:'Stop', noMeds:'No medicines.',
+    startChat:'Start the conversation with the patient.', typeMsg:'Write a message…', send:'Send',
+    tSaved:'Result saved and sent to the patient’s app', tRef:'Referral sent', tNote:'Note saved', tFile:'File uploaded and sent to the patient', tMed:'Added; the patient will get reminders at these times',
+    eValue:'Enter at least one value', eFile:'Choose a file', eBig:'The file is larger than 5 MB', eMed:'Enter the name, dose and at least one time', eOpen:'Could not open the file', eGeneric:'Something went wrong. Please try again.',
+    eGenetic:'Genetic results are not stored. Send a genetic counselling referral.', eType:'PDF or image only', eNotYours:'This patient is not booked with you',
+    hospital:'Hospital', private_clinic:'Private clinic', lab:'Lab', phc:'Health center',
+    normal:'Normal', borderline:'Borderline', high:'High', low:'Low', positive:'Positive', negative:'Negative',
+    identity:'Identity (from Sehhaty)', insurance:'Insurance', insClass:'Class {c} · {p}% co-pay', noInsurance:'No insurance', cost:'Visit cost', free:'Free', youPay:'Patient pays SAR {n}', sehhatyRef:'Sehhaty appointment no.', freeSehhaty:'Free · Sehhaty', privatePaid:'Private · SAR {n}', translatedLbl:'Translated', showOriginal:'Show original', showTranslation:'Show translation', female_doctor:'Female doctor', wheelchair_center:'Wheelchair access', home_test:'Home test', companion_reminders:'Companion gets reminders', now:'now', minAgo:'{n} min ago', hrAgo:'{n} h ago',
+  },
+};
+let lang = ls.get('aoun_dr_lang') === 'en' ? 'en' : 'ar';
+const t = (k, v) => { let s = (T[lang][k] ?? T.ar[k] ?? k); if (v) for (const x in v) s = s.split('{'+x+'}').join(v[x]); return s; };
+const pk = (o, base) => o ? (lang === 'en' ? (o[base+'_en'] || o[base+'_ar']) : o[base+'_ar']) || o[base] || '' : '';
+const loc = () => lang === 'en' ? 'en-GB' : 'ar-SA-u-nu-latn';
+const fmt = (s, o) => new Date(s).toLocaleString(loc(), {timeZone:'Asia/Riyadh', ...o});
+const date = (s) => fmt(s, {day:'numeric',month:'short',year:'numeric'});
+const dt = (s) => fmt(s, {weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+const tm = (s) => fmt(s, {hour:'numeric',minute:'2-digit'});
+const dy = (s) => fmt(s, {weekday:'short',day:'numeric',month:'short'});
+const ago = (s) => { const m = Math.max(0, Math.round((Date.now() - new Date(s).getTime()) / 60000)); return m < 1 ? t('now') : m < 60 ? t('minAgo',{n:m}) : m < 1440 ? t('hrAgo',{n:Math.round(m/60)}) : date(s); };
+const LANG = {ar:'العربية',en:'English',ur:'اردو',hi:'हिन्दी',bn:'বাংলা',fil:'Filipino',id:'Indonesia'};
+const FLAGC = {normal:'',borderline:'amber',high:'red',low:'amber',positive:'red',negative:''};
+const AVC = [['var(--mint-soft)','var(--teal)'],['var(--lav)','var(--lav-ink)'],['var(--yellow)','var(--yellow-ink)'],['#E6EDEF','var(--ink)']];
+const al = (a) => lang === 'en' ? String(a).replace(/^\S+\s*#/, 'Patient #') : a;
+const icon = (n) => `<svg class="ico"><use href="#i-${n}"/></svg>`;
+const avatar = (alias, i) => { const [b,f] = AVC[i % AVC.length]; return `<span class="av" style="background:${b};color:${f}">${esc(String(alias).split('#').pop().slice(0,2))}</span>`; };
+
+let token = ss.get('aoun_dr');
+let CAT = null, ME = null, CFG = null, current = null, tab = 'record', D = null, NOTI = [], ORIG = {};
+
+function applyLang(){
+  document.documentElement.lang = lang; document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+  document.title = lang === 'en' ? 'Aoun · Doctor portal' : 'عون · بوابة الطبيب';
+  document.querySelectorAll('[data-t]').forEach(e => e.textContent = t(e.dataset.t));
+  document.querySelectorAll('[data-langsw]').forEach(w => {
+    w.innerHTML = `<button data-l="ar" class="${lang==='ar'?'on':''}">ع</button><button data-l="en" class="${lang==='en'?'on':''}">EN</button>`;
+    w.querySelectorAll('button').forEach(b => b.onclick = () => { lang = b.dataset.l; ls.set('aoun_dr_lang', lang); applyLang(); redraw(); });
+  });
+}
+function redraw(){
+  if (!$('login').classList.contains('hide') && CFG) fillDoctors();
+  if (ME) { drawShell(); if (current) open(current, true); loadNoti(); }
+}
+
+function toast(x){const e=$('toast');e.textContent=x;e.classList.remove('hide');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.add('hide'),2600)}
+async function api(path, opts={}){
+  const r = await fetch('/doctor/api'+path, {...opts, headers:{'content-type':'application/json', ...(token?{authorization:'Bearer '+token}:{}) }});
+  if (r.status===401){ token=''; ss.del('aoun_dr'); showLogin(); throw new Error('401'); }
+  const j = await r.json().catch(()=>({}));
+  if (!r.ok) { toast(({genetic_results_are_not_stored:t('eGenetic'),file_too_large:t('eBig'),pdf_png_or_jpeg_only:t('eType'),not_your_patient:t('eNotYours')})[String(j.detail||'').split(':')[0]] || t('eGeneric')); throw new Error(j.detail); }
+  return j;
+}
+
+function fillDoctors(){
+  $('pwShow').textContent = $('code').type === 'password' ? t('show') : t('hide');
+}
+async function showLogin(){
+  $('app').classList.add('hide'); $('login').classList.remove('hide');
+  try { CFG = await fetch('/doctor/api/config').then(r=>r.json()); } catch(e) { CFG = {}; }
+  fillDoctors(); setTimeout(() => $('docId').focus(), 50);
+}
+$('pwShow').onclick = () => { const i = $('code'); i.type = i.type === 'password' ? 'text' : 'password'; $('pwShow').textContent = i.type === 'password' ? t('show') : t('hide'); };
+$('loginForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const id = $('docId').value.trim().toUpperCase(), pw = $('code').value;
+  const err = (m) => { $('loginErr').textContent = m; $('loginErr').classList.remove('hide'); };
+  $('loginErr').classList.add('hide');
+  if (!id || !pw) return err(t('eMissing'));
+  $('loginBtn').disabled = true;
+  try {
+    const r = await fetch('/doctor/api/login', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({doctor_id:id, password:pw})});
+    if (r.status === 429) return err(t('eLocked'));
+    if (!r.ok) return err(t('eLogin'));
+    token = (await r.json()).token; ss.set('aoun_dr', token); $('code').value = ''; start();
+  } catch (x) { err(t('eGeneric')); } finally { $('loginBtn').disabled = false; }
+};
+$('logout').onclick = () => { token=''; ss.del('aoun_dr'); current=null; D=null; ME=null; showLogin(); };
+document.querySelectorAll('#nav [data-v]').forEach(b=>b.onclick=()=>{
+  const v=b.dataset.v; document.querySelectorAll('#nav [data-v]').forEach(x=>x.classList.toggle('on',x===b));
+  if (v==='dash') return window.scrollTo({top:0,behavior:'smooth'});
+  if (v==='appts') return $('apptCard').scrollIntoView({behavior:'smooth',block:'start'});
+  if (!current) return toast(t('pickFirst'));
+  tab = v; render(D); $('work').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* notifications */
+const seenKey = () => 'aoun_dr_seen_' + (ME ? ME.doctor.id : '');
+function drawNoti(){
+  const seen = ls.get(seenKey());
+  const fresh = NOTI.filter(n => !seen || n.at > seen).length;
+  $('bellDot').textContent = fresh; $('bellDot').classList.toggle('hide', !fresh);
+  const st = { booking:['cal','k-lav','nBooking'], message:['chat','k-yel','nMessage'], soon:['clock','k-teal','nSoon'], ministry:['shield','k-teal','nMinistry'] };
+  $('nItems').innerHTML = NOTI.length ? NOTI.map((n,i) => { const [ic,k,key] = st[n.kind] || st.booking; return `
+    <button class="nitem ${(!seen || n.at > seen)?'new':''}" data-i="${i}">
+      <span class="ni ${k}">${icon(ic)}</span>
+      <span style="min-width:0"><div class="nt">${esc(t(key,{a:n.kind==='ministry'?pk(n,'title'):al(n.alias)}))}</div>
+        ${n.preview?`<div class="np" dir="auto">${esc(n.preview)}</div>`:''}${n.kind==='ministry'?`<div class="np">${esc(pk(n,'detail'))}</div>`:''}
+        <div class="ns num">${n.kind==='message'||n.kind==='ministry'?ago(n.at):dt(n.start)}${n.screening_ar?' · '+esc(pk(n,'screening')):''}</div></span>
+    </button>`; }).join('') : `<div class="empty">${t('noNotifications')}</div>`;
+  document.querySelectorAll('#nItems [data-i]').forEach(b => b.onclick = () => { const n = NOTI[+b.dataset.i]; closePanel(); if (n.kind==='ministry') return; open(n.patient, false, n.kind==='message'?'chat':'record'); });
+}
+async function loadNoti(){ try { NOTI = (await api('/notifications?lang='+lang)).items || []; drawNoti(); } catch(e){} }
+function closePanel(){ $('panel').classList.add('hide'); $('bell').setAttribute('aria-expanded','false'); }
+$('bell').onclick = (e) => { e.stopPropagation(); const p=$('panel'); p.classList.toggle('hide'); $('bell').setAttribute('aria-expanded', String(!p.classList.contains('hide'))); };
+$('readAll').onclick = () => { if (NOTI.length) ls.set(seenKey(), NOTI[0].at > new Date().toISOString() ? NOTI[0].at : new Date().toISOString()); drawNoti(); };
+document.addEventListener('click', (e) => { if (!$('panel').contains(e.target) && e.target !== $('bell')) closePanel(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+
+async function start(){
+  $('login').classList.add('hide'); $('app').classList.remove('hide');
+  CAT = CAT || await api('/catalog');
+  ME = await api('/me');
+  drawShell(); loadNoti();
+  clearInterval(start._p); start._p = setInterval(loadNoti, 30000);
+  if (current) open(current, true);
+  else if (ME.appointments.length) open((ME.appointments.find(a=>a.status!=='attended')||ME.appointments[0]).patient);
+}
+
+function drawShell(){
+  const doc = ME.doctor, A = ME.appointments;
+  $('docAv').textContent = pk(doc,'name').replace(/^(د\.|Dr\.)\s*/,'').trim().charAt(0);
+  $('docName').textContent = pk(doc,'name'); $('docSpec').textContent = pk(doc,'specialty');
+  $('docPlace').textContent = pk(doc,'clinic') + ' · ' + pk(ME.facility,'name');
+  $('todayDate').textContent = fmt(new Date().toISOString(), {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const msgs = A.reduce((n,a)=>n+(a.messages||0),0);
+  $('sPat').textContent = new Set(A.map(a=>a.patient)).size;
+  $('sUp').textContent = A.filter(a=>a.status!=='attended').length;
+  $('sDone').textContent = A.filter(a=>a.status==='attended').length;
+  $('sMsg').textContent = msgs;
+  $('navMsgs').textContent = msgs; $('navMsgs').classList.toggle('hide', !msgs);
+  $('apptCount').textContent = A.length ? t('countAppts',{n:A.length}) : '';
+  $('appts').innerHTML = A.length ? A.map((a,i)=>`
+    <button class="appt ${current===a.patient?'on':''}" data-p="${a.patient}">
+      <span class="who">${avatar(a.alias,i)}<span style="min-width:0"><div class="t">${esc(al(a.alias))}</div>
+        <div class="s">${LANG[a.language]||a.language}${a.messages?' · '+icon('chat').replace('class="ico"','class="ico" style="width:12px;height:12px;vertical-align:-2px"')+' '+a.messages:''}</div></span></span>
+      <span class="scr">${esc(pk(a,'screening'))}<small class="cst ${a.cost&&!a.cost.free?'paid':''}">${a.cost?(a.cost.free?t('freeSehhaty'):t('privatePaid',{n:a.cost.price})):''}</small></span>
+      <span class="tm num">${tm(a.start)}<small>${dy(a.start)}</small></span>
+      <span class="st"><span class="pill ${a.status==='attended'?'gray':''}">${a.status==='attended'?t('attended'):t('booked')}</span></span>
+    </button>`).join('') : `<div class="empty">${t('noAppts')}</div>`;
+  document.querySelectorAll('.appt').forEach(b=>b.onclick=()=>open(b.dataset.p));
+}
+
+async function open(pid, keepTab, toTab){
+  current = pid; if(!keepTab) tab = toTab || 'record';
+  document.querySelectorAll('.appt').forEach(b=>b.classList.toggle('on', b.dataset.p===pid));
+  D = await api('/patients/'+pid+'?lang='+lang);
+  render(D);
+  if (toTab) $('work').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function render(d){
+  const p = d.patient;
+  const idx = Math.max(0, ME.appointments.findIndex(a=>a.patient===p.id));
+  const a = ME.appointments[idx] || {};
+  const last = d.records.filter(r=>r.source==='aoun')[0];
+  const active = d.meds.filter(m=>m.active).length;
+  const fam = lang==='en' ? (p.family_history_en || p.family_history) : p.family_history;
+  const tags = [...p.prefs.map(x=>[t(x),'k-lav']), ...fam.map(x=>[x,'k-yel'])];
+  $('pcard').innerHTML = `
+    <div class="pc-top">${avatar(p.alias, idx)}<div style="min-width:0"><h3>${esc(al(p.alias))}</h3><div class="s">${esc(t('district',{d:pk(p,'district')}))}${a.screening?' · '+esc(pk(a,'screening')):''}</div></div></div>
+    <div class="facts">
+      <div><small>${t('age')}</small><b class="num">${esc(p.age_band)}</b></div>
+      <div><small>${t('gender')}</small><b>${p.gender==='m'?t('male'):t('female')}</b></div>
+      <div><small>${t('language')}</small><b>${LANG[p.language]||p.language}</b></div>
+      <div><small>${t('appointment')}</small><b class="num">${a.start?dt(a.start):'—'}</b></div>
+      <div><small>${t('lastResult')}</small><b class="num">${last?date(last.taken_at):'—'}</b></div>
+      <div><small>${t('activeMeds')}</small><b class="num">${active}</b></div>
+      <div><small>${t('identity')}</small><b class="num">${p.sehhaty?esc(pk(p.sehhaty,'id_type'))+' · <span dir="ltr">'+esc(p.sehhaty.id_masked)+'</span>':'—'}</b></div>
+      <div><small>${t('insurance')}</small><b>${p.sehhaty&&p.sehhaty.insurance?esc(pk(p.sehhaty.insurance,'name'))+' · '+t('insClass',{c:p.sehhaty.insurance.class,p:p.sehhaty.insurance.copay_pct}):t('noInsurance')}</b></div>
+      <div><small>${t('walks')}</small><b class="num">${d.walks?esc(t("walkMin",{n:d.walks.week_minutes,g:d.walks.goal_minutes})):'—'}</b></div>
+      <div><small>${t('cost')}</small><b>${a.cost?(a.cost.free?t('free'):esc(t('youPay',{n:a.cost.you_pay}))):'—'}</b></div>
+    </div>
+    ${a.sehhaty_ref?`<div class="sehref">${icon('shield')}<span>${t('sehhatyRef')} <b class="num" dir="ltr">${esc(a.sehhaty_ref)}</b></span></div>`:''}
+    <div class="tags">${tags.length?tags.map(([x,c])=>`<span class="tag ${c}">${esc(x)}</span>`).join(''):`<span class="tag k-teal">${t('noTags')}</span>`}</div>
+    <div class="pacts">
+      <button class="btn" data-go="result">${icon('flask')}${t('addResult')}</button>
+      <button class="btn ghost" data-go="notes">${icon('file')}${t('attachments')}</button>
+      <button class="btn ghost" data-go="chat">${icon('chat')}${t('message')}</button>
+    </div>`;
+  document.querySelectorAll('#pcard [data-go]').forEach(b=>b.onclick=()=>{ tab=b.dataset.go; render(d); $('work').scrollIntoView({behavior:'smooth',block:'start'}); });
+
+  const tabs = [['record','tRecord','heart'],['result','tResult','flask'],['notes','tNotes','file'],['meds','tMeds','pill'],['chat','tChat','chat']];
+  $('work').innerHTML = `
+    <div class="tabs" role="tablist">${tabs.map(([k,l,i])=>`<button role="tab" data-t2="${k}" class="${tab===k?'on':''}">${icon(i)}${t(l)}</button>`).join('')}</div>
+    <div id="pane"></div>`;
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t2; render(d);});
+  ({record:paneRecord, result:paneResult, notes:paneNotes, meds:paneMeds, chat:paneChat})[tab](d);
+}
+
+const flagPill = (f) => f ? `<span class="pill ${FLAGC[f]||''}">${t(f)}</span>` : '';
+
+function paneRecord(d){
+  const recs = d.records;
+  $('pane').innerHTML = `
+    <div class="info">${icon('shield')}<span>${t('recordInfo')}</span></div>
+    ${recs.length? recs.map(r=>`<div class="rec">
+      <div style="min-width:0"><div class="tt">${esc(pk(r,'title'))} ${flagPill(r.flag)}</div>
+        ${pk(r,'summary')?`<div class="ds">${esc(pk(r,'summary'))}</div>`:''}
+        <div class="src num">${esc(pk(r.facility,'name'))} · ${t(r.facility.kind)}${r.doctor?' · '+esc(pk(r.doctor,'name')):''} · ${date(r.taken_at)}</div>
+        ${r.files.length?`<div class="row" style="margin-top:6px">${r.files.map(f=>`<button class="btn ghost small" data-f="${f.id}">${icon('file')}${esc(f.filename)}</button>`).join('')}</div>`:''}</div>
+      <div class="v num">${r.value?esc(r.value):''}${r.value?`<small>${esc(r.unit||'')}${r.range&&r.range.low!=null?' · '+t('normalRange',{a:r.range.low,b:r.range.high}):''}</small>`:''}</div></div>`).join('') : `<div class="empty">${t('noRecords')}</div>`}
+    ${d.referrals.length?`<h4>${t('referrals')}</h4>${d.referrals.map(r=>`<div class="note">${r.kind==='genetic_counselling'?t('refGenetic'):t('refSpecialist')} <small>· ${esc(lang==='en'?(r.doctor_en||r.doctor):r.doctor)} · ${date(r.created_at)}</small></div>`).join('')}`:''}`;
+  bindFiles();
+}
+
+function bindFiles(){ document.querySelectorAll('[data-f]').forEach(b=>b.onclick=async()=>{
+  const r = await fetch('/doctor/api/files/'+b.dataset.f,{headers:{authorization:'Bearer '+token}});
+  if(!r.ok) return toast(t('eOpen')); const url = URL.createObjectURL(await r.blob()); window.open(url,'_blank'); }); }
+
+function paneResult(d){
+  const opts = CAT.screenings.map(s=>`<option value="${s.key}">${esc(lang==='en'?s.en:s.ar)}</option>`).join('');
+  $('pane').innerHTML = `
+    <div class="grid2"><div><label for="scr">${t('screening')}</label><select id="scr">${opts}</select></div><div></div></div>
+    <div id="tests"></div>
+    <label for="sum">${t('summary')}</label><textarea id="sum" maxlength="600" placeholder="${esc(t('summaryPh'))}"></textarea>
+    <div style="margin-top:14px" class="row"><button class="btn" id="saveRes">${icon('check')}${t('saveResult')}</button></div>
+    <h4>${t('genetic')}</h4>
+    <div class="hint" style="margin-top:0">${t('geneticNote')}</div>
+    <div class="row" style="margin-top:10px"><button class="btn ghost" id="refGen">${t('refGenetic')}</button><button class="btn ghost" id="refSpec">${t('refSpecialist')}</button></div>`;
+  const draw = () => { const s = CAT.screenings.find(x=>x.key===$('scr').value);
+    $('tests').innerHTML = `<div class="grid2">${s.tests.map(x=>`<div><label>${esc(lang==='en'?x.en:x.ar)} ${x.unit?'('+esc(x.unit)+')':''}${x.low!=null&&x.high!=null?' · '+t('normalRange',{a:x.low,b:x.high}):''}</label>
+      <input data-k="${x.key}" ${x.unit?'inputmode="decimal"':''} placeholder="${x.unit?'':esc(t('qualPh'))}"></div>`).join('')}</div>`; };
+  $('scr').onchange = draw; draw();
+  $('saveRes').onclick = async () => {
+    const values = [...document.querySelectorAll('[data-k]')].filter(i=>i.value.trim()).map(i=>({test_key:i.dataset.k, value:i.value.trim()}));
+    if(!values.length) return toast(t('eValue'));
+    await api(`/patients/${current}/results`,{method:'POST',body:JSON.stringify({screening:$('scr').value, values, summary:$('sum').value.trim()})});
+    toast(t('tSaved')); tab='record'; start();
+  };
+  $('refGen').onclick = async()=>{ await api(`/patients/${current}/referral`,{method:'POST',body:JSON.stringify({kind:'genetic_counselling'})}); toast(t('tRef')); };
+  $('refSpec').onclick = async()=>{ await api(`/patients/${current}/referral`,{method:'POST',body:JSON.stringify({kind:'specialist'})}); toast(t('tRef')); };
+}
+
+function paneNotes(d){
+  $('pane').innerHTML = `
+    <label for="note">${t('noteLabel')}</label><textarea id="note" maxlength="2000"></textarea>
+    <div style="margin-top:10px"><button class="btn" id="saveNote">${t('addNote')}</button></div>
+    <h4>${t('attach')}</h4>
+    <div class="grid2"><div><label for="file">${t('fileLabel')}</label><input type="file" id="file" accept="application/pdf,image/png,image/jpeg"></div>
+    <div><label for="recSel">${t('linkResult')}</label><select id="recSel"><option value="">${t('none')}</option>${d.records.filter(r=>r.source==='aoun').map(r=>`<option value="${r.id}">${esc(pk(r,'title'))} · ${date(r.taken_at)}</option>`).join('')}</select></div></div>
+    <div style="margin-top:10px"><button class="btn" id="up">${icon('file')}${t('upload')}</button></div>
+    <h4>${t('prevNotes')}</h4>
+    ${d.notes.length? d.notes.map(n=>`<div class="note" dir="auto">${esc(n.body)}<br><small>${esc(pk(n.doctor,'name'))} · ${date(n.created_at)}</small></div>`).join('') : `<div class="empty">${t('noNotes')}</div>`}
+    ${d.files.length?`<h4>${t('attachments')}</h4><div class="row">${d.files.map(f=>`<button class="btn ghost small" data-f="${f.id}">${icon('file')}${esc(f.filename)}</button>`).join('')}</div>`:''}`;
+  bindFiles();
+  $('saveNote').onclick = async()=>{ const b=$('note').value.trim(); if(!b) return; await api(`/patients/${current}/notes`,{method:'POST',body:JSON.stringify({body:b})}); toast(t('tNote')); open(current,true); };
+  $('up').onclick = async()=>{ const f=$('file').files[0]; if(!f) return toast(t('eFile'));
+    if(f.size>5*1024*1024) return toast(t('eBig'));
+    const b64 = await new Promise(res=>{const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.readAsDataURL(f);});
+    await api(`/patients/${current}/files`,{method:'POST',body:JSON.stringify({filename:f.name, mime:f.type, data_b64:b64, record_id:$('recSel').value||null})});
+    toast(t('tFile')); open(current,true); };
+}
+
+function paneMeds(d){
+  const times = new Set(['08:00']);
+  $('pane').innerHTML = `
+    <div class="chips" id="quick">${CAT.medicines.map((m,i)=>`<button class="chip" data-i="${i}">${esc(lang==='en'?m.en:m.ar)} · ${esc(m.dose)}</button>`).join('')}</div>
+    <div class="grid2" style="margin-top:4px">
+      <div><label for="mAr">${t('nameAr')}</label><input id="mAr" dir="rtl"></div><div><label for="mEn">${t('nameEn')}</label><input id="mEn" dir="ltr"></div>
+      <div><label for="mKind">${t('kind')}</label><select id="mKind"><option value="medication">${t('medication')}</option><option value="vitamin">${t('vitamin')}</option><option value="supplement">${t('supplement')}</option></select></div>
+      <div><label for="mDose">${t('dose')}</label><input id="mDose"></div>
+      <div><label for="mDays">${t('days')}</label><input id="mDays" type="number" min="0" max="365" value="30"></div>
+      <div><label for="mFood">${t('food')}</label><select id="mFood"><option value="0">${t('anyTime')}</option><option value="1">${t('afterFood')}</option></select></div>
+    </div>
+    <label for="tNew">${t('times')}</label>
+    <div class="row"><div class="chips" id="times"></div><input id="tNew" type="time" style="width:140px"><button class="btn ghost small" id="tAdd">${t('addTime')}</button></div>
+    <label for="mIns">${t('instructions')}</label><input id="mIns" maxlength="300">
+    <div style="margin-top:14px"><button class="btn" id="saveMed">${icon('pill')}${t('addMed')}</button></div>
+    <h4>${t('medsList')}</h4>
+    ${d.meds.length? d.meds.map(m=>`<div class="rec"><div style="min-width:0"><div class="tt">${esc(pk(m,'name'))} · <span class="num">${esc(m.dose)}</span> ${m.active?`<span class="pill">${t('ongoing')}</span>`:`<span class="pill gray">${t('ended')}</span>`}</div>
+      <div class="src num">${m.times.map(x=>tm('2026-01-01T'+x+':00+03:00')).join(' · ')} · ${m.days?t('nDays',{n:m.days}):t('ongoing')} · ${esc(pk(m,'facility'))}${m.doctor?' · '+esc(pk(m.doctor,'name')):''}</div></div>
+      <div>${m.active?`<button class="btn ghost small" data-stop="${m.id}">${t('stop')}</button>`:''}</div></div>`).join('') : `<div class="empty">${t('noMeds')}</div>`}`;
+  const drawT = () => { $('times').innerHTML=[...times].sort().map(x=>`<button class="chip on num" data-tt="${x}">${x} ✕</button>`).join('');
+    document.querySelectorAll('#times [data-tt]').forEach(b=>b.onclick=()=>{times.delete(b.dataset.tt); drawT();}); };
+  drawT();
+  $('tAdd').onclick = ()=>{ if($('tNew').value){ times.add($('tNew').value); drawT(); } };
+  document.querySelectorAll('#quick [data-i]').forEach(b=>b.onclick=()=>{ const m=CAT.medicines[+b.dataset.i];
+    $('mAr').value=m.ar; $('mEn').value=m.en; $('mKind').value=m.kind; $('mDose').value=m.dose; times.clear(); m.times.forEach(x=>times.add(x)); drawT(); });
+  $('saveMed').onclick = async()=>{ if(!$('mAr').value.trim()||!$('mDose').value.trim()||!times.size) return toast(t('eMed'));
+    await api(`/patients/${current}/meds`,{method:'POST',body:JSON.stringify({kind:$('mKind').value,name_ar:$('mAr').value.trim(),name_en:$('mEn').value.trim(),dose:$('mDose').value.trim(),times:[...times],days:+$('mDays').value||0,with_food:$('mFood').value==='1',instructions:$('mIns').value.trim()})});
+    toast(t('tMed')); open(current,true); };
+  document.querySelectorAll('[data-stop]').forEach(b=>b.onclick=async()=>{ await api(`/patients/${current}/meds/${b.dataset.stop}/stop`,{method:'POST'}); open(current,true); });
+}
+
+function paneChat(d){
+  $('pane').innerHTML = `
+    <div class="msgs" id="msgs">${d.messages.length? d.messages.map(m=>{ const tr = m.translated && !ORIG[m.id]; return `<div class="msg ${m.sender==='doctor'?'me':'them'}"><div dir="auto">${esc(tr?m.translated:m.body)}</div><small class="num">${dt(m.created_at)}</small>${m.translated?`<button class="trbtn" data-orig="${m.id}">${tr?t('translatedLbl')+' · '+t('showOriginal'):t('showTranslation')}</button>`:''}</div>`; }).join('') : `<div class="empty">${t('startChat')}</div>`}</div>
+    <div class="row" style="margin-top:12px"><input id="msg" maxlength="1000" placeholder="${esc(t('typeMsg'))}" aria-label="${esc(t('typeMsg'))}" style="flex:1"><button class="btn" id="send">${t('send')}</button></div>`;
+  const box=$('msgs'); box.scrollTop=box.scrollHeight;
+  document.querySelectorAll('[data-orig]').forEach(b=>b.onclick=()=>{ ORIG[b.dataset.orig]=!ORIG[b.dataset.orig]; paneChat(d); });
+  const send = async()=>{ const b=$('msg').value.trim(); if(!b) return; await api(`/patients/${current}/messages`,{method:'POST',body:JSON.stringify({body:b})}); open(current,true); };
+  $('send').onclick=send; $('msg').onkeydown=(e)=>{ if(e.key==='Enter') send(); };
+}
+
+applyLang();
+token ? start().catch(()=>{}) : showLogin();
+</script>

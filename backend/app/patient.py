@@ -8,6 +8,7 @@ their appointment, their full health record from every facility, files, doctor n
 times, messages with their doctor, and who opened their record. Genetic results are never stored.
 """
 import base64
+import secrets
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -15,7 +16,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from . import catalog
+from . import catalog, link, sehhaty
+from .translate import localize
 from .security import hash_token, new_id, secrets_token
 from .tools import RIYADH, _ride_view, band, label_ar, time_ar
 
@@ -32,6 +34,11 @@ class Strict(BaseModel):
 class DemoIn(Strict):
     gender: str = Field(default="f", pattern=r"^[fm]$")
     lang: str = Field(default="ar", pattern=LANG_RE)
+    profile: str = Field(default="citizen_insured", pattern=r"^(citizen|citizen_insured|resident_insured|resident_uninsured)$")
+
+
+class ProfileIn(Strict):
+    profile: str = Field(pattern=r"^(citizen|citizen_insured|resident_insured|resident_uninsured)$")
 
 
 class LangIn(Strict):
@@ -78,7 +85,7 @@ def resident_by_token(db, token: str):
 
 # ---------- shared views ----------
 
-def slot_detail(slot) -> dict:
+def slot_detail(slot, row=None, screening: str | None = None) -> dict:
     """Everything the app needs to show one appointment: time, place on the map, doctor, clinic."""
     d = datetime.fromisoformat(slot["start_local"]).astimezone(RIYADH)
     out = {"id": slot["id"], "iso": slot["start_local"], "when_ar": label_ar(slot["start_local"]), "time_ar": time_ar(d),
@@ -93,6 +100,9 @@ def slot_detail(slot) -> dict:
     if slot["doctor_id"]:
         doc = catalog.doctor(slot["doctor_id"])
         out["doctor"] = {k: doc[k] for k in ("id", "name_ar", "name_en", "gender", "specialty_ar", "specialty_en", "clinic_ar", "clinic_en")}
+    fkind = catalog.facility(slot["facility_id"])["kind"] if slot["facility_id"] else "phc"
+    out["facility_kind"] = fkind
+    out["cost"] = catalog.quote(fkind, slot["kind"], screening or slot["screening"], row)
     return out
 
 
@@ -109,9 +119,12 @@ def plan_for_case(db, case_id: str, call_id: str | None = None) -> dict:
     ride = _ride_view(plan, slot) if plan else None
     if ride and ride["mode"] == "car":
         ride["pickup_minutes"] = plan["pickup_minutes"] or 30
-    case = db.one("SELECT screening, status FROM cases WHERE id = ?", case_id)
+    case = db.one("SELECT screening, status, resident_id FROM cases WHERE id = ?", case_id)
     scr = catalog.SCREENINGS.get(case["screening"], {})
-    return {"confirmed": confirmed, "slot": slot_detail(slot) if slot else None, "ride": ride,
+    person = db.one("SELECT * FROM residents WHERE id = ?", case["resident_id"])
+    ref = db.one("SELECT sehhaty_ref FROM bookings WHERE case_id = ? AND status = 'confirmed'", case_id) if confirmed else None
+    return {"confirmed": confirmed, "slot": slot_detail(slot, person, case["screening"]) if slot else None, "ride": ride,
+            "sehhaty_ref": ref["sehhaty_ref"] if ref else None,
             "prefs": [p for p in ((plan["prefs"] if plan else "") or "").split(",") if p],
             "screening": case["screening"], "screening_ar": scr.get("ar", ""), "screening_en": scr.get("en", ""),
             "case_status": case["status"]}
@@ -154,7 +167,8 @@ def full_record(db, vault, resident_id: str) -> dict:
         d = catalog.doctor(n["doctor_id"])
         notes.append({"id": n["id"], "body": vault.decrypt(n["body_enc"]), "created_at": n["created_at"],
                       "doctor": {"id": d["id"], "name_ar": d["name_ar"], "name_en": d["name_en"]}})
-    referrals = [{"kind": r["kind"], "created_at": r["created_at"], "doctor": catalog.doctor(r["doctor_id"])["name_ar"]}
+    referrals = [{"kind": r["kind"], "created_at": r["created_at"], "doctor": catalog.doctor(r["doctor_id"])["name_ar"],
+                  "doctor_en": catalog.doctor(r["doctor_id"])["name_en"]}
                  for r in db.all("SELECT * FROM referrals WHERE resident_id = ? ORDER BY created_at DESC", resident_id)]
     return {"records": records, "files": [f for f in files if not f["record_id"]], "notes": notes, "referrals": referrals}
 
@@ -202,14 +216,30 @@ def demo_patient(body: DemoIn, request: Request):
     cid = "C9" + secrets_token()[:6].upper().replace("-", "X").replace("_", "Y")
     token = secrets_token() + secrets_token()
     with db.tx() as c:
-        c.execute("""INSERT INTO residents (id,district,age_band,language,phone_enc,contact_permission,gender)
-                     VALUES (?,?,?,?,?,?,?)""",
-                  (rid, "Al-Naseem", "45-54", body.lang, vault.encrypt("+966500000199"), 1, body.gender))
+        prof = catalog.DEMO_PROFILES[body.profile]
+        c.execute("""INSERT INTO residents (id,district,age_band,language,phone_enc,contact_permission,gender,
+                                            id_type,id_last4,insurer,insurance_class,insurance_until)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                  (rid, "Al-Naseem", "45-54", body.lang, vault.encrypt("+966500000199"), 1, body.gender,
+                   prof["id_type"], f"{secrets.randbelow(10000):04d}", prof["insurer"], prof["insurance_class"],
+                   "2027-06-30" if prof["insurer"] else None))
         c.execute("INSERT INTO cases (id,resident_id,screening,due,due_date,cohort_entry) VALUES (?,?,?,?,?,?)",
                   (cid, rid, "diabetes", 1, "2026-10-20", "2026-10-20"))
         c.execute("INSERT INTO patient_tokens VALUES (?,?,?)", (hash_token(token), rid, _now().isoformat()))
         seed_history(c, vault, rid)
     return {"token": token, "patient": rid}
+
+
+@router.patch("/sehhaty-profile")
+def switch_profile(body: ProfileIn, request: Request, p=Depends(current_patient)):
+    """Demo only: try the app as a citizen or resident, with or without insurance."""
+    if not request.app.state.settings.demo_mode:
+        raise HTTPException(404)
+    prof = catalog.DEMO_PROFILES[body.profile]
+    with request.app.state.db.tx() as c:
+        c.execute("UPDATE residents SET id_type = ?, insurer = ?, insurance_class = ?, insurance_until = ? WHERE id = ?",
+                  (prof["id_type"], prof["insurer"], prof["insurance_class"], "2027-06-30" if prof["insurer"] else None, p["id"]))
+    return {"ok": True}
 
 
 @router.get("/me")
@@ -223,7 +253,7 @@ def me(request: Request, p=Depends(current_patient)):
                                      + catalog.routine_for(p["age_band"], p["gender"] or "f")))
     return {"patient": p["id"], "district": p["district"], "district_ar": catalog.DISTRICTS[p["district"]][0],
             "district_en": catalog.DISTRICTS[p["district"]][1], "language": p["language"], "gender": p["gender"],
-            "age_band": p["age_band"], "family_history": codes,
+            "age_band": p["age_band"], "family_history": codes, "calls_ok": bool(p["contact_permission"]), "sehhaty": sehhaty.client().profile(p, request.app.state.vault.decrypt(p["phone_enc"])),
             "recommended": [{"key": k, "ar": catalog.SCREENINGS[k]["ar"], "en": catalog.SCREENINGS[k]["en"],
                              "every_months": catalog.SCREENINGS[k]["every_months"]} for k in recommended],
             "plan": plan_for_case(db, case["id"]) if case else None}
@@ -236,7 +266,22 @@ def public_catalog():
             "symptoms": [{"key": s[0], "ar": s[1], "en": s[2], "screening": s[3], "urgency": s[4]}
                          for s in catalog.FOLLOW_UP_SYMPTOMS],
             "hereditary": [{"key": k, "ar": v[0], "en": v[1]} for k, v in catalog.HEREDITARY.items()],
-            "districts": [{"key": k, "ar": v[0], "en": v[1]} for k, v in catalog.DISTRICTS.items()]}
+            "districts": [{"key": k, "ar": v[0], "en": v[1]} for k, v in catalog.DISTRICTS.items()],
+            "facilities": [{**catalog.facility(f[0]), "paid": f[0] in catalog.PAID_FACILITIES}
+                           for f in catalog.FACILITIES if f[1] != "lab"]}
+
+
+class CallsIn(Strict):
+    on: bool
+
+
+@router.patch("/calls")
+def set_calls(body: CallsIn, request: Request, p=Depends(current_patient)):
+    """The person decides whether Rufaida may call them. Off = no outbound calls at all;
+    the app still works and the chat assistant still answers when they open it."""
+    with request.app.state.db.tx() as c:
+        c.execute("UPDATE residents SET contact_permission = ? WHERE id = ?", (int(body.on), p["id"]))
+    return {"calls_ok": body.on}
 
 
 @router.patch("/language")
@@ -266,19 +311,28 @@ def plan(request: Request, p=Depends(current_patient)):
 
 @router.get("/slots")
 def slots(request: Request, days: int = 14, female: bool = False, district: str | None = None,
-          p=Depends(current_patient)):
+          private: bool = True, p=Depends(current_patient)):
+    """`district=all` lists the whole city (every center and hospital), for the facility filter."""
     """Open times the person can book now: their screening's own times first, then any center time."""
     db = request.app.state.db
     case = open_case(db, p["id"])
+    every = district == "all"
     dist = district if district in catalog.DISTRICTS else p["district"]
     st = request.app.state.settings
     now = datetime.fromisoformat(st.demo_now) if (st.demo_mode and st.demo_now) else _now().astimezone(RIYADH)
     until = now + timedelta(days=max(1, min(days, 21)))
-    rows = db.all("""SELECT * FROM slots WHERE district = ? AND screening IN (?, 'general') AND remaining > 0
+    rows = db.all("""SELECT * FROM slots WHERE screening IN (?, 'general') AND remaining > 0
                      AND start_local > ? AND start_local < ? ORDER BY start_local""",
-                  dist, case["screening"], now.isoformat(), until.isoformat())
-    out = [slot_detail(r) for r in rows if not female or r["female_staff"]]
-    return {"district": dist, "slots": out[:80]}
+                  case["screening"], now.isoformat(), until.isoformat())
+    paid_ids = catalog.PAID_FACILITIES
+    rows = [r for r in rows if (not female or r["female_staff"])
+            and (every or r["district"] == dist or (private and r["facility_id"] in paid_ids))
+            and (private or r["facility_id"] not in paid_ids)]
+    # Free Ministry times come first; paid private times are a shorter list so they never crowd them out.
+    free = [r for r in rows if r["facility_id"] not in paid_ids][:400 if every else 160]
+    paid = [r for r in rows if r["facility_id"] in paid_ids][:120 if every else 60]
+    out = [slot_detail(r, p, case["screening"]) for r in sorted(free + paid, key=lambda r: r["start_local"])]
+    return {"district": dist, "slots": out}
 
 
 @router.post("/book")
@@ -300,11 +354,13 @@ def book(body: BookIn, request: Request, p=Depends(current_patient)):
             c.execute("UPDATE holds SET status = 'released' WHERE id = ?", (h["id"],))
             c.execute("UPDATE slots SET remaining = remaining + 1 WHERE id = ?", (h["slot_id"],))
         bid = new_id("bk")
-        c.execute("INSERT INTO bookings VALUES (?,?,?,?,?,?)",
-                  (bid, case["id"], slot["id"], "app_" + bid, "confirmed", _now().isoformat()))
+        c.execute("INSERT INTO bookings (id,case_id,slot_id,offer_id,status,confirmed_at,sehhaty_ref) VALUES (?,?,?,?,?,?,?)",
+                  (bid, case["id"], slot["id"], "app_" + bid, "confirmed", _now().isoformat(), sehhaty.client().book(p, slot)))
         c.execute("UPDATE cases SET status = 'booked' WHERE id = ?", (case["id"],))
         c.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?)",
                   (new_id("ev"), case["id"], bid, "booking_confirmed" if old is None else "booking_moved", "app", None, _now().isoformat()))
+        if old is None:
+            link.record(c, p["district"], "booked")
     return plan_for_case(db, case["id"])
 
 
@@ -319,6 +375,7 @@ def cancel(request: Request, p=Depends(current_patient)):
         c.execute("UPDATE bookings SET status = 'cancelled' WHERE id = ?", (old["id"],))
         c.execute("UPDATE slots SET remaining = remaining + 1 WHERE id = ?", (old["slot_id"],))
         c.execute("UPDATE cases SET status = 'open' WHERE id = ?", (case["id"],))
+        link.record(c, p["district"], "cancelled")
     return plan_for_case(db, case["id"])
 
 
@@ -366,8 +423,8 @@ def messages(request: Request, p=Depends(current_patient)):
     doctors = sorted(my_doctors(db, p["id"]))
     out = []
     for m in db.all("SELECT * FROM messages WHERE resident_id = ? ORDER BY created_at", p["id"]):
-        out.append({"id": m["id"], "sender": m["sender"], "doctor_id": m["doctor_id"], "body": vault.decrypt(m["body_enc"]),
-                    "created_at": m["created_at"]})
+        out.append(localize({"id": m["id"], "sender": m["sender"], "doctor_id": m["doctor_id"],
+                             "body": vault.decrypt(m["body_enc"]), "created_at": m["created_at"]}, p["language"]))
     return {"doctors": [{k: catalog.doctor(d)[k] for k in ("id", "name_ar", "name_en", "specialty_ar", "specialty_en")}
                         for d in doctors], "messages": out}
 

@@ -1,6 +1,8 @@
 // "يا رفيدة": the in-app assistant, available above the tabs on every main screen.
 import { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { router } from 'expo-router';
+import { Avatar } from './Avatar';
 import { appAssistant } from '../agents/appAssistant';
 import { useT } from '../i18n';
 import { useApp } from '../store';
@@ -12,7 +14,6 @@ import { Circle, Row, Txt } from './kit';
 export function AssistantBar() {
   const { t, rtl } = useT();
   const voice = useApp((s) => s.voice);
-  const persona = appAssistant.personas[voice];
   const session = useAgentSession();
   const mine = session.active?.key === appAssistant.key;
   const live = mine && session.status === 'connected';
@@ -47,7 +48,9 @@ export function AssistantBar() {
         </Row>
       ) : (
         <Row gap={10}>
-          <Image source={persona.avatar} style={s.avatar} />
+          <Pressable onPress={() => router.push('/assistant')} accessibilityRole="button" accessibilityLabel={t('assistantMenu')}>
+            <View style={s.avatar}><Avatar size={46} talking={live && session.speaking} /></View>
+          </Pressable>
           <Pressable style={{ flex: 1 }} onPress={() => setTyping(true)} accessibilityRole="button" accessibilityHint={t('typeHere')}>
             <Txt size={16} weight="800" color={C.white}>{t('assistantCall', { name: t(voice === 'f' ? 'female' : 'male') })}</Txt>
             <Txt size={13} color="rgba(255,255,255,.82)" lines={2}>{sub}</Txt>
@@ -55,7 +58,7 @@ export function AssistantBar() {
           <Pressable onPress={toggle} accessibilityRole="button" accessibilityLabel={t(voice === 'f' ? 'female' : 'male')}>
             <Circle size={42} bg="transparent" style={s.mic}>
               <Icon d={ICON.mic} color={C.white} size={18} />
-              <View style={[s.dot, { backgroundColor: live ? C.lime : mine ? '#E2D36B' : 'rgba(255,255,255,.35)' }]} />
+              <View style={[s.dot, { backgroundColor: live ? C.lime : mine ? '#F5C451' : 'rgba(255,255,255,.35)' }]} />
             </Circle>
           </Pressable>
         </Row>
@@ -66,7 +69,7 @@ export function AssistantBar() {
 
 const s = StyleSheet.create({
   bar: { backgroundColor: C.darkBar, borderRadius: 30, paddingVertical: 10, paddingHorizontal: 12, marginHorizontal: 14, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
-  avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: '#2F6468' },
+  avatar: { width: 46, height: 46, borderRadius: 23, overflow: 'hidden', backgroundColor: '#2D516A' },
   mic: { borderWidth: 1.5, borderColor: 'rgba(255,255,255,.35)' },
   dot: { position: 'absolute', top: 2, right: 2, width: 10, height: 10, borderRadius: 3 },
   input: { flex: 1, height: 44, borderRadius: 22, paddingHorizontal: 14, color: C.white, backgroundColor: 'rgba(255,255,255,.12)', fontSize: 16 },

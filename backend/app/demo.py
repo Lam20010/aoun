@@ -19,6 +19,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from . import link
 from .db import _PATTERN, DISTRICT_AR
 from .security import hash_token, new_id, secrets_token
 from .tools import RIYADH, _ride_view, km, label_ar, place_hold, time_ar
@@ -163,6 +164,7 @@ def demo_start(body: StartIn, request: Request):
         c.execute("""INSERT INTO call_sessions (id, conv_hash, case_id, agent, language, created_at, expires_at)
                      VALUES (?,?,?,?,?,?,?)""",
                   (call_id, None, cid, agent, body.lang, now.isoformat(), (now + timedelta(minutes=KEY_MINUTES)).isoformat()))
+        link.record_case(c, cid, "contacted")
         demo_now = datetime.fromisoformat(st.demo_now) if st.demo_now else now.astimezone(RIYADH)
         if not c.execute("SELECT 1 FROM bookings WHERE case_id = ? AND status = 'confirmed'", (cid,)).fetchone():
             place_hold(c, call_id, cid, district, "diabetes", demo_now)

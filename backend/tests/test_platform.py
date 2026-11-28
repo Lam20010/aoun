@@ -185,3 +185,92 @@ def test_booking_text_in_each_language(c):
     assert "confirmed" in booking_text(slot, "en") and "Dr." in booking_text(slot, "en")
     for lang in ("ur", "hi", "bn", "fil", "id"):
         assert "Aoun" in booking_text(slot, lang) or "عون" in booking_text(slot, lang) or "औन" in booking_text(slot, lang) or "আউন" in booking_text(slot, lang)
+
+
+def test_doctor_notifications_show_bookings_and_messages_only_for_their_patients(c):
+    h = patient(c)
+    plan = book_first(c, h)
+    did = plan["slot"]["doctor"]["id"]
+    c.post("/patient/messages", headers=h, json={"body": "متى أصوم قبل الفحص؟"})
+    items = c.get("/doctor/api/notifications", headers=doctor(c, did)).json()["items"]
+    kinds = {i["kind"] for i in items}
+    assert {"booking", "message"} <= kinds
+    assert all(i["patient"] for i in items)
+    other = "D02" if did != "D02" else "D01"
+    assert c.get("/doctor/api/notifications", headers=doctor(c, other)).json()["items"] == []
+
+
+def test_doctor_signs_in_with_id_and_password_and_wrong_tries_lock(c):
+    ok = c.post("/doctor/api/login", json={"doctor_id": "d03", "password": "aoun-demo-2026"})
+    assert ok.status_code == 200 and ok.json()["token"]
+    assert c.post("/doctor/api/login", json={"doctor_id": "D99", "password": "aoun-demo-2026"}).json()["detail"] == "wrong_id_or_password"
+    for _ in range(5):
+        assert c.post("/doctor/api/login", json={"doctor_id": "D04", "password": "nope-nope"}).status_code == 401
+    assert c.post("/doctor/api/login", json={"doctor_id": "D04", "password": "aoun-demo-2026"}).status_code == 429
+
+
+def test_doctor_own_password_hash(c, monkeypatch):
+    import json
+    from app.doctor import hash_password
+    monkeypatch.setenv("AOUN_DOCTOR_PASSWORDS", json.dumps({"D05": hash_password("Reem-Strong-Pass-1")}))
+    assert c.post("/doctor/api/login", json={"doctor_id": "D05", "password": "aoun-demo-2026"}).status_code == 401
+    assert c.post("/doctor/api/login", json={"doctor_id": "D05", "password": "Reem-Strong-Pass-1"}).status_code == 200
+
+
+def test_messages_are_shown_in_the_reader_language(c, monkeypatch):
+    from app import translate
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
+    monkeypatch.setattr(translate, "translate", lambda text, target: f"[{target}] {text}")
+    h = patient(c, "en")
+    plan = book_first(c, h)
+    me = c.get("/patient/me", headers=h).json()["patient"]
+    dh = doctor(c, plan["slot"]["doctor"]["id"])
+    c.post("/patient/messages", headers=h, json={"body": "Should I fast before the test?"})
+    c.post(f"/doctor/api/patients/{me}/messages", headers=dh, json={"body": "نعم، صيام ٨ ساعات"})
+    dm = c.get(f"/doctor/api/patients/{me}?lang=ar", headers=dh).json()["messages"]
+    assert dm[0]["lang"] == "en" and dm[0]["translated"].startswith("[ar]") and "translated" not in dm[1]
+    pm = c.get("/patient/messages", headers=h).json()["messages"]
+    assert "translated" not in pm[0] and pm[1]["translated"].startswith("[en]")
+    note = c.get("/doctor/api/notifications?lang=ar", headers=dh).json()["items"]
+    assert any(i["kind"] == "message" and i["preview"].startswith("[ar]") for i in note)
+
+
+def test_no_translation_without_a_key(c, monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    h = patient(c, "en")
+    book_first(c, h)
+    c.post("/patient/messages", headers=h, json={"body": "Hello"})
+    assert "translated" not in c.get("/patient/messages", headers=h).json()["messages"][0]
+
+
+def test_sehhaty_profile_prices_and_reference(c):
+    h = {"Authorization": "Bearer " + c.post("/patient/demo", json={"gender": "f", "lang": "ar", "profile": "resident_insured"}).json()["token"]}
+    me = c.get("/patient/me", headers=h).json()
+    assert me["sehhaty"]["id_masked"].startswith("••••••") and len(me["sehhaty"]["id_masked"]) == 10
+    assert me["sehhaty"]["insurance"]["copay_pct"] == 20
+    slots = c.get("/patient/slots", headers=h).json()["slots"]
+    free = [s for s in slots if s["cost"]["free"]]
+    paid = [s for s in slots if not s["cost"]["free"]]
+    assert free and paid and all(s["facility_kind"] in ("private_clinic", "private_hospital") for s in paid)
+    p = paid[0]["cost"]
+    assert p["you_pay"] == min(round(p["price"] * 0.2), 75) and p["insurance_pays"] == p["price"] - p["you_pay"]
+    plan = c.post("/patient/book", json={"slot_id": free[0]["id"]}, headers=h).json()
+    assert plan["sehhaty_ref"].startswith("SH-") and plan["slot"]["cost"]["free"]
+    c.patch("/patient/sehhaty-profile", json={"profile": "resident_uninsured"}, headers=h)
+    paid2 = [s for s in c.get("/patient/slots", headers=h).json()["slots"] if not s["cost"]["free"]][0]["cost"]
+    assert paid2["basis"] == "cash" and paid2["you_pay"] == paid2["price"]
+    dump = "\n".join(c.app.state.db.conn.iterdump())
+    assert "id_last4" in dump  # only the last four digits are kept; there is no column for a full ID
+
+
+def test_agent_hears_cost_but_no_identity(c):
+    h = patient(c)
+    token = h["Authorization"].split()[1]
+    k = c.post("/demo/start", json={"voice": "f", "lang": "ar", "p": token}).json()["k"]
+    c.post("/demo/bind", json={"k": k, "conversation_id": "conv_cost_1"})
+    appt = c.post("/tools/get_appointment", json={"conversation_id": "conv_cost_1"}, headers=TOOL).json()
+    assert appt["cost"] == "free" and "Sehhaty" in appt["booked_through"]
+    sol = c.post("/tools/get_solutions", json={"conversation_id": "conv_cost_1", "reason": "sooner"}, headers=TOOL).json()
+    assert any(o["cost"] == "paid" and o["you_pay_sar"] > 0 for o in sol["options"])
+    text = str(appt) + str(sol)
+    assert "id_last4" not in text and "••••" not in text and "policy" not in text
