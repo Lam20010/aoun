@@ -49,7 +49,7 @@ LIVE_PANEL = """
                     </div>
                     <sc-if value="{{livePanel.hasBars}}" hint-placeholder-val="{{ false }}">
                       <span style="font-size: 12px; color: #4A5E6D">الأسباب التي ذكرها السكان لرفيدة:</span>
-                      <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{livePanel.bars}}" as="lb" hint-placeholder-count="3"><span style="font-size: 12px; background: #FBF5D6; color: #6B5A08; border-radius: 10px; padding: 4px 10px">{{lb.k}} · {{lb.n}}</span></sc-for></div>
+                      <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{livePanel.bars}}" as="lb" hint-placeholder-count="3"><span style="font-size: 12px; background: #FFF6E0; color: #7A4E00; border-radius: 10px; padding: 4px 10px">{{lb.k}} · {{lb.n}}</span></sc-for></div>
                     </sc-if>
                     <span style="font-size: 11px; color: #7D8B96">{{livePanel.note}}</span>
                   </div>
@@ -129,12 +129,12 @@ CALLS = r"""
               </sc-for>
               <sc-if value="{{ix.hasAsks}}" hint-placeholder-val="{{ true }}">
                 <span style="font-size: 12px; color: #4A5E6D">وش طلبوا:</span>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ix.asks}}" as="ak" hint-placeholder-count="4"><span style="font-size: 12px; background: #EEF2FA; color: #3D5F94; border-radius: 10px; padding: 4px 10px">{{ak}}</span></sc-for></div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ix.asks}}" as="ak" hint-placeholder-count="4"><span style="font-size: 12px; background: #EEF5FA; color: #3D6D94; border-radius: 10px; padding: 4px 10px">{{ak}}</span></sc-for></div>
               </sc-if>
               <sc-if value="{{ix.hasSug}}" hint-placeholder-val="{{ true }}">
-                <div style="background: #FFF8E6; border: 1px solid #F3E2B0; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px">
-                  <b style="font-size: 13px; color: #6B5A08">المقترح: {{ix.sugTitle}}</b>
-                  <span style="font-size: 12px; color: #6B5A08; line-height: 1.6">{{ix.sugWhy}}</span>
+                <div style="background: #FFF8E6; border: 1px solid #F8DEAB; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px">
+                  <b style="font-size: 13px; color: #7A4E00">المقترح: {{ix.sugTitle}}</b>
+                  <span style="font-size: 12px; color: #7A4E00; line-height: 1.6">{{ix.sugWhy}}</span>
                   <sc-if value="{{ix.sugPending}}" hint-placeholder-val="{{ true }}"><button onClick="{{ix.approve}}" style="align-self: flex-start; min-height: 36px; padding: 0 14px; border-radius: 10px; border: none; background: #1574AD; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">{{ix.sugBtn}}</button></sc-if>
                   <sc-if value="{{ix.sugDone}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; color: #1574AD">معتمد · يظهر للسكان الآن</span></sc-if>
                 </div>
@@ -157,7 +157,7 @@ def build():
                       "['اليرموك', 4, 0], ['الشفا', 4, 1], ['منفوحة', 4, 2], ['العزيزية', 4, 3], ['قرطبة', 4, 4]]")
     assert "['قرطبة', 4, 4]" in src
     # Data badge reflects whether live data is flowing, plus a sign-out button.
-    badge = '<span style="font-size: 12px; font-weight: 600; background: #FBF5D6; color: #6B5A08; padding: 8px 12px; border-radius: 12px">بيانات تجريبية للعرض</span>'
+    badge = '<span style="font-size: 12px; font-weight: 600; background: #FFF6E0; color: #7A4E00; padding: 8px 12px; border-radius: 12px">بيانات تجريبية للعرض</span>'
     assert badge in src
     src = src.replace(badge, '<span style="font-size: 12px; font-weight: 600; background: {{dataBadgeBg}}; color: {{dataBadgeInk}}; padding: 8px 12px; border-radius: 12px">{{dataBadge}}</span>'
                       '<button onClick="{{logout}}" style="font-size: 12px; font-weight: 600; background: #FFFFFF; color: #1574AD; border: 1px solid #DBE6EC; padding: 7px 12px; border-radius: 12px; cursor: pointer">خروج</button>')

@@ -58,7 +58,7 @@ export function AssistantBar() {
           <Pressable onPress={toggle} accessibilityRole="button" accessibilityLabel={t(voice === 'f' ? 'female' : 'male')}>
             <Circle size={42} bg="transparent" style={s.mic}>
               <Icon d={ICON.mic} color={C.white} size={18} />
-              <View style={[s.dot, { backgroundColor: live ? C.lime : mine ? '#E2D36B' : 'rgba(255,255,255,.35)' }]} />
+              <View style={[s.dot, { backgroundColor: live ? C.lime : mine ? '#F5C451' : 'rgba(255,255,255,.35)' }]} />
             </Circle>
           </Pressable>
         </Row>

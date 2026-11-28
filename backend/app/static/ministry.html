@@ -186,9 +186,9 @@ button{font-family:inherit}
                         <path d="{{cl.d}}" fill="none" stroke="#FFFFFF" stroke-width="5" vector-effect="non-scaling-stroke" stroke-linejoin="round" style="pointer-events: none"></path>
                       </sc-for>
                       <path d="{{roads.ring}}" fill="none" stroke="#F2C14E" stroke-width="9" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
-                      <path d="{{roads.ring}}" fill="none" stroke="#FDE293" stroke-width="6" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
+                      <path d="{{roads.ring}}" fill="none" stroke="#FFDA91" stroke-width="6" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
                       <path d="{{roads.av1}}" fill="none" stroke="#F2C14E" stroke-width="8" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
-                      <path d="{{roads.av1}}" fill="none" stroke="#FDE293" stroke-width="5" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
+                      <path d="{{roads.av1}}" fill="none" stroke="#FFDA91" stroke-width="5" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
                       <path d="{{roads.av2}}" fill="none" stroke="#DADCE0" stroke-width="7" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
                       <path d="{{roads.av2}}" fill="none" stroke="#FFFFFF" stroke-width="5" vector-effect="non-scaling-stroke" style="pointer-events: none"></path>
                       <sc-if value="{{water.show}}" hint-placeholder-val="{{ false }}"><path d="{{water.d}}" fill="#AADAFF" style="pointer-events: none"></path></sc-if>
@@ -285,7 +285,7 @@ button{font-family:inherit}
             <sc-if value="{{isHood}}" hint-placeholder-val="{{ false }}">
               <div class="aoun-in" style="background: rgba(255,255,255,.9); border: 1px solid #FFFFFF; border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
                 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
-                  <div style="background: #FBF5D6; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #6B5A08">العائق الأبرز</span><b style="font-size: 14px; color: #4A2F04">{{hood.barrier}}</b></div>
+                  <div style="background: #FFF6E0; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #7A4E00">العائق الأبرز</span><b style="font-size: 14px; color: #4A2F04">{{hood.barrier}}</b></div>
                   <div style="background: #FDE7E2; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #8A2A1C">النقص الأكثر شيوعًا</span><b style="font-size: 14px; color: #6E1F14">{{hood.gap}}</b><span style="font-size: 11px; color: #8A2A1C">لدى {{hood.gapPct}}% ممن فحصوا</span></div>
                 </div>
                 
@@ -299,7 +299,7 @@ button{font-family:inherit}
                     </div>
                     <sc-if value="{{livePanel.hasBars}}" hint-placeholder-val="{{ false }}">
                       <span style="font-size: 12px; color: #4A5E6D">الأسباب التي ذكرها السكان لرفيدة:</span>
-                      <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{livePanel.bars}}" as="lb" hint-placeholder-count="3"><span style="font-size: 12px; background: #FBF5D6; color: #6B5A08; border-radius: 10px; padding: 4px 10px">{{lb.k}} · {{lb.n}}</span></sc-for></div>
+                      <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{livePanel.bars}}" as="lb" hint-placeholder-count="3"><span style="font-size: 12px; background: #FFF6E0; color: #7A4E00; border-radius: 10px; padding: 4px 10px">{{lb.k}} · {{lb.n}}</span></sc-for></div>
                     </sc-if>
                     <span style="font-size: 11px; color: #7D8B96">{{livePanel.note}}</span>
                   </div>
@@ -521,7 +521,7 @@ button{font-family:inherit}
             <span style="font-size: 12px; color: #4A5E6D">مكالمات · ردّوا · حجزوا</span>
             <svg viewBox="0 0 600 120" preserveAspectRatio="none" style="width: 100%; height: 130px">
               <polyline points="{{ag.spark.calls}}" fill="none" stroke="#C6D4DB" stroke-width="3"></polyline>
-              <polyline points="{{ag.spark.ans}}" fill="none" stroke="#6C8CBF" stroke-width="3"></polyline>
+              <polyline points="{{ag.spark.ans}}" fill="none" stroke="#6C9ABF" stroke-width="3"></polyline>
               <polyline points="{{ag.spark.booked}}" fill="none" stroke="#1574AD" stroke-width="4"></polyline>
             </svg>
             <span style="font-size: 12px; color: #4A5E6D">{{ag.spark.note}}</span>
@@ -534,7 +534,7 @@ button{font-family:inherit}
               <div style="display: flex; align-items: center; gap: 10px">
                 <span style="width: 40px; height: 40px; border-radius: 12px; background: {{a.bg}}; color: #0E2E45; display: flex; align-items: center; justify-content: center; font-weight: 700">{{a.initial}}</span>
                 <div style="display: flex; flex-direction: column; flex: 1"><b style="font-size: 15px">{{a.name}}</b><span style="font-size: 12px; color: #4A5E6D">{{a.role}}</span></div>
-                <span style="font-size: 11px; font-weight: 700; background: #F2F5DC; color: #5E6A12; padding: 3px 9px; border-radius: 10px">يعمل</span>
+                <span style="font-size: 11px; font-weight: 700; background: #FFF7E6; color: #7A4E00; padding: 3px 9px; border-radius: 10px">يعمل</span>
               </div>
               <sc-for list="{{a.metrics}}" as="m" hint-placeholder-count="4">
                 <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px; border-top: 1px dashed #D5E6EE; padding-top: 6px"><span style="color: #4A5E6D">{{m.k}}</span><b>{{m.v}}</b></div>
@@ -679,12 +679,12 @@ button{font-family:inherit}
               </sc-for>
               <sc-if value="{{ix.hasAsks}}" hint-placeholder-val="{{ true }}">
                 <span style="font-size: 12px; color: #4A5E6D">وش طلبوا:</span>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ix.asks}}" as="ak" hint-placeholder-count="4"><span style="font-size: 12px; background: #EEF2FA; color: #3D5F94; border-radius: 10px; padding: 4px 10px">{{ak}}</span></sc-for></div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ix.asks}}" as="ak" hint-placeholder-count="4"><span style="font-size: 12px; background: #EEF5FA; color: #3D6D94; border-radius: 10px; padding: 4px 10px">{{ak}}</span></sc-for></div>
               </sc-if>
               <sc-if value="{{ix.hasSug}}" hint-placeholder-val="{{ true }}">
-                <div style="background: #FFF8E6; border: 1px solid #F3E2B0; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px">
-                  <b style="font-size: 13px; color: #6B5A08">المقترح: {{ix.sugTitle}}</b>
-                  <span style="font-size: 12px; color: #6B5A08; line-height: 1.6">{{ix.sugWhy}}</span>
+                <div style="background: #FFF8E6; border: 1px solid #F8DEAB; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px">
+                  <b style="font-size: 13px; color: #7A4E00">المقترح: {{ix.sugTitle}}</b>
+                  <span style="font-size: 12px; color: #7A4E00; line-height: 1.6">{{ix.sugWhy}}</span>
                   <sc-if value="{{ix.sugPending}}" hint-placeholder-val="{{ true }}"><button onClick="{{ix.approve}}" style="align-self: flex-start; min-height: 36px; padding: 0 14px; border-radius: 10px; border: none; background: #1574AD; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">{{ix.sugBtn}}</button></sc-if>
                   <sc-if value="{{ix.sugDone}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; color: #1574AD">معتمد · يظهر للسكان الآن</span></sc-if>
                 </div>
@@ -912,7 +912,7 @@ class Component extends DCLogic {
     const { RN, cities, hoods } = this.data();
     const fmt = (n) => Math.round(n).toLocaleString('en-US');
     const short = (n) => n >= 1000000 ? (n / 1000000).toFixed(1) + ' مليون' : n >= 10000 ? Math.round(n / 1000) + ' ألف' : fmt(n);
-    const COL = (p) => p < 45 ? ['#F2C4B8', '#5E1A0E'] : p < 55 ? ['#F1E7A6', '#4F3303'] : p < 65 ? ['#CCE4EE', '#08331F'] : p < 75 ? ['#59C2F9', '#06281A'] : ['#1574AD', '#FFFFFF'];
+    const COL = (p) => p < 45 ? ['#F2C4B8', '#5E1A0E'] : p < 55 ? ['#FBE6B4', '#4F3303'] : p < 65 ? ['#CCE4EE', '#08331F'] : p < 75 ? ['#59C2F9', '#06281A'] : ['#1574AD', '#FFFFFF'];
     const agg = (list) => {
       let e = 0, sc = 0, ad = 0, ea = 0, b = 0, eng = 0; const bars = {}, gaps = {};
       list.forEach((h) => { e += h.elig; sc += h.screened; ad += h.added; ea += h.early; b += h.elig * h.before; eng += h.elig * h.engaged;
@@ -963,7 +963,7 @@ class Component extends DCLogic {
         pick: goCity(c.name, c.region), enter: () => this.setState({ hover: { kind: 'city', id: c.name } }) }; }) : [];
 
     // خريطة المدينة بطابع خرائط الشوارع
-    const BARCOL = { 'بُعد المركز': '#E8A33D', 'تعارض المواعيد مع الدوام': '#6C8CBF', 'المواصلات': '#8E7CC3', 'رعاية الأطفال': '#E07B91', 'الخوف من الفحص': '#5C98B6', 'قلة الوعي': '#C9A227', 'تفضيل طبيبة': '#D46A4C', 'صعوبة الحجز': '#7FA0B8', 'حاجز اللغة': '#3F6FA6' };
+    const BARCOL = { 'بُعد المركز': '#E8A33D', 'تعارض المواعيد مع الدوام': '#6C9ABF', 'المواصلات': '#8E7CC3', 'رعاية الأطفال': '#E07B91', 'الخوف من الفحص': '#5C98B6', 'قلة الوعي': '#D5971B', 'تفضيل طبيبة': '#D46A4C', 'صعوبة الحجز': '#7FA0B8', 'حاجز اللغة': '#3F6FA6' };
     const hexPos = {};
     let cells = [], cityT = 'translate(0px, 0px) scale(1)', parks = [], roads = { ring: '', av1: '', av2: '' }, water = { show: false, d: '' }, selCell = '', cityLabels = [], healthPins = [], pois = [], scaleText = '1 كم';
     if (cityObj) {
@@ -1001,7 +1001,7 @@ class Component extends DCLogic {
         const xs = poly.map((p) => p[0]), ys = poly.map((p) => p[1]); const w = Math.max(...xs) - Math.min(...xs), hh = Math.max(...ys) - Math.min(...ys);
         const inside = (pt) => { let c = false; for (let a = 0, b = poly.length - 1; a < poly.length; b = a++) { const xi = poly[a][0], yi = poly[a][1], xj = poly[b][0], yj = poly[b][1]; if (((yi > pt[1]) !== (yj > pt[1])) && (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi)) c = !c; } return c; };
         const needMobile = h.barrier === 'بُعد المركز' || h.barrier === 'المواصلات' || h.barrier === 'حاجز اللغة' || !!s.approved[h.city + '|' + h.name + '|b'];
-        const items = [['مركز صحي ' + h.name, '#1574AD', 'M12 5v14M5 12h14', 0.2, 0.22], ['جامع الحي', '#0A5278', 'M12 3l7 6v12H5V9z', -0.24, -0.16], ['مدرسة', '#3B6FB6', 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5', 0.24, -0.24], ['صيدلية · قياس ضغط مجاني', '#C2412D', 'M12 5v14M5 12h14', -0.22, 0.26], ['حديقة الحي', '#3E8E3E', 'M12 22V12M12 12c-4 0-7-3-7-7 4 0 7 3 7 7z', 0.02, -0.34]];
+        const items = [['مركز صحي ' + h.name, '#1574AD', 'M12 5v14M5 12h14', 0.2, 0.22], ['جامع الحي', '#0A5278', 'M12 3l7 6v12H5V9z', -0.24, -0.16], ['مدرسة', '#3B7FB6', 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5', 0.24, -0.24], ['صيدلية · قياس ضغط مجاني', '#C2412D', 'M12 5v14M5 12h14', -0.22, 0.26], ['حديقة الحي', '#3E8E3E', 'M12 22V12M12 12c-4 0-7-3-7-7 4 0 7 3 7 7z', 0.02, -0.34]];
         if (needMobile) items.push(['موقع مقترح لعيادة متنقلة', '#B26A12', 'M3 7h11v9H3zM14 10h4l3 3v3h-7', -0.04, 0.08]);
         pois = items.map(([label, color, d, ox, oy]) => { let pt = [c0[0] + ox * w, c0[1] + oy * hh]; if (!inside(pt)) pt = [c0[0] + ox * w * 0.45, c0[1] + oy * hh * 0.45]; const p = Pp(pt[0], pt[1]); return { label, color, d, left: pc(p[0]), top: pc(p[1]) }; });
       }
@@ -1012,7 +1012,7 @@ class Component extends DCLogic {
     const zoomOut = () => this.setState({ zoom: Math.max(0.8, (s.zoom || 1) - 0.35) });
     const barrierLegend = cityObj && s.layer === 'barrier';
     const legend = barrierLegend ? Object.entries(BARCOL).filter(([n]) => cityObj.hoods.some((h) => h.barrier === n)).map(([t, c]) => ({ c, t }))
-      : [['#F2C4B8', '<45%'], ['#F1E7A6', '45–54'], ['#CCE4EE', '55–64'], ['#59C2F9', '65–74'], ['#1574AD', '75%+']].map(([c, t]) => ({ c, t }));
+      : [['#F2C4B8', '<45%'], ['#FBE6B4', '45–54'], ['#CCE4EE', '55–64'], ['#59C2F9', '65–74'], ['#1574AD', '75%+']].map(([c, t]) => ({ c, t }));
 
     // side list
     let scopeList = [], listTitle = '';
@@ -1050,7 +1050,7 @@ class Component extends DCLogic {
       const h = hoodObj; const k1 = h.city + '|' + h.name + '|b', k2 = h.city + '|' + h.name + '|g';
       const late = h.late; const gain1 = Math.round(6 + (h.elig % 7)), gain2 = Math.round(3 + (h.elig % 5));
       hoodRecs = [
-        { title: (BACT[h.barrier] || ['تدخل'])[0], why: 'لأن «' + h.barrier + '» هو أكثر سبب ذكره ' + fmt(late) + ' متأخرًا في الحي.', impact: 'متوقع: +' + gain1 + ' نقطة إكمال', d: (BACT[h.barrier] || ['', 'M12 5v14M5 12h14'])[1], bg: '#FBF5D6', color: '#6B5A08', done: !!s.approved[k1], pending: !s.approved[k1], approve: approve(k1) },
+        { title: (BACT[h.barrier] || ['تدخل'])[0], why: 'لأن «' + h.barrier + '» هو أكثر سبب ذكره ' + fmt(late) + ' متأخرًا في الحي.', impact: 'متوقع: +' + gain1 + ' نقطة إكمال', d: (BACT[h.barrier] || ['', 'M12 5v14M5 12h14'])[1], bg: '#FFF6E0', color: '#7A4E00', done: !!s.approved[k1], pending: !s.approved[k1], approve: approve(k1) },
         { title: GACT[h.gap] || 'توعية صحية', why: 'لأن «' + h.gap + '» هو النقص الأكثر شيوعًا هنا (' + h.gapPct + '% ممن فحصوا).', impact: 'متوقع: +' + gain2 + ' نقاط ووقاية أبكر', d: 'M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z', bg: '#FDE7E2', color: '#8A2A1C', done: !!s.approved[k2], pending: !s.approved[k2], approve: approve(k2) },
         { title: 'تحدي «حيّ صحّي» للحي', why: 'هدف جماعي 80% ومكافأة مجتمعية عند تحقيقه، مع تذكير رفيدة للعائلات.', impact: 'متوقع: +3 نقاط', d: 'M12 2l2.9 6.9L22 9.6l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.6L2 9.6l7.1-.7z', bg: '#E5F3FC', color: '#1574AD', done: !!s.approved[h.city + h.name + 'c'], pending: !s.approved[h.city + h.name + 'c'], approve: approve(h.city + h.name + 'c') }
       ];
@@ -1106,12 +1106,12 @@ class Component extends DCLogic {
       { label: 'فحوصات إضافية بفضل عون', value: short(A.added * rangeK), sub: 'أشخاص فحصوا بعد تواصل رفيدة', subColor: '#1574AD', d: 'M12 5v14M5 12h14' },
       { label: 'حالات اكتشاف مبكر', value: fmt(A.early * rangeK), sub: 'أُحيلت للعلاج في مرحلة مبكرة', subColor: '#8A2A1C', d: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3' },
       { label: 'نسبة الاستفادة', value: A.engaged + '%', sub: 'ممن تواصلت معهم رفيدة حجزوا', subColor: '#4A5E6D', d: 'M20 6L9 17l-5-5' },
-      { label: 'المستحقون في النطاق', value: short(A.elig), sub: short(A.late) + ' ما زالوا متأخرين', subColor: '#6B5A08', d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8' },
+      { label: 'المستحقون في النطاق', value: short(A.elig), sub: short(A.late) + ' ما زالوا متأخرين', subColor: '#7A4E00', d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8' },
       { label: 'تدخلات نشطة', value: String(Math.max(1, Math.round(scopeHoods.length * 0.35)) + Object.keys(s.approved).length), sub: Object.keys(s.approved).length + ' اعتمدتها اليوم', subColor: '#4A5E6D', d: 'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z' }
     ];
 
     // donut
-    const PAL = ['#1574AD', '#3BA6E0', '#8FD3B4', '#D9822B', '#6C8CBF', '#B8C5CC'];
+    const PAL = ['#1574AD', '#3BA6E0', '#8FD3B4', '#D9822B', '#6C9ABF', '#B8C5CC'];
     const bEntries = Object.entries(A.bars).sort((x, y) => y[1] - x[1]);
     const top = bEntries.slice(0, 5); const rest = bEntries.slice(5).reduce((a, b) => a + b[1], 0);
     if (rest > 0) top.push(['أخرى', rest]);
@@ -1141,8 +1141,8 @@ class Component extends DCLogic {
       [(h) => 'اكتشاف مبكر: حالة ' + (h.gap.indexOf('ضغط') >= 0 ? 'ارتفاع ضغط' : 'سكري') + ' جديدة أُحيلت للطبيب من حي ' + h.name, '#FDE7E2', '#8A2A1C', 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3'],
       [(h) => 'أم من حي ' + h.name + ' أكدت موعد فحص الثدي مع طبيبة', '#FCE7F0', '#8E2457', 'M20 6L9 17l-5-5'],
       [(h) => 'رفيدة تكلمت باللهجة المحلية مع ' + (12 + h.elig % 30) + ' من كبار السن في ' + h.city, '#E5F3FC', '#1574AD', 'M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0'],
-      [(h) => 'عيادة متنقلة وصلت حي ' + h.name + ' وبدأت استقبال المواعيد', '#FBF5D6', '#6B5A08', 'M3 7h11v9H3zM14 10h4l3 3v3h-7'],
-      [(h) => 'مرافق نقل أوصل مستفيدًا كبيرًا في السن لمركز ' + h.city, '#E6EEF7', '#3D5F94', 'M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8'],
+      [(h) => 'عيادة متنقلة وصلت حي ' + h.name + ' وبدأت استقبال المواعيد', '#FFF6E0', '#7A4E00', 'M3 7h11v9H3zM14 10h4l3 3v3h-7'],
+      [(h) => 'مرافق نقل أوصل مستفيدًا كبيرًا في السن لمركز ' + h.city, '#E6EEF7', '#3D6D94', 'M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8'],
       [(h) => 'رفيدة تواصلت بالأوردو مع ' + (20 + h.elig % 40) + ' عاملًا قرب حي ' + h.name, '#E5F3FC', '#1574AD', 'M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10']
     ];
     const TIMES = ['الآن', 'قبل دقيقة', 'قبل 3 دقائق', 'قبل 6 دقائق', 'قبل 9 دقائق'];
@@ -1152,8 +1152,8 @@ class Component extends DCLogic {
     const active = [
       { title: 'عيادة متنقلة', where: 'حي النسيم، الرياض · باقي 3 أيام', prog: '72%', status: '1,180 فحص حتى الآن', bg: '#E4F0F5', color: '#1574AD', d: 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4' },
       { title: 'دعم المواصلات', where: 'كبار السن · السويدي والعليا', prog: '54%', status: '640 مشوارًا هذا الشهر', bg: '#FFF1DC', color: '#B26A12', d: 'M5 17h14M6 17l1.5-6h9L18 17M8 21a1 1 0 1 0 0-2M16 21a1 1 0 1 0 0-2' },
-      { title: 'مواعيد مرنة', where: 'مساءً ونهاية الأسبوع · الملقا', prog: '61%', status: '+11 نقطة في الحي', bg: '#F4E9F7', color: '#7A3E8F', d: 'M3 4h18v17H3zM16 2v4M8 2v4M3 10h18' },
-      { title: 'تواصل بلغات العمالة', where: 'البطحاء والسلي · أوردو وبنغالي', prog: '45%', status: '3,920 عاملًا تواصلنا معهم', bg: '#E6EEF7', color: '#3D5F94', d: 'M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10M14.5 16h5' }
+      { title: 'مواعيد مرنة', where: 'مساءً ونهاية الأسبوع · الملقا', prog: '61%', status: '+11 نقطة في الحي', bg: '#E9E9F7', color: '#3E3E8F', d: 'M3 4h18v17H3zM16 2v4M8 2v4M3 10h18' },
+      { title: 'تواصل بلغات العمالة', where: 'البطحاء والسلي · أوردو وبنغالي', prog: '45%', status: '3,920 عاملًا تواصلنا معهم', bg: '#E6EEF7', color: '#3D6D94', d: 'M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10M14.5 16h5' }
     ];
 
     // stats
@@ -1214,9 +1214,9 @@ class Component extends DCLogic {
     steppers.push(stp('k', 'أقل حجم مجموعة يُعرض', 'لا تُعرض أي مجموعة أقل من هذا العدد', ' شخص', 10, 20, 200));
     chipRows.push({ label: 'مدة الاحتفاظ بالبيانات', desc: 'بعدها تُحذف تفاصيل المحادثات تلقائيًا', opts: opt('retention', [['6', '6 أشهر'], ['12', 'سنة'], ['24', 'سنتان']]) });
     const team = [['د. سارة العتيبي', 'مديرة المنصة', 'كل المناطق', 'نشط'], ['م. فهد القحطاني', 'محلل بيانات', 'منطقة الرياض', 'نشط'], ['أ. نوف الشهري', 'مشرفة مراكز', 'منطقة مكة المكرمة', 'نشط'], ['أ. ماجد الدوسري', 'منسق تدخلات', 'المنطقة الشرقية', 'بانتظار التفعيل']]
-      .map(([name, role, scope, status]) => ({ name, role, scope, status, ini: name.replace(/^(د|م|أ)\. /, '').charAt(0), bg: status === 'نشط' ? '#E5F3FC' : '#FBF5D6', ink: status === 'نشط' ? '#1574AD' : '#6B5A08' }));
+      .map(([name, role, scope, status]) => ({ name, role, scope, status, ini: name.replace(/^(د|م|أ)\. /, '').charAt(0), bg: status === 'نشط' ? '#E5F3FC' : '#FFF6E0', ink: status === 'نشط' ? '#1574AD' : '#7A4E00' }));
     const integrations = [['صحتي', 'التطبيق الذي تعمل داخله رفيدة', 'متصل'], ['نفاذ', 'توثيق حسابات المستفيدين', 'متصل'], ['موعد', 'حجز المواعيد في المراكز', 'متصل'], ['بوابة الرسائل', 'التذكيرات النصية', 'قيد الإعداد']]
-      .map(([name, desc, status]) => ({ name, desc, status, bg: status === 'متصل' ? '#E5F3FC' : '#FBF5D6', ink: status === 'متصل' ? '#1574AD' : '#6B5A08' }));
+      .map(([name, desc, status]) => ({ name, desc, status, bg: status === 'متصل' ? '#E5F3FC' : '#FFF6E0', ink: status === 'متصل' ? '#1574AD' : '#7A4E00' }));
     const clean = JSON.stringify(cfg) === JSON.stringify(saved0);
     const settingsVals = { steppers, alertToggles, agentToggles, chipRows, seasonToggles, privacyToggles, team, integrations, saved: s.saved, clean,
       saveBg: clean ? '#9DB5AC' : '#1574AD', saveCursor: clean ? 'not-allowed' : 'pointer', notSettings: s.tab !== 'settings',
@@ -1263,15 +1263,15 @@ class Component extends DCLogic {
           { label: "فحوصات مكتملة لكل 1000 ساكن", value: fmt(per, 1), sub: `${fmt(per / sms.completed, 1)}× مقارنة برسائل SMS (${fmt(sms.completed, 1)})`, ink: "#1574AD" },
           { label: "نسبة الحجز من المكالمات المجابة", value: pct(full.booking), sub: `مقابل ${pct(sms.booking)} حاليًا`, ink: "#1574AD" },
           { label: "الغياب عن الموعد", value: pct(full.noshow), sub: `↓ من ${pct(sms.noshow)} · المعدل السعودي 23%`, ink: "#1574AD" },
-          { label: "مخالفات قواعد الأمان", value: fmt(F.violations), sub: `طوارئ حُوّلت لـ 997: ${fmt(F.emerg)} من ${fmt(F.emergSaid)}`, ink: "#5E6A12" },
+          { label: "مخالفات قواعد الأمان", value: fmt(F.violations), sub: `طوارئ حُوّلت لـ 997: ${fmt(F.emerg)} من ${fmt(F.emergSaid)}`, ink: "#7A4E00" },
         ],
         funnel: [["تواصلت معهم رفيدة", cont], ["ردّوا", ans], ["حجزوا", booked], ["فحصوا وراجعه الطبيب", per]].map(([name, x]) => ({ name, v: fmt(x), w: Math.max(6, (x / cont) * 100) + "%" })),
         undiag: `سكري غير مشخّص اكتُشف: ${fmt(full.undiag)} مقابل ${fmt(sms.undiag)} بالطريقة الحالية.`,
         spark: { calls: line("calls"), ans: line("ans"), booked: line("booked"), note: `اليوم: ${days[13].calls} مكالمة · ${days[13].ans} ردّوا · ${days[13].booked} حجزوا. الجمعة أقل لأن رفيدة ما تتصل وقت الصلاة.` },
         agents: [
           { initial: "خ", bg: "#E2EFF5", name: "وكيل التخطيط والتحليل", role: "يقرر مين نتصل عليه ومتى، ويقترح للوزارة تدخّلًا لكل حي", metrics: [{ k: "دقة ترتيب الأولوية (AUC)", v: fmt(D.models.priorityAUC, 2) }, { k: "فجوة الإكمال سعودي/غير سعودي", v: fmt(full.gap, 1) + " نقطة" }, { k: "تدخلات مقترحة / اعتمدها موظف", v: fmt(MI.proposals) + " / " + fmt(MI.approved, 1) }, { k: "تدخل بدون اعتماد بشري", v: "0" }] },
-          { initial: "ر", bg: "#DCE6A6", name: "الوكيل الصوتي · رفيدة/رفيد", role: "يتصل ويفهم السبب ويحجز الموعد الجاهز", metrics: [{ k: "دقة معرفة اللغة", v: pct(U.lang) }, { k: "دقة فهم السبب", v: pct(U.barrier) }, { k: "الوحيد اللي يكلّم الناس · الطوارئ المكتشفة", v: `${U.emergencyCases}/${U.emergencyCases}` }, { k: "نسبة الحجز", v: pct(full.booking) }] },
-          { initial: "م", bg: "#F1E7A6", name: "وكيل المتابعة", role: "يذكّر ويعيد الحجز لين يراجع الطبيب النتيجة", metrics: [{ k: "مواعيد أُعيد حجزها", v: fmt(F.rebooked) }, { k: "الغياب", v: pct(full.noshow) }, { k: "حُوّلت لموظف صحي", v: fmt(F.escalated, 1) }, { k: "توقع الحضور (AUC)", v: fmt(D.models.attendAUC, 2) }] },
+          { initial: "ر", bg: "#EBD2A1", name: "الوكيل الصوتي · رفيدة/رفيد", role: "يتصل ويفهم السبب ويحجز الموعد الجاهز", metrics: [{ k: "دقة معرفة اللغة", v: pct(U.lang) }, { k: "دقة فهم السبب", v: pct(U.barrier) }, { k: "الوحيد اللي يكلّم الناس · الطوارئ المكتشفة", v: `${U.emergencyCases}/${U.emergencyCases}` }, { k: "نسبة الحجز", v: pct(full.booking) }] },
+          { initial: "م", bg: "#FBE6B4", name: "وكيل المتابعة", role: "يذكّر ويعيد الحجز لين يراجع الطبيب النتيجة", metrics: [{ k: "مواعيد أُعيد حجزها", v: fmt(F.rebooked) }, { k: "الغياب", v: pct(full.noshow) }, { k: "حُوّلت لموظف صحي", v: fmt(F.escalated, 1) }, { k: "توقع الحضور (AUC)", v: fmt(D.models.attendAUC, 2) }] },
         ],
         ablation: AB.map(([k, name, color]) => ({ name, color, v: fmt(C[k].completed), w: (C[k].completed / mx) * 100 + "%" })),
         langs: Object.entries(U.byLang).map(([k, x]) => ({ name: LN[k] || k, v: pct(x), w: x * 100 + "%" })),
@@ -1294,21 +1294,21 @@ const api = (path, opts) => fetch("/ministry/api" + path, Object.assign({}, opts
 
 const FEED_STYLE = {
   booked: ["#E5F3FC", "#1574AD", "M3 4h18v17H3zM16 2v4M8 2v4M3 10h18"],
-  cancelled: ["#FBF5D6", "#6B5A08", "M3 4h18v17H3zM9 13l6 6M15 13l-6 6"],
-  barrier: ["#FBF5D6", "#6B5A08", "M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"],
-  result: ["#E6EEF7", "#3D5F94", "M9 3h6v4H9zM5 5h14v16H5zM9 12h6M9 16h4"],
+  cancelled: ["#FFF6E0", "#7A4E00", "M3 4h18v17H3zM9 13l6 6M15 13l-6 6"],
+  barrier: ["#FFF6E0", "#7A4E00", "M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"],
+  result: ["#E6EEF7", "#3D6D94", "M9 3h6v4H9zM5 5h14v16H5zM9 12h6M9 16h4"],
   early: ["#FDE7E2", "#8A2A1C", "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3"],
   referral: ["#FDE7E2", "#8A2A1C", "M5 12h14M13 6l6 6-6 6"],
-  walk: ["#EEF2D2", "#4B5512", "M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6 3 3v3M7 12l3-3 3 2 3 1"],
-  helped: ["#E1E8F3", "#3D5F94", "M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4l-2-2H9l-2 2a4 4 0 0 1-4-4v-4a4 4 0 0 1 4-4z"],
+  walk: ["#FFF3DC", "#7A4E00", "M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6 3 3v3M7 12l3-3 3 2 3 1"],
+  helped: ["#E1EBF3", "#3D6D94", "M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4l-2-2H9l-2 2a4 4 0 0 1-4-4v-4a4 4 0 0 1 4-4z"],
   intervention: ["#E5F3FC", "#1574AD", "M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"],
   contacted: ["#E5F3FC", "#1574AD", "M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM19 10v1a7 7 0 0 1-14 0v-1M12 18v3"],
 };
 const IV_STYLE = {
   mobile_clinic: ["#E4F0F5", "#1574AD", "M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4"],
   transport: ["#FFF1DC", "#B26A12", "M5 17h14M6 17l1.5-6h9L18 17M8 21a1 1 0 1 0 0-2M16 21a1 1 0 1 0 0-2"],
-  evening_hours: ["#F4E9F7", "#7A3E8F", "M3 4h18v17H3zM16 2v4M8 2v4M3 10h18"],
-  language: ["#E6EEF7", "#3D5F94", "M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10M14.5 16h5"],
+  evening_hours: ["#E9E9F7", "#3E3E8F", "M3 4h18v17H3zM16 2v4M8 2v4M3 10h18"],
+  language: ["#E6EEF7", "#3D6D94", "M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10M14.5 16h5"],
   challenge: ["#E5F3FC", "#1574AD", "M12 2l2.9 6.9L22 9.6l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.6L2 9.6l7.1-.7z"],
 };
 const ago = (iso) => {
@@ -1389,8 +1389,8 @@ class AounMinistry extends Component {
       submit: () => this.login() };
     v.logout = () => this.logout();
     v.dataBadge = L ? "مباشر من التجربة · بقية المملكة محاكاة" : "بيانات تجريبية للعرض";
-    v.dataBadgeBg = L ? "#E5F3FC" : "#FBF5D6";
-    v.dataBadgeInk = L ? "#1574AD" : "#6B5A08";
+    v.dataBadgeBg = L ? "#E5F3FC" : "#FFF6E0";
+    v.dataBadgeInk = L ? "#1574AD" : "#7A4E00";
     v.is = Object.assign({}, v.is, { calls: s.tab === "calls" });
     v.ins = this.insightsVals();
     if (!L) { v.livePanel = { show: false }; return v; }
@@ -1468,7 +1468,7 @@ class AounMinistry extends Component {
     const kpis = [["اتصال من رفيدة ورفيد", n(c.contacted)], ["ردّوا على المكالمة", pct(c.answered, c.contacted)],
       ["ذكروا سببًا", n(I.city_with_reason)], ["حجزوا", pct(c.booked, c.contacted)],
       ["نتائج وصلت من الأطباء", n(c.results)], ["طلبوا عدم الاتصال", n(c.opted_out)]].map(([k, v]) => ({ k, n: v }));
-    const PAL = ["#1574AD", "#C98A1B", "#7A3E8F", "#3D5F94", "#B5523B", "#4B5512", "#3BA6E0", "#8C6D3F", "#6A7883", "#A0446B"];
+    const PAL = ["#1574AD", "#C98A1B", "#3E3E8F", "#3D6D94", "#B5523B", "#7A4E00", "#3BA6E0", "#8C6D3F", "#6A7883", "#A0446B"];
     const colorOf = {}; I.reasons.forEach((r, i) => { colorOf[r.code] = PAL[i % PAL.length]; });
     const maxR = Math.max(1, ...I.reasons.map((r) => r.n || 0));
     const reasons = I.reasons.slice(0, 8).map((r) => ({ ar: r.ar, n: n(r.n), w: Math.round((r.n || 2) * 100 / maxR) + "%", color: colorOf[r.code] }));

@@ -39,6 +39,11 @@ render.yaml          one-click deploy of the server on Render
 
 Taken from the logo: navy `#002336`, sky `#59C2F9`, brand blue `#1574AD` (buttons and links on white), ink `#0E2E45`, soft blue `#E5F3FC`. All three interfaces use the same palette. The app's is in `mobile/src/theme.ts`.
 
+The companion colours are chosen to go with the blue:
+- **Gold `#F2B33D`** (dark `#7A4E00`, soft `#FFF3DC`) for highlights, walking and warnings.
+- **Indigo `#3E3E8F`** for a second category.
+- **Red `#8A2A1C`** for danger only.
+
 Logo files are in `brand/`. The main logo is `lockup-h-*`: the heart, a line, then «عون», all in one colour (blue on white, sky or white on navy).
 
 Other versions:

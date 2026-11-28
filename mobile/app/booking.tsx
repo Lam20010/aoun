@@ -29,7 +29,7 @@ const local = (s: Slot) => new Date(new Date(s.iso).getTime() + 3 * 3600000);
 const placeOf = (s: Slot): Place => s.kind === 'mobile_clinic' ? 'mobile' : s.kind === 'home_visit' ? 'home'
   : s.facility_kind === 'hospital' ? 'hospital' : s.facility_kind === 'private_clinic' || s.facility_kind === 'private_hospital' ? 'private' : 'phc';
 const KIND_ICON: Record<Place, string> = { any: ICON.pin, phc: ICON.plus, hospital: 'M4 21V5h10v16M14 9h6v12M8 9h2M8 13h2M8 17h2M7 3h4', mobile: ICON.car, home: ICON.home, private: ICON.shield };
-const KIND_BG: Record<Place, string> = { any: C.mintSoft, phc: C.mintSoft, hospital: '#E1E8F3', mobile: '#EEF2D2', home: C.yellow, private: '#FBEBD5' };
+const KIND_BG: Record<Place, string> = { any: C.mintSoft, phc: C.mintSoft, hospital: '#E1EBF3', mobile: '#FFF3DC', home: C.yellow, private: '#FBEBD5' };
 const km = (a: { lat: number; lon: number }, b: { lat: number; lon: number }) => Math.hypot(a.lat - b.lat, (a.lon - b.lon) * 0.91) * 111;
 const BASE: F = { area: 'mine', place: 'any', facility: null, time: 'any', days: 'any', cost: 'any', female: false, wheelchair: false, sort: 'soon' };
 

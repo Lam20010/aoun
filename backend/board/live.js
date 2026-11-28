@@ -11,21 +11,21 @@ const api = (path, opts) => fetch("/ministry/api" + path, Object.assign({}, opts
 
 const FEED_STYLE = {
   booked: ["#E5F3FC", "#1574AD", "M3 4h18v17H3zM16 2v4M8 2v4M3 10h18"],
-  cancelled: ["#FBF5D6", "#6B5A08", "M3 4h18v17H3zM9 13l6 6M15 13l-6 6"],
-  barrier: ["#FBF5D6", "#6B5A08", "M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"],
-  result: ["#E6EEF7", "#3D5F94", "M9 3h6v4H9zM5 5h14v16H5zM9 12h6M9 16h4"],
+  cancelled: ["#FFF6E0", "#7A4E00", "M3 4h18v17H3zM9 13l6 6M15 13l-6 6"],
+  barrier: ["#FFF6E0", "#7A4E00", "M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"],
+  result: ["#E6EEF7", "#3D6D94", "M9 3h6v4H9zM5 5h14v16H5zM9 12h6M9 16h4"],
   early: ["#FDE7E2", "#8A2A1C", "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3"],
   referral: ["#FDE7E2", "#8A2A1C", "M5 12h14M13 6l6 6-6 6"],
-  walk: ["#EEF2D2", "#4B5512", "M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6 3 3v3M7 12l3-3 3 2 3 1"],
-  helped: ["#E1E8F3", "#3D5F94", "M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4l-2-2H9l-2 2a4 4 0 0 1-4-4v-4a4 4 0 0 1 4-4z"],
+  walk: ["#FFF3DC", "#7A4E00", "M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6 3 3v3M7 12l3-3 3 2 3 1"],
+  helped: ["#E1EBF3", "#3D6D94", "M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4l-2-2H9l-2 2a4 4 0 0 1-4-4v-4a4 4 0 0 1 4-4z"],
   intervention: ["#E5F3FC", "#1574AD", "M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"],
   contacted: ["#E5F3FC", "#1574AD", "M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM19 10v1a7 7 0 0 1-14 0v-1M12 18v3"],
 };
 const IV_STYLE = {
   mobile_clinic: ["#E4F0F5", "#1574AD", "M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4"],
   transport: ["#FFF1DC", "#B26A12", "M5 17h14M6 17l1.5-6h9L18 17M8 21a1 1 0 1 0 0-2M16 21a1 1 0 1 0 0-2"],
-  evening_hours: ["#F4E9F7", "#7A3E8F", "M3 4h18v17H3zM16 2v4M8 2v4M3 10h18"],
-  language: ["#E6EEF7", "#3D5F94", "M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10M14.5 16h5"],
+  evening_hours: ["#E9E9F7", "#3E3E8F", "M3 4h18v17H3zM16 2v4M8 2v4M3 10h18"],
+  language: ["#E6EEF7", "#3D6D94", "M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10M14.5 16h5"],
   challenge: ["#E5F3FC", "#1574AD", "M12 2l2.9 6.9L22 9.6l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.6L2 9.6l7.1-.7z"],
 };
 const ago = (iso) => {
@@ -106,8 +106,8 @@ class AounMinistry extends Component {
       submit: () => this.login() };
     v.logout = () => this.logout();
     v.dataBadge = L ? "مباشر من التجربة · بقية المملكة محاكاة" : "بيانات تجريبية للعرض";
-    v.dataBadgeBg = L ? "#E5F3FC" : "#FBF5D6";
-    v.dataBadgeInk = L ? "#1574AD" : "#6B5A08";
+    v.dataBadgeBg = L ? "#E5F3FC" : "#FFF6E0";
+    v.dataBadgeInk = L ? "#1574AD" : "#7A4E00";
     v.is = Object.assign({}, v.is, { calls: s.tab === "calls" });
     v.ins = this.insightsVals();
     if (!L) { v.livePanel = { show: false }; return v; }
@@ -185,7 +185,7 @@ class AounMinistry extends Component {
     const kpis = [["اتصال من رفيدة ورفيد", n(c.contacted)], ["ردّوا على المكالمة", pct(c.answered, c.contacted)],
       ["ذكروا سببًا", n(I.city_with_reason)], ["حجزوا", pct(c.booked, c.contacted)],
       ["نتائج وصلت من الأطباء", n(c.results)], ["طلبوا عدم الاتصال", n(c.opted_out)]].map(([k, v]) => ({ k, n: v }));
-    const PAL = ["#1574AD", "#C98A1B", "#7A3E8F", "#3D5F94", "#B5523B", "#4B5512", "#3BA6E0", "#8C6D3F", "#6A7883", "#A0446B"];
+    const PAL = ["#1574AD", "#C98A1B", "#3E3E8F", "#3D6D94", "#B5523B", "#7A4E00", "#3BA6E0", "#8C6D3F", "#6A7883", "#A0446B"];
     const colorOf = {}; I.reasons.forEach((r, i) => { colorOf[r.code] = PAL[i % PAL.length]; });
     const maxR = Math.max(1, ...I.reasons.map((r) => r.n || 0));
     const reasons = I.reasons.slice(0, 8).map((r) => ({ ar: r.ar, n: n(r.n), w: Math.round((r.n || 2) * 100 / maxR) + "%", color: colorOf[r.code] }));

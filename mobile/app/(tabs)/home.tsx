@@ -29,12 +29,12 @@ type Ev = { id: string; kind: string; start: string; end: string; title_ar: stri
   lat: number; lon: number; who_ar: string; who_en: string; free: boolean; bookable?: boolean };
 const EV_STYLE: Record<string, [string, string, string]> = {
   mammo_truck: ['#FCE8EE', '#A33A5C', 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4'],
-  bp_check: ['#FBF5D6', '#6B5A08', 'M3 12h4l2-5 4 10 2-5h6'],
-  group_walk: ['#EEF2D2', '#4B5512', 'M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6 3 3v3M7 12l3-3 3 2 3 1'],
+  bp_check: ['#FFF6E0', '#7A4E00', 'M3 12h4l2-5 4 10 2-5h6'],
+  group_walk: ['#FFF3DC', '#7A4E00', 'M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6 3 3v3M7 12l3-3 3 2 3 1'],
   vaccine: ['#E5F3FC', '#1574AD', 'M18 2l4 4M17 7l3-3M19 9L9 19l-4 1 1-4L16 6zM12 10l2 2'],
-  talk: ['#E1E8F3', '#3D5F94', 'M7 8h10M7 12h6M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],
+  talk: ['#E1EBF3', '#3D6D94', 'M7 8h10M7 12h6M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],
   mobile_clinic: ['#E5F3FC', '#1574AD', 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4'],
-  evening_hours: ['#F4E9F7', '#7A3E8F', 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z'],
+  evening_hours: ['#E9E9F7', '#3E3E8F', 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z'],
 };
 
 export default function Home() {
@@ -102,8 +102,8 @@ export default function Home() {
     { key: 'care', title: t('carePlan'), sub: t('carePlanSub'), icon: ICON.doc, bg: C.yellow, to: '/care' },
     { key: 'family', title: t('family'), sub: T('شجرة عائلتك', 'Your family tree'), icon: ICON.people, bg: C.mint, to: '/family' },
     { key: 'walk', title: t('walk'), sub: walks ? T(`${walks.week_minutes} من ${walks.goal_minutes} دقيقة هالأسبوع`, `${walks.week_minutes} of ${walks.goal_minutes} min this week`) : t('walkSub'), icon: ICON.walk, bg: C.mintSoft, to: '/walk', wide: true },
-    { key: 'game', title: t('game'), sub: T(`${pts} عملة · ساعدي جيرانك`, `${pts} coins · help neighbours`), icon: ICON.game, bg: '#E1E8F3', to: '/game' },
-    { key: 'needle', title: t('needle'), sub: t('needleSub'), icon: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z', bg: '#EEF2D2', to: '/game?mode=calm' },
+    { key: 'game', title: t('game'), sub: T(`${pts} عملة · ساعدي جيرانك`, `${pts} coins · help neighbours`), icon: ICON.game, bg: '#E1EBF3', to: '/game' },
+    { key: 'needle', title: t('needle'), sub: t('needleSub'), icon: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z', bg: '#FFF3DC', to: '/game?mode=calm' },
     { key: 'record', title: t('record'), sub: t('recordSub'), icon: ICON.file, bg: C.lavender, to: '/record' },
     { key: 'messages', title: t('messages'), sub: t('messagesSub'), icon: ICON.chat, bg: C.mintCard, to: '/messages' },
   ];

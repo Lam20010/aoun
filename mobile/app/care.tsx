@@ -31,14 +31,14 @@ export default function Care() {
         : T('تقدرين تطلبين توصيل من المكالمة أو من الخطة.', 'You can ask for a ride in the call or from the plan.') },
     { title: T('المشي من خطتك', 'Walking, part of your plan'), color: C.lime, done: (walks?.week_minutes ?? 0) >= (walks?.goal_minutes ?? 150),
       body: T(`نص ساعة مشي يوميًا في ممشى الحي. هالأسبوع: ${walks?.week_minutes ?? 0} من ${walks?.goal_minutes ?? 150} دقيقة.`, `Half an hour a day at the district walkway. This week: ${walks?.week_minutes ?? 0} of ${walks?.goal_minutes ?? 150} min.`) },
-    { title: T('بعد النتيجة', 'After the result'), color: '#E2D36B', done: mine.length > 0,
+    { title: T('بعد النتيجة', 'After the result'), color: '#F5C451', done: mine.length > 0,
       body: mine.length ? T(`طبيبك راجع ${mine.length} نتيجة. شوفيها في سجلك.`, `Your doctor reviewed ${mine.length} result(s). See them in your record.`)
         : T('رفيدة توصلك النتيجة بعد ما يراجعها الطبيب، وترتّب المتابعة إذا احتجتي.', 'Rufaida sends the result after the doctor reviews it, and arranges follow-up if needed.') },
   ];
   useReadable([T('خطة الرعاية', 'Care plan'), ...items.map((i) => i.title + '. ' + i.body)]);
   return (
     <Screen title={T('خطة الرعاية', 'Care plan')}>
-      <LinearGradient colors={['#6C8CBF', '#3BA6E0']} style={{ borderRadius: 24, padding: 22, minHeight: 120, justifyContent: 'flex-end' }}>
+      <LinearGradient colors={['#6C9ABF', '#3BA6E0']} style={{ borderRadius: 24, padding: 22, minHeight: 120, justifyContent: 'flex-end' }}>
         <Txt size={28} weight="800" color={C.white}>{T('خطة الرعاية', 'Care plan')}</Txt>
         {slot?.doctor && <Txt size={14} color="rgba(255,255,255,.9)">{pick(slot.doctor as never, 'name')} · {pick(slot.doctor as never, 'clinic')}</Txt>}
       </LinearGradient>
