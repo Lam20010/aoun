@@ -22,7 +22,7 @@ LOGIN = """
   <div style="position: fixed; inset: 0; z-index: 50; background: linear-gradient(135deg, #0D2A3D, #1574AD); display: flex; align-items: center; justify-content: center; padding: 16px; font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif" dir="rtl">
     <div style="width: 100%; max-width: 420px; background: #FFFFFF; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 24px 60px rgba(0,0,0,.25)">
       <div dir="ltr" style="display: flex; align-items: center; gap: 6px; align-self: flex-end">
-        <img src="/ministry/board/mark.png" alt="" style="width: 44px; height: 44px"><img src="/ministry/board/wordmark.png" alt="عون" style="height: 26px">
+        <img src="/ministry/board/lockup.png" alt="عون" style="height: 52px; width: auto">
       </div>
       <b style="font-size: 22px; color: #0E2E45">منصة وزارة الصحة</b>
       <span style="font-size: 14px; color: #4A5E6D; line-height: 1.7">ادخل برقمك الوظيفي وكلمة المرور. اللوحة تعرض أرقامًا مجمّعة فقط، وتخفي أي مجموعة أقل من 50 شخصًا.</span>
@@ -161,6 +161,9 @@ def build():
     assert badge in src
     src = src.replace(badge, '<span style="font-size: 12px; font-weight: 600; background: {{dataBadgeBg}}; color: {{dataBadgeInk}}; padding: 8px 12px; border-radius: 12px">{{dataBadge}}</span>'
                       '<button onClick="{{logout}}" style="font-size: 12px; font-weight: 600; background: #FFFFFF; color: #1574AD; border: 1px solid #DBE6EC; padding: 7px 12px; border-radius: 12px; cursor: pointer">خروج</button>')
+    pair = re.search(r'<img src="/ministry/board/mark.png"[^>]*>\s*<img src="/ministry/board/wordmark.png"[^>]*>', src)
+    assert pair
+    src = src.replace(pair.group(0), '<img src="/ministry/board/lockup.png" alt="عون" style="height: 40px; width: auto; display: block">')
     anchor = '<b style="font-size: 15px">اقتراحات رفيدة لهذا الحي</b>'
     assert anchor in src
     src = src.replace(anchor, LIVE_PANEL + "                " + anchor)

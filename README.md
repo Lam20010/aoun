@@ -1,4 +1,4 @@
-<p align="center"><img src="brand/lockup-light.png" alt="عون" width="220"></p>
+<p align="center"><img src="brand/lockup-h-blue.png" alt="عون" width="260"></p>
 
 # عون · Aoun
 
@@ -39,7 +39,9 @@ render.yaml          one-click deploy of the server on Render
 
 Taken from the logo: navy `#002336`, sky `#59C2F9`, brand blue `#1574AD` (buttons and links on white), ink `#0E2E45`, soft blue `#E5F3FC`. All three interfaces use the same palette. The app's is in `mobile/src/theme.ts`.
 
-Logo files are in `brand/`:
+Logo files are in `brand/`. The main logo is `lockup-h-*`: the heart, a line, then «عون», all in one colour (blue on white, sky or white on navy).
+
+Other versions:
 - `lockup-light`: on white.
 - `lockup-dark` or `lockup-white`: on dark.
 - `lockup-on-navy`: comes with its own navy background.

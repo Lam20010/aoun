@@ -30,7 +30,7 @@ export default function Welcome() {
       <LinearGradient colors={['#D6EEFC', '#F3F8FB']} style={StyleSheet.absoluteFill} />
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Skyline width="100%" height={150} opacity={0.9} /></View>
       <View style={{ paddingTop: insets.top + 40, paddingHorizontal: 24, gap: 18 }}>
-        <Image source={require('../assets/aoun-icon.png')} style={{ width: 64, height: 64 }} />
+        <Image source={require('../assets/aoun-lockup.png')} style={{ width: 162, height: 56, alignSelf: 'flex-end' }} resizeMode="contain" />
         <Txt size={34} weight="800" color={C.teal}>{t('hello')} {first}</Txt>
         <Txt size={16} color={C.inkSoft}>{t('wReady')}</Txt>
         <Card style={{ gap: 12 }}>
