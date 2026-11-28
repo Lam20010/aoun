@@ -140,7 +140,7 @@ export default function Home() {
       {/* top bar: the Aoun logo, then «أنا معك» and settings */}
       <View style={[s.bar, { paddingTop: insets.top + 8 }]}>
         <Row style={{ justifyContent: 'space-between' }}>
-          <Image source={require('../../assets/aoun-lockup.png')} style={{ width: 118, height: 41 }} resizeMode="contain" accessibilityLabel={t('aoun')} />
+          <Image source={require('../../assets/aoun-lockup.png')} style={{ width: 97, height: 46 }} resizeMode="contain" accessibilityLabel={t('aoun')} />
           <Row gap={8}>
             <Pressable onPress={() => router.push('/assistant')} accessibilityRole="button" accessibilityLabel={t('assistantMenu')} hitSlop={6}><Circle size={40} bg={C.mintSoft}><Icon d={ICON.heart} size={20} color={C.teal} /></Circle></Pressable>
             <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel={t('settings')} hitSlop={6}><Circle size={40} bg={C.mintSoft}><Icon d={ICON.sliders} size={19} color={C.teal} /></Circle></Pressable>
