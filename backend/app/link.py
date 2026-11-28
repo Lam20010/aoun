@@ -211,9 +211,55 @@ def patient_router(current_patient) -> APIRouter:
         db = request.app.state.db
         d = p["district"]
         return {"district": d, "district_ar": catalog.DISTRICTS[d][0], "district_en": catalog.DISTRICTS[d][1],
-                "interventions": active(db, d)}
+                "interventions": active(db, d), "events": events(db, d, _today(request))}
 
     return r
+
+
+# Health events in the district (demo calendar, dates move with today). Approved Ministry interventions join them.
+def events(db, district: str, today: date) -> list[dict]:
+    ar, en, lat, lon = catalog.DISTRICTS[district]
+    def nxt(weekday: int, min_days: int = 0) -> date:
+        d = today + timedelta(days=min_days)
+        while d.weekday() != weekday:
+            d += timedelta(days=1)
+        return d
+    def at(d: date, hm: str) -> str:
+        return f"{d.isoformat()}T{hm}:00+03:00"
+    truck = today + timedelta(days=2 if today.weekday() != 2 else 3)
+    out = [
+        {"id": f"ev-mammo-{district}", "kind": "mammo_truck", "start": at(truck, "09:00"), "end": at(truck, "16:00"),
+         "title_ar": "عربة الكشف المبكر عن سرطان الثدي", "title_en": "Breast cancer screening truck",
+         "place_ar": f"حديقة حي {ar}", "place_en": f"{en} park", "lat": lat + 0.002, "lon": lon + 0.0025,
+         "who_ar": "للسيدات من ٤٠ سنة وفوق · بدون موعد", "who_en": "Women 40+ · walk in", "free": True},
+        {"id": f"ev-bp-{district}", "kind": "bp_check", "start": at(nxt(4), "12:30"), "end": at(nxt(4), "14:00"),
+         "title_ar": "قياس ضغط وسكر مجاني", "title_en": "Free blood pressure and sugar check",
+         "place_ar": f"جامع حي {ar} · بعد صلاة الجمعة", "place_en": f"{en} mosque · after Friday prayer", "lat": lat - 0.004, "lon": lon - 0.004,
+         "who_ar": "للجميع", "who_en": "Everyone", "free": True},
+        {"id": f"ev-walk-{district}", "kind": "group_walk", "start": at(nxt(5), "06:30"), "end": at(nxt(5), "07:30"),
+         "title_ar": "مشي جماعي في ممشى الحي", "title_en": "Group walk at the district walkway",
+         "place_ar": f"ممشى {ar}", "place_en": f"{en} walkway", "lat": lat + 0.002, "lon": lon + 0.0025,
+         "who_ar": "للعائلة كلها", "who_en": "The whole family", "free": True},
+        {"id": f"ev-flu-{district}", "kind": "vaccine", "start": at(today + timedelta(days=1), "08:00"), "end": at(today + timedelta(days=6), "16:00"),
+         "title_ar": "حملة لقاح الإنفلونزا الموسمية", "title_en": "Seasonal flu vaccine campaign",
+         "place_ar": f"مركز صحي {ar}", "place_en": f"{en} Health Center", "lat": lat, "lon": lon,
+         "who_ar": "احجزي من صحتي أو تعالي مباشرة", "who_en": "Book in Sehhaty or walk in", "free": True},
+        {"id": f"ev-talk-{district}", "kind": "talk", "start": at(nxt(1, 1), "19:00"), "end": at(nxt(1, 1), "20:00"),
+         "title_ar": "لقاء توعوي: السكري والأكل الصحي", "title_en": "Talk: diabetes and healthy eating",
+         "place_ar": f"مركز حي {ar}", "place_en": f"{en} community center", "lat": lat - 0.002, "lon": lon + 0.003,
+         "who_ar": "مع أخصائية تغذية", "who_en": "With a dietitian", "free": True},
+    ]
+    for iv in active(db, district):
+        if iv["kind"] in ("mobile_clinic", "evening_hours"):
+            d = date.fromisoformat(iv["approved_at"][:10]) + timedelta(days=1)
+            out.append({"id": "ev-" + iv["id"], "kind": iv["kind"], "start": at(d, "16:00" if iv["kind"] == "mobile_clinic" else "20:00"),
+                        "end": at(d + timedelta(days=2 if iv["kind"] == "mobile_clinic" else 6), "18:00" if iv["kind"] == "mobile_clinic" else "21:00"),
+                        "title_ar": iv["title_ar"], "title_en": iv["title_en"],
+                        "place_ar": "عند جامع الحي" if iv["kind"] == "mobile_clinic" else f"مركز صحي {ar}",
+                        "place_en": "By the district mosque" if iv["kind"] == "mobile_clinic" else f"{en} Health Center",
+                        "lat": lat - 0.004, "lon": lon - 0.004, "who_ar": "مواعيد جديدة من الوزارة · احجزي من التطبيق",
+                        "who_en": "New times from the Ministry · book in the app", "free": True, "bookable": True})
+    return sorted(out, key=lambda e: e["start"])
 
 
 def walks_view(db, rid: str, today: date) -> dict:

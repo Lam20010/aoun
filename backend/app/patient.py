@@ -253,7 +253,7 @@ def me(request: Request, p=Depends(current_patient)):
                                      + catalog.routine_for(p["age_band"], p["gender"] or "f")))
     return {"patient": p["id"], "district": p["district"], "district_ar": catalog.DISTRICTS[p["district"]][0],
             "district_en": catalog.DISTRICTS[p["district"]][1], "language": p["language"], "gender": p["gender"],
-            "age_band": p["age_band"], "family_history": codes, "sehhaty": sehhaty.client().profile(p, request.app.state.vault.decrypt(p["phone_enc"])),
+            "age_band": p["age_band"], "family_history": codes, "calls_ok": bool(p["contact_permission"]), "sehhaty": sehhaty.client().profile(p, request.app.state.vault.decrypt(p["phone_enc"])),
             "recommended": [{"key": k, "ar": catalog.SCREENINGS[k]["ar"], "en": catalog.SCREENINGS[k]["en"],
                              "every_months": catalog.SCREENINGS[k]["every_months"]} for k in recommended],
             "plan": plan_for_case(db, case["id"]) if case else None}
@@ -266,7 +266,22 @@ def public_catalog():
             "symptoms": [{"key": s[0], "ar": s[1], "en": s[2], "screening": s[3], "urgency": s[4]}
                          for s in catalog.FOLLOW_UP_SYMPTOMS],
             "hereditary": [{"key": k, "ar": v[0], "en": v[1]} for k, v in catalog.HEREDITARY.items()],
-            "districts": [{"key": k, "ar": v[0], "en": v[1]} for k, v in catalog.DISTRICTS.items()]}
+            "districts": [{"key": k, "ar": v[0], "en": v[1]} for k, v in catalog.DISTRICTS.items()],
+            "facilities": [{**catalog.facility(f[0]), "paid": f[0] in catalog.PAID_FACILITIES}
+                           for f in catalog.FACILITIES if f[1] != "lab"]}
+
+
+class CallsIn(Strict):
+    on: bool
+
+
+@router.patch("/calls")
+def set_calls(body: CallsIn, request: Request, p=Depends(current_patient)):
+    """The person decides whether Rufaida may call them. Off = no outbound calls at all;
+    the app still works and the chat assistant still answers when they open it."""
+    with request.app.state.db.tx() as c:
+        c.execute("UPDATE residents SET contact_permission = ? WHERE id = ?", (int(body.on), p["id"]))
+    return {"calls_ok": body.on}
 
 
 @router.patch("/language")
@@ -297,21 +312,25 @@ def plan(request: Request, p=Depends(current_patient)):
 @router.get("/slots")
 def slots(request: Request, days: int = 14, female: bool = False, district: str | None = None,
           private: bool = True, p=Depends(current_patient)):
+    """`district=all` lists the whole city (every center and hospital), for the facility filter."""
     """Open times the person can book now: their screening's own times first, then any center time."""
     db = request.app.state.db
     case = open_case(db, p["id"])
+    every = district == "all"
     dist = district if district in catalog.DISTRICTS else p["district"]
     st = request.app.state.settings
     now = datetime.fromisoformat(st.demo_now) if (st.demo_mode and st.demo_now) else _now().astimezone(RIYADH)
     until = now + timedelta(days=max(1, min(days, 21)))
-    rows = db.all("""SELECT * FROM slots WHERE (district = ? OR (? AND facility_id LIKE 'C-%'))
-                     AND screening IN (?, 'general') AND remaining > 0
+    rows = db.all("""SELECT * FROM slots WHERE screening IN (?, 'general') AND remaining > 0
                      AND start_local > ? AND start_local < ? ORDER BY start_local""",
-                  dist, int(private), case["screening"], now.isoformat(), until.isoformat())
-    rows = [r for r in rows if not female or r["female_staff"]]
-    # Free Ministry times come first; paid private times are a short extra list so they never crowd them out.
-    free = [r for r in rows if not r["facility_id"].startswith("C-")][:120]
-    paid = [r for r in rows if r["facility_id"].startswith("C-")][:40]
+                  case["screening"], now.isoformat(), until.isoformat())
+    paid_ids = catalog.PAID_FACILITIES
+    rows = [r for r in rows if (not female or r["female_staff"])
+            and (every or r["district"] == dist or (private and r["facility_id"] in paid_ids))
+            and (private or r["facility_id"] not in paid_ids)]
+    # Free Ministry times come first; paid private times are a shorter list so they never crowd them out.
+    free = [r for r in rows if r["facility_id"] not in paid_ids][:400 if every else 160]
+    paid = [r for r in rows if r["facility_id"] in paid_ids][:120 if every else 60]
     out = [slot_detail(r, p, case["screening"]) for r in sorted(free + paid, key=lambda r: r["start_local"])]
     return {"district": dist, "slots": out}
 

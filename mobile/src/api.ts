@@ -65,6 +65,7 @@ export const api = {
   sendMessage: (body: string, doctor_id?: string) => req('/patient/messages', { body: doctor_id ? { body, doctor_id } : { body } }),
   appState: () => req<{ game: Record<string, unknown>; avatar: Record<string, unknown> }>('/patient/app-state'),
   saveState: (body: { game?: unknown; avatar?: unknown; helped?: number }) => req('/patient/app-state', { method: 'PUT', body }),
+  calls: (on: boolean) => req<{ calls_ok: boolean }>('/patient/calls', { method: 'PATCH', body: { on } }),
   walks: () => req<Walks>('/patient/walks'),
   addWalk: (minutes: number) => req<Walks>('/patient/walks', { body: { minutes } }),
   district: () => req<DistrictNews>('/patient/district'),

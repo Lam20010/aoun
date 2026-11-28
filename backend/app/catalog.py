@@ -35,6 +35,7 @@ FACILITIES = [
     ("H-CENTRAL", "hospital", "Al-Olaya", "مستشفى الرياض المركزي", "Riyadh Central Hospital", 0.010, 0.006, 1, 1),
     ("C-NAKHEEL", "private_clinic", "Al-Rawdah", "عيادات النخيل الطبية", "Al-Nakheel Medical Clinics", -0.004, 0.004, 1, 1),
     ("C-SHIFA", "private_clinic", "Al-Malqa", "مجمع الشفاء الطبي", "Al-Shifa Medical Complex", 0.006, 0.004, 1, 1),
+    ("H-RAAYA", "private_hospital", "Al-Olaya", "مستشفى الرعاية الأهلي", "Al-Raaya Private Hospital", -0.007, 0.009, 1, 1),
     ("L-RAZI", "lab", "Al-Olaya", "مختبرات الرازي", "Al-Razi Laboratories", -0.006, -0.004, 1, 1),
 ]
 
@@ -63,7 +64,16 @@ DOCTORS = [
     ("D13", "C-NAKHEEL", "f", "د. جواهر القرني", "Dr. Jawaher Al-Qarni", "طب الأسرة", "Family medicine", "early", "12"),
     ("D14", "C-SHIFA", "m", "د. ناصر البقمي", "Dr. Nasser Al-Buqami", "الباطنة", "Internal medicine", "chronic", "8"),
     ("D15", "C-SHIFA", "f", "د. هند العمري", "Dr. Hind Al-Omari", "صحة المرأة", "Women's health", "women", "9"),
+    # Ministry hospitals: screening clinics, free through Sehhaty
+    ("D16", "H-EAST", "f", "د. عبير الحارثي", "Dr. Abeer Al-Harthi", "الأشعة وصحة الثدي", "Breast imaging", "women", "B12"),
+    ("D17", "H-EAST", "m", "د. بندر السهلي", "Dr. Bandar Al-Sahli", "الباطنة", "Internal medicine", "chronic", "A4"),
+    ("D18", "H-NORTH", "m", "د. يوسف الشهراني", "Dr. Yousef Al-Shahrani", "الجهاز الهضمي", "Gastroenterology", "early", "C7"),
+    ("D19", "H-CENTRAL", "f", "د. مها الدخيل", "Dr. Maha Al-Dakheel", "طب الأسرة", "Family medicine", "early", "2-14"),
+    # private hospital (paid; insurance may cover part)
+    ("D20", "H-RAAYA", "f", "د. شهد المالكي", "Dr. Shahad Al-Malki", "صحة المرأة", "Women's health", "women", "305"),
+    ("D21", "H-RAAYA", "m", "د. تركي الفيفي", "Dr. Turki Al-Faifi", "الباطنة", "Internal medicine", "chronic", "210"),
 ]
+PAID_FACILITIES = {f[0] for f in FACILITIES if f[1] in ("private_clinic", "private_hospital")}
 
 # ---------- the screening programme ----------
 # Each test: key, ar, en, unit, low, high (normal range), borderline high (None if not used)
@@ -269,7 +279,7 @@ PRIVATE_PRICE = {  # SAR, the screening visit at a private clinic, including the
     "diabetes": 120, "hypertension": 80, "cholesterol": 150, "obesity": 60, "vitamin_d": 180, "anemia": 90,
     "thyroid": 160, "colorectal": 140, "breast": 450, "cervical": 300, "osteoporosis": 400,
 }
-FREE_KINDS = ("phc", "mobile_clinic", "home_visit", "virtual")
+FREE_KINDS = ("phc", "hospital", "mobile_clinic", "home_visit", "virtual")
 DEMO_PROFILES = {  # what the demo patient's Sehhaty account looks like
     "citizen": {"id_type": "citizen", "insurer": "", "insurance_class": ""},
     "citizen_insured": {"id_type": "citizen", "insurer": "WAHA", "insurance_class": "A"},

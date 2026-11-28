@@ -19,7 +19,7 @@ export default function Welcome() {
   const ar = lang === 'ar';
   const name = seh ? (ar ? seh.name_ar : seh.name_en) : '';
   const first = seh ? (ar ? seh.first_name_ar : seh.first_name_en) : '';
-  const go = () => { set({ welcomed: true }); router.replace(me?.plan?.confirmed ? '/home' : '/incoming'); };
+  const go = () => { set({ welcomed: true }); router.replace(me?.plan?.confirmed || me?.calls_ok === false ? '/home' : '/incoming'); };
   const rows: [string, string, string][] = [
     [t('wName'), name || '…', ICON.people],
     [t('wId'), seh?.id_masked ?? '…', ICON.shield],

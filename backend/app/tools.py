@@ -253,7 +253,7 @@ def _cost(r, person) -> dict:
            if q["basis"] == "insurance" else f"paid private clinic: SAR {q['price']}, no insurance on their Sehhaty record")
     return {"cost": "free" if q["free"] else "paid", "price_sar": q["price"], "you_pay_sar": q["you_pay"],
             "insurance_pays_sar": q["insurance_pays"], "cost_say": say, "cost_ar": q["note_ar"],
-            "private_clinic": fkind == "private_clinic"}
+            "private_clinic": fkind in ("private_clinic", "private_hospital")}
 
 
 def _slot_view(r, person=None) -> dict:
@@ -493,7 +493,7 @@ def get_solutions(body: SolutionsIn, request: Request):
     picked = []
     if rule is not None:
         rows = db.all("""SELECT * FROM slots WHERE district = ? AND screening IN (?, 'general') AND remaining > 0
-                         AND (facility_id IS NULL OR facility_id NOT LIKE 'C-%')
+                         AND (facility_id IS NULL OR facility_id NOT IN ('C-NAKHEEL','C-SHIFA','H-RAAYA'))
                          ORDER BY screening = 'general', start_local""", case["district"], case["screening"])
         seen = set()
         tag = ONE_PER_TAG.get(body.reason)
@@ -519,7 +519,7 @@ def get_solutions(body: SolutionsIn, request: Request):
             picked = picked[:1]
         # A paid private-clinic choice when the free ones do not fit: earlier, very late, or on Friday.
         if body.reason in (Reason.sooner, Reason.work_hours):
-            for r in db.all("""SELECT * FROM slots WHERE facility_id LIKE 'C-%' AND screening IN (?, 'general')
+            for r in db.all("""SELECT * FROM slots WHERE facility_id IN ('C-NAKHEEL','C-SHIFA','H-RAAYA') AND screening IN (?, 'general')
                                AND remaining > 0 ORDER BY start_local""", case["screening"]):
                 d = datetime.fromisoformat(r["start_local"])
                 if d > now and (body.reason == Reason.sooner or d.hour >= 21 or d.weekday() == 4):

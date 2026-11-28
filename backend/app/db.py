@@ -397,8 +397,19 @@ def generated_slots(start_day: str, days: int = 21) -> list[tuple]:
                 out.append((f"G{fid[2:]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], dist, "general",
                             f"{day.isoformat()}T{t}:00+03:00", places, int(f["wheelchair"]), 1, "center",
                             int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
-        # private clinics: earlier, later and on Fridays, but paid
-        for fid in ("C-NAKHEEL", "C-SHIFA"):
+        # Ministry hospitals' screening clinics: Sunday to Thursday, free
+        if day.weekday() not in (4, 5):
+            for fid in ("H-EAST", "H-NORTH", "H-CENTRAL"):
+                f = _fac_info(fid)
+                docs = doctors_at(fid)
+                for ti, t in enumerate(["08:30", "11:00", "13:30"]):
+                    doc = docs[(ti + di) % len(docs)]
+                    info = _doc(doc)
+                    out.append((f"H{fid[2:6]}{day.strftime('%m%d')}{t.replace(':', '')}", f["name_ar"], f["district"], "general",
+                                f"{day.isoformat()}T{t}:00+03:00", 3, int(f["wheelchair"]), 1, "center",
+                                int(info["gender"] == "f"), 1, f["lat"], f["lon"], fid, doc))
+        # private clinics and hospital: earlier, later and on Fridays, but paid
+        for fid in ("C-NAKHEEL", "C-SHIFA", "H-RAAYA"):
             f = _fac_info(fid)
             docs = doctors_at(fid)
             for ti, t in enumerate(["07:00", "13:00", "21:00", "22:30"]):

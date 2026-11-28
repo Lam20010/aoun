@@ -99,3 +99,27 @@ def test_sehhaty_welcome_shows_masked_details_only(c):
     seh = c.get("/patient/me", headers=h).json()["sehhaty"]
     assert seh["first_name_ar"] and seh["id_masked"].startswith("••••••") and "••" in seh["phone_masked"]
     assert seh["mode"] == "simulated"
+
+
+def test_district_events_and_the_whole_city_with_hospitals(c):
+    h = patient(c)
+    ev = c.get("/patient/district", headers=h).json()["events"]
+    assert any(e["kind"] == "mammo_truck" for e in ev) and all(e["start"] <= e2["start"] for e, e2 in zip(ev, ev[1:]))
+    city = c.get("/patient/slots?district=all&days=10", headers=h).json()["slots"]
+    kinds = {s["facility_kind"] for s in city}
+    assert {"phc", "hospital", "private_clinic", "private_hospital"} <= kinds
+    assert all(s["cost"]["free"] for s in city if s["facility_kind"] == "hospital")
+    fac = c.get("/patient/catalog").json()["facilities"]
+    assert any(f["kind"] == "hospital" for f in fac) and any(f["paid"] for f in fac)
+
+
+def test_person_can_turn_off_calls_and_the_outbound_call_is_refused(c):
+    h = patient(c)
+    assert c.get("/patient/me", headers=h).json()["calls_ok"] is True
+    assert c.patch("/patient/calls", json={"on": False}, headers=h).json() == {"calls_ok": False}
+    me = c.get("/patient/me", headers=h).json()
+    assert me["calls_ok"] is False
+    row = c.app.state.db.one("SELECT contact_permission FROM residents WHERE id = ?", me["patient"])
+    assert row["contact_permission"] == 0
+    c.patch("/patient/calls", json={"on": True}, headers=h)
+    assert c.get("/patient/me", headers=h).json()["calls_ok"] is True

@@ -17,7 +17,7 @@ export interface Plan {
 }
 export interface Me {
   patient: string; district: string; district_ar: string; district_en: string; language: string; gender: 'f' | 'm';
-  age_band: string; family_history: string[]; recommended: { key: string; ar: string; en: string; every_months: number }[]; plan: Plan | null; sehhaty?: Sehhaty;
+  age_band: string; family_history: string[]; recommended: { key: string; ar: string; en: string; every_months: number }[]; plan: Plan | null; sehhaty?: Sehhaty; calls_ok?: boolean;
 }
 export interface FileRef { id: string; record_id: string | null; filename: string; mime: string; size: number; created_at: string; doctor: string }
 export interface Rec {

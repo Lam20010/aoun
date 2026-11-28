@@ -5,6 +5,7 @@ import { useApp } from '../store';
 import { langInfo, type Lang } from '../i18n';
 import { api } from '../api';
 import type { Tool } from './types';
+import { linesFor, READ_TOPICS, type Topic } from './readAloud';
 
 const SCREENS: Record<string, string> = {
   home: '/home', notebook: '/notebook', results: '/notebook?seg=results', preferences: '/notebook?seg=prefs',
@@ -25,14 +26,22 @@ export const appTools: Record<string, Tool> = {
   },
 
   // Reads what is on the screen with the phone's own voice, so nothing on it is sent to the agent.
-  read_screen: async (_p, ctx) => {
-    const lines = useApp.getState().screenText;
-    if (!lines.length) return 'nothing to read on this screen';
+  // Reads to the person with the phone's own voice: the open screen, or a topic from their own data
+  // (plan, results, diagnoses, doctor messages, medicines, the whole record, or everything).
+  // The agent only names the topic; nothing that is read is sent to it.
+  read_screen: async ({ what }, ctx) => {
+    const topic = (READ_TOPICS as readonly string[]).includes(String(what)) ? (what as Topic) : 'screen';
+    const go: Partial<Record<Topic, string>> = { plan: '/plan', results: '/notebook?seg=results', diagnoses: '/record', record: '/record', messages: '/messages', medicines: '/meds' };
+    if (go[topic]) router.navigate(go[topic] as never);
+    const lang = useApp.getState().lang;
+    let lines: string[] = [];
+    try { lines = await linesFor(topic, lang); } catch { return 'could not load it; the phone may be offline'; }
+    if (!lines.length) return 'nothing to read';
     ctx.setMicMuted(true);
-    const voice = langInfo(useApp.getState().lang).speech;
+    const voice = langInfo(lang).speech;
     for (const line of lines) await speak(line, voice);
     ctx.setMicMuted(false);
-    return 'done: the phone read the screen aloud';
+    return 'done: the phone read ' + topic + ' aloud (' + lines.length + ' lines)';
   },
 
   set_text_size: ({ size }) => {

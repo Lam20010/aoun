@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native';
+import { Pressable, Switch, View } from 'react-native';
 import { Screen } from '../src/ui/Screen';
 import { Icon, ICON } from '../src/ui/Icon';
 import { Card, Pill, Row, Segments, Txt } from '../src/ui/kit';
@@ -54,6 +54,17 @@ export default function Settings() {
           </View>
         </Card>
       )}
+      <Card style={{ gap: 8 }}>
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Row gap={8} style={{ flex: 1 }}><Icon d={ICON.phone} color={C.teal} />
+            <Txt size={16} weight="700" style={{ flex: 1 }}>{lang === 'ar' ? (voice === 'm' ? 'مكالمات رفيد' : 'مكالمات رفيدة') : (voice === 'm' ? 'Calls from Rafeed' : 'Calls from Rufaida')}</Txt></Row>
+          <Switch value={me?.calls_ok !== false} trackColor={{ true: C.teal, false: C.line }}
+            onValueChange={async (v) => { try { await api.calls(v); await refresh(); } catch {} }} />
+        </Row>
+        <Txt size={13} color={C.muted}>{me?.calls_ok === false
+          ? (lang === 'ar' ? 'المكالمات موقفة. ما راح نتصل عليك، وتقدرين تحجزين من التطبيق وتسألين المساعدة بالكتابة أو الصوت داخل التطبيق.' : 'Calls are off. We will not call you; you can book in the app and ask the assistant by text or voice inside the app.')
+          : (lang === 'ar' ? 'رفيدة تتصل عشان ترتّب فحصك وتذكّرك. تقدرين توقفينها متى ما بغيتي.' : 'Rufaida calls to arrange your check-up and remind you. You can turn this off any time.')}</Txt>
+      </Card>
       <Card style={{ gap: 10 }}>
         <Row gap={8}><Icon d={ICON.text} color={C.teal} /><Txt size={16} weight="700">{t('textSize')}</Txt></Row>
         <Segments<number> value={fontScale} onChange={(v) => set({ fontScale: v as 0 | 1 | 2 })} items={[{ key: 0, label: t('normalSize') }, { key: 1, label: t('bigger') }, { key: 2, label: t('bigger') + '+' }]} />

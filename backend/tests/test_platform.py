@@ -251,7 +251,7 @@ def test_sehhaty_profile_prices_and_reference(c):
     slots = c.get("/patient/slots", headers=h).json()["slots"]
     free = [s for s in slots if s["cost"]["free"]]
     paid = [s for s in slots if not s["cost"]["free"]]
-    assert free and paid and all(s["facility_kind"] == "private_clinic" for s in paid)
+    assert free and paid and all(s["facility_kind"] in ("private_clinic", "private_hospital") for s in paid)
     p = paid[0]["cost"]
     assert p["you_pay"] == min(round(p["price"] * 0.2), 75) and p["insurance_pays"] == p["price"] - p["you_pay"]
     plan = c.post("/patient/book", json={"slot_id": free[0]["id"]}, headers=h).json()

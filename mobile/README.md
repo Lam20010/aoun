@@ -89,6 +89,13 @@ every screen follow. They can also pick it in settings. Arabic and Urdu read rig
 - **«شكل رفيدة»** (`app/avatar.tsx`): hair or hijab, ghutra or shemagh, beard, skin, expression, glasses and colours.
 - **«أنا معك»** (`app/assistant.tsx`): everything the assistant can open; tap the assistant's face on the bar.
 
+## Home, booking and the assistant
+
+- **Home** starts with «توعية» (short awareness cards, the person's own screening first), then «جديد في حيّك» (health events near home from the server: a mammography truck in the park, free checks after Friday prayer, a group walk, the flu campaign, and whatever the Ministry approved), then one line showing how far the plan has come.
+- **Booking** loads every open time in the city once (health centers, Ministry hospitals, mobile clinics, home visits, private clinics and hospitals) and filters on the phone: area, type of place, a specific place, time of day, days, cost (free / covered by insurance), woman doctor, wheelchair access, and sort by soonest, nearest or cheapest. Quick chips cover the common ones.
+- **Calls from Rufaida** can be turned off in Settings. The server then never calls the person (`contact_permission = 0`); the app and the in-app assistant still work.
+- **Reading aloud**: the assistant's `read_screen` takes `what` (screen, plan, results, diagnoses, messages, medicines, record, everything). The phone loads that data itself and reads it with its own voice; the agent never receives it.
+
 ## Sehhaty and cost
 
 The app shows the Sehhaty account (masked ID, insurance) in Settings, with a demo switcher between four profiles. Each slot and the plan show the cost: free through Sehhaty, or the private price, what insurance pays and what you pay. See the backend README for the rules.
