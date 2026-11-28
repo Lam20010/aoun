@@ -297,7 +297,7 @@ const s = StyleSheet.create({
   day: { backgroundColor: C.white, borderRadius: 18, paddingVertical: 8, width: 62, alignItems: 'center', gap: 2 },
   count: { minWidth: 22, borderRadius: 8, paddingHorizontal: 5, paddingVertical: 1 },
   kind: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  scrim: { flex: 1, backgroundColor: 'rgba(15,46,48,.35)' },
+  scrim: { flex: 1, backgroundColor: 'rgba(0,35,54,.35)' },
   sheet: { maxHeight: '88%', backgroundColor: C.bg, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, paddingTop: 10, gap: 12 },
   grab: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: C.line },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

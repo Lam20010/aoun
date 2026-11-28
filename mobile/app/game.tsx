@@ -163,7 +163,7 @@ export default function GameScreen() {
         pick: () => { if (own) return; if (g.pts < cost) return setMsg(T('تحتاجين عملات أكثر. ساعدي جارك وتكسبين.', 'You need more coins. Help a neighbour to earn some.'));
           update({ pts: g.pts - cost, up: { ...g.up, [key]: true } }); setMsg(T('حلو! حيّك صار أحلى وأسهل للجميع.', 'Lovely! Your district is nicer and easier for everyone.')); } }; });
     if (tab === 'acts') return Object.keys(ACTS).map((key) => { const A = ACTS[key];
-      return { key, t: tx(A.t), cost: '+' + A.gain, coin: true, done: !!g.actsDone[key], icon: <IsoIcon k={key} c={[A.c, '#FFFFFF', '#E6EFEC', '#0F2E30']} />, pick: () => startAct(key) }; });
+      return { key, t: tx(A.t), cost: '+' + A.gain, coin: true, done: !!g.actsDone[key], icon: <IsoIcon k={key} c={[A.c, '#FFFFFF', '#E6EDEF', '#002336']} />, pick: () => startAct(key) }; });
     if (tab === 'store') { const cnt = (x: string) => Object.values(g.plots).filter((v) => v === x).length;
       return ([['house', T('منازل', 'Houses'), cnt('house') + 1], ['park', T('حدائق', 'Parks'), cnt('park')], ['clinic', T('عيادات', 'Clinics'), cnt('clinic') + 1],
         ['pharmacy', T('صيدليات', 'Pharmacies'), cnt('pharmacy')], ['trees', T('جيران ساعدتيهم', 'Neighbours helped'), Object.keys(g.done).length]] as [string, string, number][])
@@ -195,7 +195,7 @@ export default function GameScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <LinearGradient colors={['#96D7C6', '#D5EFE8', '#F6F0C4', '#EADFAE']} locations={[0, 0.3, 0.52, 1]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#59C2F9', '#D6EEFC', '#F6F0C4', '#EADFAE']} locations={[0, 0.3, 0.52, 1]} style={StyleSheet.absoluteFill} />
       <Svg width={width} height={H * k} viewBox={`0 0 ${W} ${H}`} style={{ position: 'absolute', top: 0, left: 0 }}>
         <G opacity={0.55}><Ellipse cx={70} cy={120} rx={34} ry={10} fill="#FFFFFF" /><Ellipse cx={300} cy={200} rx={40} ry={11} fill="#FFFFFF" /><Ellipse cx={200} cy={250} rx={28} ry={8} fill="#FFFFFF" /></G>
         <G fill="#B9D6CC" opacity={0.7}><Rect x={10} y={300} width={40} height={40} rx={3} /><Rect x={54} y={290} width={30} height={50} rx={3} /><Rect x={300} y={285} width={34} height={55} rx={3} /><Rect x={338} y={300} width={46} height={40} rx={3} /><Rect x={250} y={305} width={44} height={35} rx={3} /></G>
@@ -211,7 +211,7 @@ export default function GameScreen() {
       ))}
       {!calm && scene.locks.map((p, i) => (
         <View key={i} style={{ position: 'absolute', left: pct(p.x) - 40, top: pct(p.y) - 18, width: 80, alignItems: 'center' }} pointerEvents="none">
-          <Icon d={ICON.lock} size={20} color="#3A5658" /><Txt size={10} weight="800" color="#3A5658" center>{T('يُفتح عند المستوى 5', 'Opens at level 5')}</Txt>
+          <Icon d={ICON.lock} size={20} color="#394C59" /><Txt size={10} weight="800" color="#394C59" center>{T('يُفتح عند المستوى 5', 'Opens at level 5')}</Txt>
         </View>
       ))}
       {!calm && scene.coins.map((c) => (
@@ -233,14 +233,14 @@ export default function GameScreen() {
           <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} style={s.round} accessibilityRole="button" accessibilityLabel={T('رجوع', 'Back')}>
             <Icon d={L === 'ar' ? 'M5 12h14M13 6l6 6-6 6' : ICON.arrowLeft} size={20} width={2.4} />
           </Pressable>
-          <Row gap={6} style={s.chip}><Icon d={ICON.game} size={18} color={C.teal} /><Txt size={17} weight="800" color="#3F8C8C">{calm ? T('وضع التشتيت', 'Calm mode') : T('حيّ عون', 'Aoun district')}</Txt></Row>
+          <Row gap={6} style={s.chip}><Icon d={ICON.game} size={18} color={C.teal} /><Txt size={17} weight="800" color="#1E86C4">{calm ? T('وضع التشتيت', 'Calm mode') : T('حيّ عون', 'Aoun district')}</Txt></Row>
           <View style={{ flex: 1 }} />
           <Row gap={6} style={s.chipS}><Coin /><Txt size={15} weight="800">{g.pts.toLocaleString('en-US')}</Txt></Row>
           <View style={s.chipS}><Txt size={13} weight="800">{T('المستوى ', 'Level ') + lvl}</Txt></View>
         </Row>
         <Row gap={8} style={{ marginTop: 10 }}>
           <View style={s.face}><Avatar size={56} /></View>
-          <View style={s.bubble}><Txt size={13} weight="800" color="#3F8C8C">{T(f ? 'رفيدة' : 'رفيد', f ? 'Rufaida' : 'Rafeed')}</Txt><Txt size={14}>{bubble}</Txt></View>
+          <View style={s.bubble}><Txt size={13} weight="800" color="#1E86C4">{T(f ? 'رفيدة' : 'رفيد', f ? 'Rufaida' : 'Rafeed')}</Txt><Txt size={14}>{bubble}</Txt></View>
         </Row>
         {calm && !cheer && (
           <View style={{ marginTop: 10, gap: 4 }}>
@@ -276,7 +276,7 @@ export default function GameScreen() {
           <Txt size={15} weight="800" style={{ paddingHorizontal: 14 }}>{{ hood: T('ابني في حيّك', 'Build in your district'), shop: T('المتجر · طوّري حيّك', 'Shop · improve your district'), acts: T('أنشطة سريعة', 'Quick activities'), store: T('المخزن', 'Inventory') }[tab]}</Txt>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 12, paddingVertical: 8 }}>
             {cards.map((c) => (
-              <Pressable key={c.key} onPress={c.pick} style={[s.card, { opacity: (c as { dim?: boolean }).dim ? 0.55 : 1, backgroundColor: c.done ? '#EEF2D2' : '#FFFFFF', borderColor: c.done ? '#BAC94A' : sel && tab === 'hood' ? '#E2D36B' : '#E6EFEC' }]}>
+              <Pressable key={c.key} onPress={c.pick} style={[s.card, { opacity: (c as { dim?: boolean }).dim ? 0.55 : 1, backgroundColor: c.done ? '#EEF2D2' : '#FFFFFF', borderColor: c.done ? '#BAC94A' : sel && tab === 'hood' ? '#E2D36B' : '#E6EDEF' }]}>
                 {c.icon}<Txt size={12} weight="700" center lines={2}>{c.t}</Txt>
                 <Row gap={3} style={{ justifyContent: 'center' }}>{c.coin && <Coin size={13} />}<Txt size={12} weight="800">{c.cost}</Txt></Row>
               </Pressable>
@@ -328,7 +328,7 @@ export default function GameScreen() {
             )}
             {won && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 }}><Txt size={18} weight="800" center>{tx(N.thanks)}</Txt><Row gap={4}><Coin /><Txt size={15} weight="800">+{N.gain}</Txt></Row></View>}
           </View>
-          <Pressable onPress={closeTask} style={[s.btn, { backgroundColor: won ? '#BAC94A' : '#D5EFE8' }]}><Txt size={15} weight="800" center>{won ? (calm ? T('يلا', 'Next') : T('تم', 'Done')) : calm ? T('خلّصت', 'Finished') : T('بعدين', 'Later')}</Txt></Pressable>
+          <Pressable onPress={closeTask} style={[s.btn, { backgroundColor: won ? '#BAC94A' : '#D6EEFC' }]}><Txt size={15} weight="800" center>{won ? (calm ? T('يلا', 'Next') : T('تم', 'Done')) : calm ? T('خلّصت', 'Finished') : T('بعدين', 'Later')}</Txt></Pressable>
         </View>
       )}
 
@@ -346,13 +346,13 @@ export default function GameScreen() {
             {A.type === 'tap' && !act.won && [[30, 20], [70, 28], [45, 45], [85, 55], [25, 62], [60, 75], [88, 88]].map(([x, y], i) => act.hit.includes(i) ? null : (
               <Pressable key={i} onPress={() => { const hit = act.hit.concat([i]); const nx = { ...act, hit }; setAct(nx); if (hit.length >= A.need) setTimeout(() => winAct(nx), 200); }}
                 style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, transform: [{ translateX: -18 }, { translateY: -18 }] }} hitSlop={8}>
-                <Svg width={36} height={36} viewBox="0 0 24 24"><Path d={['M8 4 h8 v16 h-8 z', 'M5 7 L12 4 L19 8 L17 17 L9 20 L4 14 Z', 'M10 3 h4 v4 l2 3 v11 h-8 V10 l2-3 z'][i % 3]} fill={['#6C8CBF', '#FFFFFF', '#96D7C6'][i % 3]} stroke="#173F42" strokeWidth={1} /></Svg>
+                <Svg width={36} height={36} viewBox="0 0 24 24"><Path d={['M8 4 h8 v16 h-8 z', 'M5 7 L12 4 L19 8 L17 17 L9 20 L4 14 Z', 'M10 3 h4 v4 l2 3 v11 h-8 V10 l2-3 z'][i % 3]} fill={['#6C8CBF', '#FFFFFF', '#59C2F9'][i % 3]} stroke="#0E2E45" strokeWidth={1} /></Svg>
               </Pressable>
             ))}
             {A.type === 'move' && !act.won && (
               <>
                 {act.id === 'boxes'
-                  ? <Pressable onPress={() => placeNext(-1)} accessibilityRole="button" style={[s.target, { left: '75%', top: '47%', width: 104, height: 96, borderRadius: 12 }]}><Svg width={90} height={60} viewBox="0 0 120 80"><Rect x={4} y={10} width={80} height={50} fill="#6C8CBF" /><Rect x={84} y={26} width={30} height={34} fill="#6C8CBF" /><SC cx={24} cy={66} r={10} fill="#173F42" /><SC cx={96} cy={66} r={10} fill="#173F42" /></Svg></Pressable>
+                  ? <Pressable onPress={() => placeNext(-1)} accessibilityRole="button" style={[s.target, { left: '75%', top: '47%', width: 104, height: 96, borderRadius: 12 }]}><Svg width={90} height={60} viewBox="0 0 120 80"><Rect x={4} y={10} width={80} height={50} fill="#6C8CBF" /><Rect x={84} y={26} width={30} height={34} fill="#6C8CBF" /><SC cx={24} cy={66} r={10} fill="#0E2E45" /><SC cx={96} cy={66} r={10} fill="#0E2E45" /></Svg></Pressable>
                   : [[25, 32], [55, 22], [80, 42]].map(([x, y], h) => <Pressable key={h} onPress={() => placeNext(h)} accessibilityRole="button" style={[s.target, { left: `${x}%`, top: `${y}%`, width: 56, height: 40, borderRadius: 28, transform: [{ translateX: -28 }, { translateY: -20 }], borderColor: act.holes[h] >= 0 ? '#BAC94A' : '#7A5434', backgroundColor: 'rgba(122,84,52,.22)' }]} />)}
                 {act.pos.map(([x, y], i) => act.placed[i] ? (
                   <View key={i} style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, transform: [{ translateX: -20 }, { translateY: -20 }] }}><IsoIcon k={act.id === 'boxes' ? 'house' : 'park'} c={act.id === 'boxes' ? ['#F3E3B5', '#E2D3A0', '#CDB98A', '#CDB98A'] : ['#BAC94A', '#7A5434', '#7A5434', '#BAC94A']} /></View>
@@ -372,7 +372,7 @@ export default function GameScreen() {
             )}
             {act.won && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 }}><Txt size={18} weight="800" center>{tx(A.thanks)}</Txt><Row gap={4}><Coin /><Txt size={15} weight="800">+{A.gain}</Txt></Row></View>}
           </View>
-          <Pressable onPress={closeAct} style={[s.btn, { backgroundColor: act.won ? '#BAC94A' : '#D5EFE8' }]}><Txt size={15} weight="800" center>{act.won ? (calm ? T('يلا', 'Next') : T('تم', 'Done')) : calm ? T('خلّصت', 'Finished') : T('بعدين', 'Later')}</Txt></Pressable>
+          <Pressable onPress={closeAct} style={[s.btn, { backgroundColor: act.won ? '#BAC94A' : '#D6EEFC' }]}><Txt size={15} weight="800" center>{act.won ? (calm ? T('يلا', 'Next') : T('تم', 'Done')) : calm ? T('خلّصت', 'Finished') : T('بعدين', 'Later')}</Txt></Pressable>
         </View>
       )}
 
@@ -399,15 +399,15 @@ const s = StyleSheet.create({
   fill: { height: '100%', backgroundColor: C.tealMid, borderRadius: 4 },
   tasks: { backgroundColor: 'rgba(255,255,255,.97)', borderRadius: 18, padding: 12, marginTop: 8 },
   reward: { borderRadius: 12, paddingHorizontal: 8, paddingVertical: 4, minWidth: 46, alignItems: 'center' },
-  plot: { position: 'absolute', width: 40, height: 40, borderRadius: 20, borderWidth: 3, borderColor: '#FFF', alignItems: 'center', justifyContent: 'center', elevation: 3, shadowColor: '#0F2E30', shadowOpacity: 0.25, shadowRadius: 6 },
-  coin: { position: 'absolute', width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', elevation: 3, shadowColor: '#0F2E30', shadowOpacity: 0.25, shadowRadius: 6 },
+  plot: { position: 'absolute', width: 40, height: 40, borderRadius: 20, borderWidth: 3, borderColor: '#FFF', alignItems: 'center', justifyContent: 'center', elevation: 3, shadowColor: '#002336', shadowOpacity: 0.25, shadowRadius: 6 },
+  coin: { position: 'absolute', width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', elevation: 3, shadowColor: '#002336', shadowOpacity: 0.25, shadowRadius: 6 },
   npc: { backgroundColor: '#FFF', borderRadius: 16, paddingVertical: 3, paddingHorizontal: 4 },
   npcI: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   badge: { width: 16, height: 16, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   tip: { width: 0, height: 0, borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 7, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: '#FFF' },
   bottom: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,.96)', borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingTop: 12 },
   card: { width: 92, borderRadius: 18, borderWidth: 1.5, padding: 8, alignItems: 'center', gap: 4 },
-  tabs: { marginHorizontal: 12, backgroundColor: '#F3F8F6', borderRadius: 20, padding: 4, justifyContent: 'space-between' },
+  tabs: { marginHorizontal: 12, backgroundColor: '#F3F8FB', borderRadius: 20, padding: 4, justifyContent: 'space-between' },
   tab: { flex: 1, alignItems: 'center', paddingVertical: 6, borderRadius: 16, gap: 2 },
   sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 26, borderTopRightRadius: 26, padding: 16, gap: 10, elevation: 10, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16 },
   area: { height: 300, borderRadius: 20, backgroundColor: '#DDE6A8', overflow: 'hidden' },
@@ -415,5 +415,5 @@ const s = StyleSheet.create({
   hole: { position: 'absolute', width: 64, height: 40, marginLeft: -32, marginTop: -20, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   target: { position: 'absolute', transform: [{ translateX: -52 }, { translateY: -48 }], borderWidth: 2, borderColor: '#FFF', backgroundColor: 'rgba(255,255,255,.15)', alignItems: 'center', justifyContent: 'center' },
   btn: { borderRadius: 999, paddingVertical: 13 },
-  cheer: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(243,248,246,.97)', alignItems: 'center', gap: 16, paddingHorizontal: 28 },
+  cheer: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(243,248,251,.97)', alignItems: 'center', gap: 16, paddingHorizontal: 28 },
 });

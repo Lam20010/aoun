@@ -4,13 +4,13 @@
     "slug": "aoun",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/aoun-icon.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#0F2E30",
+    "backgroundColor": "#002336",
     "splash": {
-      "image": "./assets/aoun-icon.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F2E30"
+      "backgroundColor": "#002336"
     },
     "ios": {
       "supportsTablet": false,
@@ -27,8 +27,8 @@
     "android": {
       "package": "sa.aoun.demo",
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/aoun-icon.png"
+        "backgroundColor": "#002336",
+        "foregroundImage": "./assets/adaptive-icon.png"
       },
       "permissions": [
         "RECORD_AUDIO",

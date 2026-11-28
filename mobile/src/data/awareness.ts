@@ -5,7 +5,7 @@ import type { Lang } from '../i18n';
 export interface Tip { key: string; screening?: string; c: string; ink: string; icon: string; tag: [string, string]; title: [string, string]; facts: [string, string][] }
 
 export const TIPS: Tip[] = [
-  { key: 'diabetes', screening: 'diabetes', c: '#E6F4F1', ink: '#2F7F80', icon: 'M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z',
+  { key: 'diabetes', screening: 'diabetes', c: '#E5F3FC', ink: '#1574AD', icon: 'M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z',
     tag: ['نوفمبر شهر التوعية بالسكري', 'November is diabetes awareness month'], title: ['السكري يقدر ينكشف بدري', 'Diabetes can be caught early'],
     facts: [['كثير ما يحسّون بأي أعراض في البداية.', 'Many people feel nothing at first.'],
       ['فحص السكر التراكمي من عمر ٣٥، أو قبل لو في العائلة سكري.', 'An HbA1c test from 35, or earlier if diabetes runs in the family.'],

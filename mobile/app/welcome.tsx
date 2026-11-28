@@ -27,7 +27,7 @@ export default function Welcome() {
   ];
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
-      <LinearGradient colors={['#D5EFE8', '#F3F8F6']} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#D6EEFC', '#F3F8FB']} style={StyleSheet.absoluteFill} />
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}><Skyline width="100%" height={150} opacity={0.9} /></View>
       <View style={{ paddingTop: insets.top + 40, paddingHorizontal: 24, gap: 18 }}>
         <Image source={require('../assets/aoun-icon.png')} style={{ width: 64, height: 64 }} />

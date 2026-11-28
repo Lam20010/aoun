@@ -2,7 +2,7 @@
 // The same scene as the presentation's footer, drawn once and reused on the home screen and the walk tile.
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 
-const SAND = '#E9DCC3', SAND2 = '#DCCBAA', DOOR = '#C9B38A', DOME = '#CFE6E0', PALM = '#96C9B4', TRUNK = '#C9A87A', INK = '#9DB8B2';
+const SAND = '#E9DCC3', SAND2 = '#DCCBAA', DOOR = '#C9B38A', DOME = '#CEDFE7', PALM = '#96C9B4', TRUNK = '#C9A87A', INK = '#9CB0B9';
 
 function House({ x, w, h, c = SAND }: { x: number; w: number; h: number; c?: string }) {
   const y = 120 - h, teeth = Math.max(2, Math.floor(w / 9));

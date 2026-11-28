@@ -31,9 +31,9 @@ const EV_STYLE: Record<string, [string, string, string]> = {
   mammo_truck: ['#FCE8EE', '#A33A5C', 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4'],
   bp_check: ['#FBF5D6', '#6B5A08', 'M3 12h4l2-5 4 10 2-5h6'],
   group_walk: ['#EEF2D2', '#4B5512', 'M13 4a1.5 1.5 0 1 0 0-.01M9 21l2-6 3 3v3M7 12l3-3 3 2 3 1'],
-  vaccine: ['#E6F4F1', '#2F7F80', 'M18 2l4 4M17 7l3-3M19 9L9 19l-4 1 1-4L16 6zM12 10l2 2'],
+  vaccine: ['#E5F3FC', '#1574AD', 'M18 2l4 4M17 7l3-3M19 9L9 19l-4 1 1-4L16 6zM12 10l2 2'],
   talk: ['#E1E8F3', '#3D5F94', 'M7 8h10M7 12h6M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],
-  mobile_clinic: ['#E6F4F1', '#2F7F80', 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4'],
+  mobile_clinic: ['#E5F3FC', '#1574AD', 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4'],
   evening_hours: ['#F4E9F7', '#7A3E8F', 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z'],
 };
 
@@ -118,7 +118,7 @@ export default function Home() {
     <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingBottom: 210 }}
       refreshControl={<RefreshControl refreshing={busy} onRefresh={load} />}>
       {/* welcome over the neighbourhood */}
-      <LinearGradient colors={['#D5EFE8', '#EAF5F1', C.bg]} style={{ paddingTop: insets.top + 12, paddingHorizontal: 20 }}>
+      <LinearGradient colors={['#D6EEFC', '#EAF5F1', C.bg]} style={{ paddingTop: insets.top + 12, paddingHorizontal: 20 }}>
         <Row style={{ justifyContent: 'space-between' }}>
           <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel={t('settings')}><Circle size={44}><Icon d={ICON.sliders} size={20} /></Circle></Pressable>
           <Pressable onPress={() => router.push('/assistant')} accessibilityRole="button" accessibilityLabel={t('assistantMenu')}><Circle size={44}><Icon d={ICON.heart} size={22} color={C.teal} /></Circle></Pressable>
@@ -148,7 +148,7 @@ export default function Home() {
       {/* 2. what's new in the district */}
       {head(T('جديد في حيّك', 'New in your district'), me ? T(`فعاليات صحية قريبة منك في ${me.district_ar}`, `Health events near you in ${me.district_en}`) : undefined)}
       {challenge && (
-        <Card style={{ marginHorizontal: 20, marginBottom: 10, backgroundColor: '#E6F4F1', gap: 6 }} onPress={() => router.push('/game')}>
+        <Card style={{ marginHorizontal: 20, marginBottom: 10, backgroundColor: '#E5F3FC', gap: 6 }} onPress={() => router.push('/game')}>
           <Row gap={8}><Icon d={ICON.shield} size={17} color={C.teal} /><Txt size={12} weight="700" color={C.teal}>{T('من وزارة الصحة لحيّك', 'From the Ministry for your district')}</Txt></Row>
           <Row style={{ justifyContent: 'space-between' }}><Txt size={16} weight="800">{pick(challenge as never, 'title')}</Txt><Txt size={14} weight="800" color={C.teal}>{challenge.progress}/{challenge.goal}</Txt></Row>
           <View style={s.track}><View style={[s.fill, { width: `${(challenge.progress ?? 0) / (challenge.goal || 1) * 100}%` }]} /></View>
@@ -307,10 +307,10 @@ const s = StyleSheet.create({
   lineFill: { height: 4, borderRadius: 2, backgroundColor: C.teal },
   node: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: C.line, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center' },
   appt: { borderRadius: R.card, padding: 18, gap: 4 },
-  dash: { borderTopWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(23,63,66,.25)', marginVertical: 10 },
+  dash: { borderTopWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(14,46,69,.25)', marginVertical: 10 },
   grid: { flexWrap: 'wrap', gap: 12, paddingHorizontal: 20 },
   tile: { borderRadius: 24, padding: 14, minHeight: 124, overflow: 'hidden' },
-  scrim: { flex: 1, backgroundColor: 'rgba(15,46,48,.35)' },
+  scrim: { flex: 1, backgroundColor: 'rgba(0,35,54,.35)' },
   sheet: { backgroundColor: C.bg, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 22, gap: 10 },
   bullet: { width: 7, height: 7, borderRadius: 4, marginTop: 8 },
 });

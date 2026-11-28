@@ -1,23 +1,23 @@
 // Colours and shapes from the Aoun prototype.
 export const C = {
-  bg: '#F3F8F6',
+  bg: '#F3F8FB',
   card: '#FFFFFF',
-  ink: '#173F42',
-  inkSoft: '#4E5C5E',
-  muted: '#7E8C8E',
-  teal: '#2F7F80',
-  tealMid: '#5AA7A7',
-  mint: '#96D7C6',
-  mintSoft: '#D5EFE8',
-  mintCard: '#BFE6DA',
-  dark: '#0F2E30',
-  darkBar: '#1E4A4D',
+  ink: '#0E2E45',
+  inkSoft: '#4A5A66',
+  muted: '#7D8B96',
+  teal: '#1574AD',
+  tealMid: '#3BA6E0',
+  mint: '#59C2F9',
+  mintSoft: '#D6EEFC',
+  mintCard: '#BEE3F8',
+  dark: '#002336',
+  darkBar: '#0B3A55',
   lime: '#BAC94A',
   yellow: '#F6F0C4',
   yellowInk: '#6B5A08',
   lavender: '#E3E8F6',
   blue: '#6C8CBF',
-  line: '#E3ECEA',
+  line: '#E2EBF1',
   red: '#FF3B30',
   white: '#FFFFFF',
 };
@@ -25,8 +25,8 @@ export const C = {
 export const R = { card: 22, pill: 999, tile: 18, row: 16 };
 
 export const GRAD = {
-  callBg: ['#1F4A50', '#173A3F', '#0F2A2D'] as const,
-  lock: ['#22494F', '#1B3F44', '#203E4A'] as const,
-  apptCard: ['#CBEDE2', '#A9DCCD'] as const,
-  notebookHead: ['#6C8CBF', '#5AA7A7'] as const,
+  callBg: ['#1D3C52', '#152E41', '#0E212E'] as const,
+  lock: ['#203C51', '#193346', '#1E364C'] as const,
+  apptCard: ['#CDE9FA', '#A4D8F6'] as const,
+  notebookHead: ['#6C8CBF', '#3BA6E0'] as const,
 };

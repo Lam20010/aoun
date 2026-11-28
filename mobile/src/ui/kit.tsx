@@ -57,7 +57,7 @@ const s = StyleSheet.create({
 });
 
 export function Pill({ text, tone = 'mint' }: { text: string; tone?: 'mint' | 'amber' | 'red' | 'gray' | 'dark' }) {
-  const c = { mint: [C.mintSoft, C.teal], amber: ['#FBEFD5', '#A16207'], red: ['#FDE4DA', '#C2410C'], gray: ['#EEF2F1', C.inkSoft], dark: [C.dark, C.white] }[tone];
+  const c = { mint: [C.mintSoft, C.teal], amber: ['#FBEFD5', '#A16207'], red: ['#FDE4DA', '#C2410C'], gray: ['#EEF1F2', C.inkSoft], dark: [C.dark, C.white] }[tone];
   return <View style={{ backgroundColor: c[0], borderRadius: R.pill, paddingHorizontal: 10, paddingVertical: 3, alignSelf: 'flex-start' }}><Txt size={12} weight="700" color={c[1]}>{text}</Txt></View>;
 }
 

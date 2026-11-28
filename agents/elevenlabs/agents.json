@@ -1,0 +1,167 @@
+{
+  "exported": "2026-11-28",
+  "shared_settings": {
+    "llm": "gemini-3.5-flash",
+    "temperature": 0.3,
+    "language": "ar",
+    "tts": {
+      "model_id": "eleven_v4",
+      "stability": 0.5,
+      "speed": 0.95,
+      "similarity_boost": 0.75,
+      "optimize_streaming_latency": 3,
+      "expressive_mode": true,
+      "text_normalisation_type": "system_prompt"
+    },
+    "asr": {
+      "provider": "scribe_v3_live",
+      "quality": "high"
+    },
+    "turn": {
+      "turn_timeout": 7.0,
+      "mode": "turn",
+      "turn_eagerness": "normal",
+      "turn_model": "turn_v3",
+      "speculative_turn": true
+    },
+    "built_in_tools": {
+      "end_call": "Hang up only after you have said goodbye and the person has nothing more to ask.",
+      "language_detection": "Switch only when the caller clearly speaks English, Urdu, Hindi, Bengali, Filipino or Indonesian, or asks to switch. Never switch because of an Arabic dialect, an accent or one foreign word. (only_at_conversation_start: true)"
+    },
+    "client_overrides": {
+      "agent.language": true,
+      "conversation.text_only": true
+    },
+    "privacy_now": {
+      "record_voice": true,
+      "retention_days": -1,
+      "zero_retention_mode": false,
+      "note": "Undecided. Recommended before going live: zero_retention_mode true (nothing kept after a call)."
+    }
+  },
+  "agents": [
+    {
+      "id": "agent_9701m8d18596fbv8ghbf9jk4we3c",
+      "branch": "agtbrch_8401m8d186btfmx9jv542hq69dmy",
+      "name": "عون – رُفيدة (مكالمات)",
+      "role": "Outbound call to women",
+      "prompt_file": "rufaida_prompt.md",
+      "voice_id": "o0oG1TnHDWDdKbAeBgCO",
+      "language_voices": {
+        "bn": "8e81Dm4CldjBZSlArGoT",
+        "en": "DXFkLCBUTmvXpp2QwZjA",
+        "fil": "BtcCEANLn920ZIoN9grW",
+        "hi": "Nda1Ovn4Zg0G77HVF1Fz",
+        "id": "TrU3igk19A4aIUi2GAA2",
+        "ur": "o85TqPN3F4P7dWae2paA"
+      },
+      "first_message_ar": "السلام عليكم، معك عون من وزارة الصحة. عساك بخير وصحة؟",
+      "tools": [
+        "get_appointment",
+        "confirm_booking",
+        "record_barrier",
+        "send_location_link",
+        "get_solutions",
+        "request_transport",
+        "set_preferences",
+        "request_nurse_callback",
+        "opt_out",
+        "end_call",
+        "language_detection"
+      ]
+    },
+    {
+      "id": "agent_3801m8d1800xe1dbvm93n5dg3gay",
+      "branch": "agtbrch_4401m8d181cbfe399e3dys2zq0dy",
+      "name": "عون – رفيد (مكالمات)",
+      "role": "Outbound call to men",
+      "prompt_file": "rafeed_prompt.md",
+      "voice_id": "O7RAXQn7KXIEqLr2JNyO",
+      "language_voices": {
+        "bn": "DILxRymqpFvk807E7A8C",
+        "en": "9yRadyCvZPvu908xMjvZ",
+        "fil": "StymX0JUYNoafvGtCcXl",
+        "hi": "3aVSYngN97kYGwRG442x",
+        "id": "RPiKODq6UzT7HwJC1aX8",
+        "ur": "3T5Zbv3ekfwIvj6wyRNC"
+      },
+      "first_message_ar": "السلام عليكم، معك عون من وزارة الصحة. عساك بخير وصحة؟",
+      "tools": [
+        "get_appointment",
+        "confirm_booking",
+        "record_barrier",
+        "send_location_link",
+        "get_solutions",
+        "request_transport",
+        "set_preferences",
+        "request_nurse_callback",
+        "opt_out",
+        "end_call",
+        "language_detection"
+      ]
+    },
+    {
+      "id": "agent_1501m8ef5ggye2a9q13mtb0rvkzj",
+      "branch": "agtbrch_3401m8ef5gh0e19rdmbpfx327srr",
+      "name": "عون – رُفيدة (التطبيق)",
+      "role": "In-app voice assistant (women)",
+      "prompt_file": "rufaida_app_prompt.md",
+      "voice_id": "o0oG1TnHDWDdKbAeBgCO",
+      "language_voices": {
+        "bn": "8e81Dm4CldjBZSlArGoT",
+        "en": "DXFkLCBUTmvXpp2QwZjA",
+        "fil": "BtcCEANLn920ZIoN9grW",
+        "hi": "Nda1Ovn4Zg0G77HVF1Fz",
+        "id": "TrU3igk19A4aIUi2GAA2",
+        "ur": "o85TqPN3F4P7dWae2paA"
+      },
+      "first_message_ar": "هلا والله! أنا رُفيدة، اطلبي اللي تبينه بصوتك.",
+      "tools": [
+        "open_screen",
+        "read_screen",
+        "set_text_size",
+        "set_app_language",
+        "show_on_map",
+        "start_call",
+        "end_call",
+        "language_detection"
+      ]
+    },
+    {
+      "id": "agent_5601m8ef72qze8yv81t5v27tfqe0",
+      "branch": "agtbrch_6501m8ef72r2e4fay0gj1qfsypfm",
+      "name": "عون – رفيد (التطبيق)",
+      "role": "In-app voice assistant (men)",
+      "prompt_file": "rafeed_app_prompt.md",
+      "voice_id": "O7RAXQn7KXIEqLr2JNyO",
+      "language_voices": {
+        "bn": "DILxRymqpFvk807E7A8C",
+        "en": "9yRadyCvZPvu908xMjvZ",
+        "fil": "StymX0JUYNoafvGtCcXl",
+        "hi": "3aVSYngN97kYGwRG442x",
+        "id": "RPiKODq6UzT7HwJC1aX8",
+        "ur": "3T5Zbv3ekfwIvj6wyRNC"
+      },
+      "first_message_ar": "هلا والله! أنا رفيد، اطلب اللي تبيه بصوتك.",
+      "tools": [
+        "open_screen",
+        "read_screen",
+        "set_text_size",
+        "set_app_language",
+        "show_on_map",
+        "start_call",
+        "end_call",
+        "language_detection"
+      ]
+    }
+  ],
+  "languages": [
+    "ar",
+    "en",
+    "ur",
+    "hi",
+    "bn",
+    "fil",
+    "id"
+  ]
+}

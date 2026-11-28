@@ -5,7 +5,7 @@ import { useApp } from '../store';
 
 export interface AvF { hair: string; hairC: string; skin: string; bg: string; outfit: string; expr: string; clip: boolean; glasses: boolean }
 export interface AvM { head: string; hairC: string; skin: string; bg: string; beard: string; expr: string; glasses: boolean }
-export const AVF: AvF = { hair: 'long', hairC: '#3B2418', skin: '#F7DCC8', bg: '#2E7AA0', outfit: '#5BA9C9', expr: 'happy', clip: true, glasses: false };
+export const AVF: AvF = { hair: 'long', hairC: '#3B2418', skin: '#F7DCC8', bg: '#2E7AA0', outfit: '#5795CD', expr: 'happy', clip: true, glasses: false };
 export const AVM: AvM = { head: 'ghutra', hairC: '#1E1A18', skin: '#DCEEF7', bg: '#2E7AA0', beard: 'none', expr: 'happy', glasses: false };
 
 const FACE_F = 'M30 46 C30 33 38 28 50 28 C62 28 70 33 70 46 L70 57 C70 71 61 80 50 80 C39 80 30 71 30 57 Z';
@@ -48,9 +48,9 @@ export function AvatarSvg({ voice, f, m, size = 46, talking }: { voice: 'f' | 'm
   } else {
     const a = A as AvM; const has = a.head !== 'none'; const wrap = a.head === 'shemagh' ? '#C8443A' : '#FFFFFF';
     back = has ? 'M14 100 C12 48 28 18 50 18 C72 18 88 48 86 100 L72 100 C74 64 66 46 50 46 C34 46 26 64 28 100 Z' : ''; backFill = wrap;
-    body = 'M24 100 C26 87 36 82 50 82 C64 82 74 87 76 100 Z'; bodyFill = '#F5F7F7'; face = FACE_M; beard = BEARD[a.beard] ?? '';
+    body = 'M24 100 C26 87 36 82 50 82 C64 82 74 87 76 100 Z'; bodyFill = '#F5F6F7'; face = FACE_M; beard = BEARD[a.beard] ?? '';
     top = has ? 'M28 52 C27 32 37 22 50 22 C63 22 73 32 72 52 C68 44 60 40 50 40 C40 40 32 44 28 52 Z' : 'M29 52 C27 33 38 26 50 26 C62 26 73 33 71 52 C69 43 62 38 50 38 C38 38 31 43 29 52 Z';
-    topFill = has ? wrap : a.hairC; igal = has ? 'M27 34 Q50 22 73 34 M28 41 Q50 30 72 41' : ''; ink = '#17303A'; mouthC = '#5E7C86';
+    topFill = has ? wrap : a.hairC; igal = has ? 'M27 34 Q50 22 73 34 M28 41 Q50 30 72 41' : ''; ink = '#162A3B'; mouthC = '#5C7488';
   }
   const mouthFill = ex.filled ? (ex.dark ? '#8A2F3A' : mouthC) : 'none';
   return (
@@ -63,7 +63,7 @@ export function AvatarSvg({ voice, f, m, size = 46, talking }: { voice: 'f' | 'm
       {!!beard && <Path d={beard} fill={A.hairC} />}
       <Path d={top} fill={topFill} />
       {!!extra && <Path d={extra} fill={A.hairC} />}
-      {!!igal && <Path d={igal} fill="none" stroke="#17303A" strokeWidth={4} strokeLinecap="round" />}
+      {!!igal && <Path d={igal} fill="none" stroke="#162A3B" strokeWidth={4} strokeLinecap="round" />}
       {!male && <><Circle cx="37" cy="65" r="4.5" fill="#F2A7A0" fillOpacity={0.75} /><Circle cx="63" cy="65" r="4.5" fill="#F2A7A0" fillOpacity={0.75} /></>}
       {!!ex.eyeL && <Path d={ex.eyeL} fill="none" stroke={ink} strokeWidth={2.6} strokeLinecap="round" />}
       {!!ex.eyeR && <Path d={ex.eyeR} fill="none" stroke={ink} strokeWidth={2.6} strokeLinecap="round" />}
@@ -71,7 +71,7 @@ export function AvatarSvg({ voice, f, m, size = 46, talking }: { voice: 'f' | 'm
       {ex.dotR > 0 && <Circle cx="58.5" cy="55" r={ex.dotR} fill={ink} />}
       <Path d={ex.mouth} fill={mouthFill} stroke={ex.filled ? 'none' : mouthC} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
       {clip && <><Circle cx="67" cy="33" r="4.2" fill="#F4B183" /><Circle cx="67" cy="33" r="1.6" fill="#FFFFFF" /></>}
-      {A.glasses && <G fill="none" stroke="#173F42" strokeWidth={1.8}><Circle cx="41.5" cy="55" r="6" /><Circle cx="58.5" cy="55" r="6" /><Path d="M47.5 55h5" /></G>}
+      {A.glasses && <G fill="none" stroke="#0E2E45" strokeWidth={1.8}><Circle cx="41.5" cy="55" r="6" /><Circle cx="58.5" cy="55" r="6" /><Path d="M47.5 55h5" /></G>}
     </Svg>
   );
 }

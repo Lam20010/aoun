@@ -38,7 +38,7 @@ export default function Care() {
   useReadable([T('خطة الرعاية', 'Care plan'), ...items.map((i) => i.title + '. ' + i.body)]);
   return (
     <Screen title={T('خطة الرعاية', 'Care plan')}>
-      <LinearGradient colors={['#6C8CBF', '#5AA7A7']} style={{ borderRadius: 24, padding: 22, minHeight: 120, justifyContent: 'flex-end' }}>
+      <LinearGradient colors={['#6C8CBF', '#3BA6E0']} style={{ borderRadius: 24, padding: 22, minHeight: 120, justifyContent: 'flex-end' }}>
         <Txt size={28} weight="800" color={C.white}>{T('خطة الرعاية', 'Care plan')}</Txt>
         {slot?.doctor && <Txt size={14} color="rgba(255,255,255,.9)">{pick(slot.doctor as never, 'name')} · {pick(slot.doctor as never, 'clinic')}</Txt>}
       </LinearGradient>

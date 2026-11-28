@@ -10,12 +10,12 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=Reem+Kufi:wght@500;700&amp;display=swap" rel="stylesheet">
 <style>
-body{margin:0;background:#EEF5F4}
-a{color:#2F7F80}a:hover{color:#1F5D5E}
+body{margin:0;background:#EEF6FB}
+a{color:#1574AD}a:hover{color:#1C4661}
 button{font-family:inherit}
 @keyframes aounIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 @keyframes aounFeed{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-@keyframes aounPulse{0%{box-shadow:0 0 0 0 rgba(47,163,127,.55)}100%{box-shadow:0 0 0 10px rgba(47,163,127,0)}}
+@keyframes aounPulse{0%{box-shadow:0 0 0 0 rgba(46,155,214,.55)}100%{box-shadow:0 0 0 10px rgba(46,155,214,0)}}
 .aoun-in{animation:aounIn .5s cubic-bezier(.2,.7,.2,1)}
 .aoun-feed{animation:aounFeed .45s ease-out}
 .aoun-live{animation:aounPulse 1.6s ease-out infinite}
@@ -29,20 +29,20 @@ button{font-family:inherit}
   html, body { -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
   button, a.ios-btn { font-family: inherit !important; -webkit-appearance: none; touch-action: manipulation; transition: opacity .12s ease, transform .12s ease; }
   button:active, a.ios-btn:active { opacity: .55; }
-  button:focus-visible, a.ios-btn:focus-visible { outline: 3px solid #96D7C6; outline-offset: 2px; }
+  button:focus-visible, a.ios-btn:focus-visible { outline: 3px solid #59C2F9; outline-offset: 2px; }
   * { scrollbar-width: none; } *::-webkit-scrollbar { display: none; }
 </style>
 </helmet>
-<div dir="rtl" style="min-height: 100vh; box-sizing: border-box; display: flex; flex-wrap: wrap; font-family: -apple-system, BlinkMacSystemFont, 'SF Arabic', 'SF Pro Text', 'IBM Plex Sans Arabic', system-ui, sans-serif; color: #173F42; background: linear-gradient(160deg, #F4F9F8 0%, #E6F0EE 100%); font-size: 15px">
+<div dir="rtl" style="min-height: 100vh; box-sizing: border-box; display: flex; flex-wrap: wrap; font-family: -apple-system, BlinkMacSystemFont, 'SF Arabic', 'SF Pro Text', 'IBM Plex Sans Arabic', system-ui, sans-serif; color: #0E2E45; background: linear-gradient(160deg, #F4F7F9 0%, #E6EDF0 100%); font-size: 15px">
 
-  <aside style="flex: 1 1 220px; max-width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #2F7F80 0%, #1F5D5E 100%); color: #FFFFFF; padding: 26px 16px; display: flex; flex-direction: column; gap: 26px">
+  <aside style="flex: 1 1 220px; max-width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #1574AD 0%, #1C4661 100%); color: #FFFFFF; padding: 26px 16px; display: flex; flex-direction: column; gap: 26px">
     <div style="display: flex; align-items: center; gap: 12px; padding: 0 6px">
       <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px">
         <div dir="ltr" style="display: flex; align-items: center; gap: 2px; background: #FFFFFF; border-radius: 16px; padding: 6px 16px 6px 8px">
           <img src="/_blob/a4364b41dd1782f1148f76b39a3c3e5d" alt="" style="width: 46px; height: 46px; display: block">
           <img src="/_blob/c3f120709c9e954988ea455ebfa38543" alt="عون" style="height: 28px; width: auto; display: block; margin-left: 4px">
         </div>
-        <span style="font-size: 12px; color: #D5EFE7">منصة وزارة الصحة</span>
+        <span style="font-size: 12px; color: #D6EEFC">منصة وزارة الصحة</span>
       </div>
     </div>
     <nav aria-label="أقسام المنصة" style="display: flex; flex-direction: column; gap: 6px">
@@ -55,16 +55,16 @@ button{font-family:inherit}
     </nav>
     <div style="margin-top: auto; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
       <div style="display: flex; align-items: center; gap: 8px"><span class="aoun-live" style="width: 10px; height: 10px; border-radius: 5px; background: #6FE0B5"></span><b style="font-size: 13px">رفيدة تعمل الآن</b></div>
-      <span style="font-size: 12px; line-height: 1.7; color: #D5EFE7">{{liveCount}} محادثة جارية مع المستفيدين في كل المناطق</span>
+      <span style="font-size: 12px; line-height: 1.7; color: #D6EEFC">{{liveCount}} محادثة جارية مع المستفيدين في كل المناطق</span>
     </div>
-    <div style="font-size: 11px; line-height: 1.7; color: #C4E3DC; padding: 0 6px">كل الأرقام مجمّعة ومجهّلة، ولا تُعرض أي مجموعة أقل من 50 شخصًا.</div>
+    <div style="font-size: 11px; line-height: 1.7; color: #C3DAE4; padding: 0 6px">كل الأرقام مجمّعة ومجهّلة، ولا تُعرض أي مجموعة أقل من 50 شخصًا.</div>
   </aside>
 
   <main style="flex: 999 1 600px; min-width: 0; box-sizing: border-box; padding: 26px clamp(14px, 2.6vw, 34px); display: flex; flex-direction: column; gap: 18px">
 
-    <header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; background: rgba(255,255,255,.75); border: 1px solid #FFFFFF; border-radius: 22px; padding: 16px 20px; box-shadow: 0 6px 24px rgba(11,110,79,.06)">
+    <header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; background: rgba(255,255,255,.75); border: 1px solid #FFFFFF; border-radius: 22px; padding: 16px 20px; box-shadow: 0 6px 24px rgba(7,83,114,.06)">
       <div style="display: flex; align-items: center; gap: 14px">
-        <div style="width: 52px; height: 52px; border-radius: 16px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center">
+        <div style="width: 52px; height: 52px; border-radius: 16px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path><path d="M9 3v15M15 6v15"></path></svg>
         </div>
         <div>
@@ -80,7 +80,7 @@ button{font-family:inherit}
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
-        <div role="group" aria-label="الفترة" style="display: flex; background: #E6F4F1; border-radius: 12px; padding: 4px">
+        <div role="group" aria-label="الفترة" style="display: flex; background: #E5F3FC; border-radius: 12px; padding: 4px">
           <sc-for list="{{ranges}}" as="rg" hint-placeholder-count="3">
             <button onClick="{{rg.pick}}" aria-pressed="{{rg.selected}}" style="min-height: 36px; padding: 0 12px; border: none; border-radius: 9px; background: {{rg.bg}}; color: {{rg.color}}; font-size: 13px; font-weight: 600; cursor: pointer">{{rg.label}}</button>
           </sc-for>
@@ -93,12 +93,12 @@ button{font-family:inherit}
     <!-- KPIs -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 12px">
       <sc-for list="{{kpis}}" as="k" hint-placeholder-count="6">
-        <div style="background: rgba(255,255,255,.85); border: 1px solid #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(11,110,79,.05)">
+        <div style="background: rgba(255,255,255,.85); border: 1px solid #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(7,83,114,.05)">
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
-            <span style="font-size: 13px; color: #4C6466; font-weight: 500">{{k.label}}</span>
-            <span style="width: 34px; height: 34px; border-radius: 11px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{k.d}}"></path></svg></span>
+            <span style="font-size: 13px; color: #4A5E6D; font-weight: 500">{{k.label}}</span>
+            <span style="width: 34px; height: 34px; border-radius: 11px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{k.d}}"></path></svg></span>
           </div>
-          <span style="font-size: 30px; font-weight: 700; color: #173F42; line-height: 1.1">{{k.value}}</span>
+          <span style="font-size: 30px; font-weight: 700; color: #0E2E45; line-height: 1.1">{{k.value}}</span>
           <span style="font-size: 12px; font-weight: 600; color: {{k.subColor}}">{{k.sub}}</span>
         </div>
       </sc-for>
@@ -110,21 +110,21 @@ button{font-family:inherit}
       <div style="display: flex; flex-direction: column; gap: 18px">
         <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: stretch">
 
-          <section style="flex: 1.7 1 520px; min-width: 0; background: rgba(255,255,255,.88); border: 1px solid #FFFFFF; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 28px rgba(11,110,79,.07)">
+          <section style="flex: 1.7 1 520px; min-width: 0; background: rgba(255,255,255,.88); border: 1px solid #FFFFFF; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 28px rgba(7,83,114,.07)">
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap">
               <div>
                 <h2 style="margin: 0; font-size: 19px">{{mapTitle}}</h2>
-                <span style="font-size: 12px; color: #4C6466">{{mapHint}}</span>
+                <span style="font-size: 12px; color: #4A5E6D">{{mapHint}}</span>
               </div>
               <sc-if value="{{canBack}}" hint-placeholder-val="{{ false }}">
-                <button onClick="{{back}}" style="min-height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #CFE2DF; background: #FFFFFF; color: #2F7F80; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px">
+                <button onClick="{{back}}" style="min-height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #CEDCE3; background: #FFFFFF; color: #1574AD; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg>
                   تصغير
                 </button>
               </sc-if>
             </div>
 
-            <div style="position: relative; border-radius: 18px; background: radial-gradient(ellipse at 50% 40%, #F7FBFA 0%, #E3F0ED 100%); overflow: hidden">
+            <div style="position: relative; border-radius: 18px; background: radial-gradient(ellipse at 50% 40%, #F7FAFB 0%, #E2ECF1 100%); overflow: hidden">
               <sc-if value="{{showKingdomMap}}" hint-placeholder-val="{{ true }}">
                 <div style="position: relative; width: 100%; aspect-ratio: 730 / 600">
                   <svg viewBox="0 0 730 600" role="img" aria-label="خريطة مناطق المملكة ملونة حسب نسبة إكمال الفحوصات" style="position: absolute; inset: 0; width: 100%; height: 100%">
@@ -135,18 +135,18 @@ button{font-family:inherit}
                     </g>
                   </svg>
                   <sc-for list="{{regionLabels}}" as="l" hint-placeholder-count="13">
-                    <span style="position: absolute; left: {{l.left}}; top: {{l.top}}; transform: translate(-50%, -50%); pointer-events: none; font-size: {{l.fs}}; font-weight: 700; color: #173F42; background: rgba(255,255,255,.85); padding: 2px 9px; border-radius: 10px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.08)">{{l.name}}</span>
+                    <span style="position: absolute; left: {{l.left}}; top: {{l.top}}; transform: translate(-50%, -50%); pointer-events: none; font-size: {{l.fs}}; font-weight: 700; color: #0E2E45; background: rgba(255,255,255,.85); padding: 2px 9px; border-radius: 10px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.08)">{{l.name}}</span>
                   </sc-for>
                   <sc-for list="{{cityPins}}" as="c" hint-placeholder-count="4">
                     <button class="aoun-in" onClick="{{c.pick}}" onMouseEnter="{{c.enter}}" onMouseLeave="{{leave}}" style="position: absolute; left: {{c.left}}; top: {{c.top}}; transform: {{c.tf}}; display: flex; flex-direction: {{c.dir}}; align-items: center; gap: 3px; border: none; background: transparent; padding: 0; cursor: pointer; z-index: 2">
-                      <span style="background: #FFFFFF; border-radius: 12px; padding: 5px 10px; font-size: 13px; font-weight: 700; color: #173F42; box-shadow: 0 3px 10px rgba(0,0,0,.15); display: flex; align-items: center; gap: 6px; white-space: nowrap">{{c.name}}<span style="background: {{c.fill}}; color: {{c.ink}}; border-radius: 8px; padding: 0 7px">{{c.pct}}%</span></span>
-                      <span style="width: 16px; height: 16px; border-radius: 8px; background: #2F7F80; border: 3px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,.3); box-sizing: border-box"></span>
+                      <span style="background: #FFFFFF; border-radius: 12px; padding: 5px 10px; font-size: 13px; font-weight: 700; color: #0E2E45; box-shadow: 0 3px 10px rgba(0,0,0,.15); display: flex; align-items: center; gap: 6px; white-space: nowrap">{{c.name}}<span style="background: {{c.fill}}; color: {{c.ink}}; border-radius: 8px; padding: 0 7px">{{c.pct}}%</span></span>
+                      <span style="width: 16px; height: 16px; border-radius: 8px; background: #1574AD; border: 3px solid #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,.3); box-sizing: border-box"></span>
                     </button>
                   </sc-for>
                 </div>
               </sc-if>
               <sc-if value="{{geoLoading}}" hint-placeholder-val="{{ false }}">
-                <div style="aspect-ratio: 730 / 600; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #4C6466">جاري تحميل الخريطة…</div>
+                <div style="aspect-ratio: 730 / 600; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #4A5E6D">جاري تحميل الخريطة…</div>
               </sc-if>
 
               <sc-if value="{{showCityMap}}" hint-placeholder-val="{{ false }}">
@@ -178,7 +178,7 @@ button{font-family:inherit}
                     </g>
                   </svg>
                   <sc-for list="{{healthPins}}" as="hp" hint-placeholder-count="10">
-                    <span aria-hidden="true" style="position: absolute; left: {{hp.left}}; top: {{hp.top}}; transform: translate(-50%, -50%); width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF; border: 2px solid #2F7F80; display: flex; align-items: center; justify-content: center; pointer-events: none; transition: left .8s cubic-bezier(.2,.7,.2,1), top .8s cubic-bezier(.2,.7,.2,1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2F7F80" stroke-width="4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span>
+                    <span aria-hidden="true" style="position: absolute; left: {{hp.left}}; top: {{hp.top}}; transform: translate(-50%, -50%); width: 20px; height: 20px; border-radius: 10px; background: #FFFFFF; border: 2px solid #1574AD; display: flex; align-items: center; justify-content: center; pointer-events: none; transition: left .8s cubic-bezier(.2,.7,.2,1), top .8s cubic-bezier(.2,.7,.2,1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1574AD" stroke-width="4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span>
                   </sc-for>
                   <sc-for list="{{cityLabels}}" as="cl" hint-placeholder-count="12">
                     <span style="position: absolute; left: {{cl.left}}; top: {{cl.top}}; transform: translate(-50%, -50%); opacity: {{cl.op}}; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: left .8s cubic-bezier(.2,.7,.2,1), top .8s cubic-bezier(.2,.7,.2,1), opacity .4s">
@@ -220,7 +220,7 @@ button{font-family:inherit}
               <sc-if value="{{tip.show}}" hint-placeholder-val="{{ false }}">
                 <div role="tooltip" style="position: absolute; left: {{tip.left}}; top: {{tip.top}}; transform: {{tip.tf}}; width: 260px; pointer-events: none; background: rgba(16,36,28,.95); color: #FFFFFF; border-radius: 16px; padding: 12px 14px; box-shadow: 0 12px 32px rgba(0,0,0,.28); display: flex; flex-direction: column; gap: 6px; z-index: 5; text-align: right">
                   <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><b style="font-size: 15px">{{tip.name}}</b><b style="font-size: 20px; color: #8FE3BE">{{tip.pct}}%</b></div>
-                  <span style="font-size: 12px; line-height: 1.6; color: #D5EFE7">{{tip.brief}}</span>
+                  <span style="font-size: 12px; line-height: 1.6; color: #D6EEFC">{{tip.brief}}</span>
                   <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; font-size: 11.5px; color: #FFFFFF">
                     <span>المستحقون: <b>{{tip.elig}}</b></span><span>قبل عون: <b>{{tip.before}}%</b></span>
                     <span>اكتشاف مبكر: <b>{{tip.early}}</b></span><span>متأخرون: <b>{{tip.late}}</b></span>
@@ -232,35 +232,35 @@ button{font-family:inherit}
             </div>
 
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
-              <div style="display: flex; gap: 4px; align-items: center; font-size: 11px; color: #4C6466; flex-wrap: wrap">
+              <div style="display: flex; gap: 4px; align-items: center; font-size: 11px; color: #4A5E6D; flex-wrap: wrap">
                 <span>{{legendLo}}</span>
                 <sc-for list="{{legend}}" as="lg" hint-placeholder-count="5">
                   <span style="display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="width: 40px; height: 12px; border-radius: 4px; background: {{lg.c}}; border: 1px solid #FFFFFF"></span><span>{{lg.t}}</span></span>
                 </sc-for>
                 <span>{{legendHi}}</span>
               </div>
-              <span style="font-size: 11px; color: #5A7375">حدود المناطق: svg-maps/saudi-arabia · CC BY 4.0 · مواقع الأحياء تخطيطية</span>
+              <span style="font-size: 11px; color: #56707F">حدود المناطق: svg-maps/saudi-arabia · CC BY 4.0 · مواقع الأحياء تخطيطية</span>
             </div>
           </section>
 
           <!-- لوحة النطاق -->
           <section style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
-            <div style="background: linear-gradient(150deg, #2F7F80 0%, #3F8B8B 100%); color: #FFFFFF; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-              <span style="font-size: 12px; color: #D5EFE7">{{scope.kind}}</span>
+            <div style="background: linear-gradient(150deg, #1574AD 0%, #1E86C4 100%); color: #FFFFFF; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+              <span style="font-size: 12px; color: #D6EEFC">{{scope.kind}}</span>
               <b style="font-size: 24px; line-height: 1.2">{{scope.name}}</b>
-              <span style="font-size: 13px; line-height: 1.7; color: #E3F4EF">{{scope.brief}}</span>
+              <span style="font-size: 13px; line-height: 1.7; color: #E2EFF5">{{scope.brief}}</span>
               <div style="display: flex; align-items: flex-end; gap: 10px">
                 <span style="font-size: 44px; font-weight: 700; line-height: 1">{{scope.pct}}%</span>
-                <span style="font-size: 13px; color: #D5EFE7; padding-bottom: 6px">نسبة الإكمال · كانت {{scope.before}}% قبل عون</span>
+                <span style="font-size: 13px; color: #D6EEFC; padding-bottom: 6px">نسبة الإكمال · كانت {{scope.before}}% قبل عون</span>
               </div>
               <div style="height: 10px; border-radius: 5px; background: rgba(255,255,255,.2); position: relative; overflow: hidden">
                 <div style="position: absolute; top: 0; bottom: 0; right: 0; width: {{scope.pctW}}; background: #FFFFFF; border-radius: 5px"></div>
                 <div style="position: absolute; top: 0; bottom: 0; right: 0; width: {{scope.beforeW}}; background: #9FD9BF; border-radius: 5px"></div>
               </div>
               <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 4px">
-                <div style="display: flex; flex-direction: column"><b style="font-size: 17px">{{scope.addedT}}</b><span style="font-size: 11px; color: #D5EFE7">فحص إضافي</span></div>
-                <div style="display: flex; flex-direction: column"><b style="font-size: 17px">{{scope.earlyT}}</b><span style="font-size: 11px; color: #D5EFE7">اكتشاف مبكر</span></div>
-                <div style="display: flex; flex-direction: column"><b style="font-size: 17px">{{scope.lateT}}</b><span style="font-size: 11px; color: #D5EFE7">ما زالوا متأخرين</span></div>
+                <div style="display: flex; flex-direction: column"><b style="font-size: 17px">{{scope.addedT}}</b><span style="font-size: 11px; color: #D6EEFC">فحص إضافي</span></div>
+                <div style="display: flex; flex-direction: column"><b style="font-size: 17px">{{scope.earlyT}}</b><span style="font-size: 11px; color: #D6EEFC">اكتشاف مبكر</span></div>
+                <div style="display: flex; flex-direction: column"><b style="font-size: 17px">{{scope.lateT}}</b><span style="font-size: 11px; color: #D6EEFC">ما زالوا متأخرين</span></div>
               </div>
             </div>
 
@@ -272,21 +272,21 @@ button{font-family:inherit}
                 </div>
                 <b style="font-size: 15px">اقتراحات رفيدة لهذا الحي</b>
                 <sc-for list="{{hoodRecs}}" as="rc" hint-placeholder-count="3">
-                  <div style="border: 1px solid #DCEBE8; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+                  <div style="border: 1px solid #DBE6EC; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
                     <div style="display: flex; gap: 10px; align-items: flex-start">
                       <span style="flex: 0 0 34px; height: 34px; border-radius: 11px; background: {{rc.bg}}; color: {{rc.color}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{rc.d}}"></path></svg></span>
                       <div style="display: flex; flex-direction: column; gap: 2px">
                         <b style="font-size: 14px">{{rc.title}}</b>
-                        <span style="font-size: 12px; color: #4C6466; line-height: 1.6">{{rc.why}}</span>
+                        <span style="font-size: 12px; color: #4A5E6D; line-height: 1.6">{{rc.why}}</span>
                       </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
-                      <span style="font-size: 12px; font-weight: 700; color: #2F7F80">{{rc.impact}}</span>
+                      <span style="font-size: 12px; font-weight: 700; color: #1574AD">{{rc.impact}}</span>
                       <sc-if value="{{rc.pending}}" hint-placeholder-val="{{ true }}">
-                        <button onClick="{{rc.approve}}" style="min-height: 38px; padding: 0 16px; border-radius: 10px; border: none; background: #2F7F80; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">اعتماد</button>
+                        <button onClick="{{rc.approve}}" style="min-height: 38px; padding: 0 16px; border-radius: 10px; border: none; background: #1574AD; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">اعتماد</button>
                       </sc-if>
                       <sc-if value="{{rc.done}}" hint-placeholder-val="{{ false }}">
-                        <span style="font-size: 12px; font-weight: 700; color: #2F7F80; background: #E6F4F1; padding: 7px 10px; border-radius: 10px">معتمد · رفيدة تبلّغ السكان</span>
+                        <span style="font-size: 12px; font-weight: 700; color: #1574AD; background: #E5F3FC; padding: 7px 10px; border-radius: 10px">معتمد · رفيدة تبلّغ السكان</span>
                       </sc-if>
                     </div>
                   </div>
@@ -297,11 +297,11 @@ button{font-family:inherit}
             <sc-if value="{{showList}}" hint-placeholder-val="{{ true }}">
               <div style="background: rgba(255,255,255,.9); border: 1px solid #FFFFFF; border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1">
                 <b style="font-size: 15px">{{listTitle}}</b>
-                <span style="font-size: 12px; color: #4C6466">الأقل إكمالًا أولًا · اضغط للدخول</span>
+                <span style="font-size: 12px; color: #4A5E6D">الأقل إكمالًا أولًا · اضغط للدخول</span>
                 <sc-for list="{{scopeList}}" as="it" hint-placeholder-count="6">
-                  <button onClick="{{it.pick}}" style="text-align: right; min-height: 48px; border-radius: 14px; border: 1px solid #E1EFEC; background: #FFFFFF; color: #173F42; padding: 8px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer">
-                    <span style="width: 12px; height: 12px; border-radius: 4px; background: {{it.fill}}; flex: 0 0 auto; border: 1px solid #C7DAD7"></span>
-                    <span style="flex: 1; display: flex; flex-direction: column"><b style="font-size: 14px">{{it.name}}</b><span style="font-size: 11px; color: #4C6466">{{it.sub}}</span></span>
+                  <button onClick="{{it.pick}}" style="text-align: right; min-height: 48px; border-radius: 14px; border: 1px solid #E0EBF0; background: #FFFFFF; color: #0E2E45; padding: 8px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+                    <span style="width: 12px; height: 12px; border-radius: 4px; background: {{it.fill}}; flex: 0 0 auto; border: 1px solid #C6D4DB"></span>
+                    <span style="flex: 1; display: flex; flex-direction: column"><b style="font-size: 14px">{{it.name}}</b><span style="font-size: 11px; color: #4A5E6D">{{it.sub}}</span></span>
                     <b style="font-size: 15px">{{it.pct}}%</b>
                   </button>
                 </sc-for>
@@ -324,7 +324,7 @@ button{font-family:inherit}
                 </svg>
                 <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none">
                   <b style="font-size: 18px; line-height: 1.2">{{scope.lateShort}}</b>
-                  <span style="font-size: 11px; color: #4C6466">متأخر عن الفحص</span>
+                  <span style="font-size: 11px; color: #4A5E6D">متأخر عن الفحص</span>
                 </div>
               </div>
               <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 7px">
@@ -336,37 +336,37 @@ button{font-family:inherit}
           </section>
 
           <section style="background: rgba(255,255,255,.88); border: 1px solid #FFFFFF; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><h2 style="margin: 0; font-size: 18px">الأثر عبر الأشهر</h2><b style="color: #2F7F80; font-size: 14px">+{{scope.delta}} نقطة</b></div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><h2 style="margin: 0; font-size: 18px">الأثر عبر الأشهر</h2><b style="color: #1574AD; font-size: 14px">+{{scope.delta}} نقطة</b></div>
             <div style="position: relative; width: 100%; aspect-ratio: 560 / 230">
               <svg viewBox="0 0 560 230" role="img" aria-label="نسبة إكمال الفحوصات شهريًا قبل إطلاق عون وبعده" style="position: absolute; inset: 0; width: 100%; height: 100%">
                 <sc-for list="{{chart.grid}}" as="gl" hint-placeholder-count="4">
-                  <line x1="40" x2="550" y1="{{gl.y}}" y2="{{gl.y}}" stroke="#E1EFEC" stroke-width="1"></line>
+                  <line x1="40" x2="550" y1="{{gl.y}}" y2="{{gl.y}}" stroke="#E0EBF0" stroke-width="1"></line>
                 </sc-for>
-                <rect x="{{chart.launchX}}" y="14" width="{{chart.launchW}}" height="176" fill="#E6F4F1"></rect>
-                <path d="{{chart.area}}" fill="#2F7F80" opacity="0.10"></path>
-                <polyline points="{{chart.line}}" fill="none" stroke="#2F7F80" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></polyline>
-                <circle cx="{{chart.lastX}}" cy="{{chart.lastY}}" r="5" fill="#FFFFFF" stroke="#2F7F80" stroke-width="3"></circle>
-                <circle cx="{{chart.firstX}}" cy="{{chart.firstY}}" r="4" fill="#FFFFFF" stroke="#5A7375" stroke-width="2.5"></circle>
+                <rect x="{{chart.launchX}}" y="14" width="{{chart.launchW}}" height="176" fill="#E5F3FC"></rect>
+                <path d="{{chart.area}}" fill="#1574AD" opacity="0.10"></path>
+                <polyline points="{{chart.line}}" fill="none" stroke="#1574AD" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                <circle cx="{{chart.lastX}}" cy="{{chart.lastY}}" r="5" fill="#FFFFFF" stroke="#1574AD" stroke-width="3"></circle>
+                <circle cx="{{chart.firstX}}" cy="{{chart.firstY}}" r="4" fill="#FFFFFF" stroke="#56707F" stroke-width="2.5"></circle>
               </svg>
               <sc-for list="{{chart.gridL}}" as="gl" hint-placeholder-count="4">
-                <span style="position: absolute; left: {{gl.left}}; top: {{gl.top}}; transform: translate(-100%, -50%); font-size: 11px; color: #5A7375">{{gl.t}}</span>
+                <span style="position: absolute; left: {{gl.left}}; top: {{gl.top}}; transform: translate(-100%, -50%); font-size: 11px; color: #56707F">{{gl.t}}</span>
               </sc-for>
-              <span style="position: absolute; left: {{chart.launchL}}; top: 7%; font-size: 11px; font-weight: 700; color: #2F7F80">بعد إطلاق عون</span>
-              <span style="position: absolute; left: {{chart.firstL}}; top: {{chart.firstT}}; transform: translate(-50%, -130%); font-size: 14px; font-weight: 700; color: #4C6466">{{chart.firstV}}%</span>
-              <span style="position: absolute; left: {{chart.lastL}}; top: {{chart.lastT}}; transform: translate(-50%, -130%); font-size: 16px; font-weight: 700; color: #2F7F80">{{chart.lastV}}%</span>
+              <span style="position: absolute; left: {{chart.launchL}}; top: 7%; font-size: 11px; font-weight: 700; color: #1574AD">بعد إطلاق عون</span>
+              <span style="position: absolute; left: {{chart.firstL}}; top: {{chart.firstT}}; transform: translate(-50%, -130%); font-size: 14px; font-weight: 700; color: #4A5E6D">{{chart.firstV}}%</span>
+              <span style="position: absolute; left: {{chart.lastL}}; top: {{chart.lastT}}; transform: translate(-50%, -130%); font-size: 16px; font-weight: 700; color: #1574AD">{{chart.lastV}}%</span>
               <sc-for list="{{chart.monthsL}}" as="mo" hint-placeholder-count="12">
-                <span style="position: absolute; left: {{mo.left}}; top: 88%; transform: translateX(-50%); font-size: 10.5px; color: #5A7375; white-space: nowrap">{{mo.t}}</span>
+                <span style="position: absolute; left: {{mo.left}}; top: 88%; transform: translateX(-50%); font-size: 10.5px; color: #56707F; white-space: nowrap">{{mo.t}}</span>
               </sc-for>
             </div>
           </section>
 
           <section style="background: rgba(255,255,255,.88); border: 1px solid #FFFFFF; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-            <div style="display: flex; align-items: center; gap: 8px"><span class="aoun-live" style="width: 10px; height: 10px; border-radius: 5px; background: #5AA7A7"></span><h2 style="margin: 0; font-size: 18px">ما يحدث الآن</h2></div>
+            <div style="display: flex; align-items: center; gap: 8px"><span class="aoun-live" style="width: 10px; height: 10px; border-radius: 5px; background: #3BA6E0"></span><h2 style="margin: 0; font-size: 18px">ما يحدث الآن</h2></div>
             <sc-for list="{{feed}}" as="f" hint-placeholder-count="5">
-              <div class="{{f.cls}}" style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid #EEF5F4">
+              <div class="{{f.cls}}" style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid #EEF6FB">
                 <span style="flex: 0 0 30px; height: 30px; border-radius: 10px; background: {{f.bg}}; color: {{f.color}}; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{f.d}}"></path></svg></span>
                 <span style="flex: 1; font-size: 13px; line-height: 1.6">{{f.text}}</span>
-                <span style="font-size: 11px; color: #5A7375; white-space: nowrap">{{f.time}}</span>
+                <span style="font-size: 11px; color: #56707F; white-space: nowrap">{{f.time}}</span>
               </div>
             </sc-for>
           </section>
@@ -379,9 +379,9 @@ button{font-family:inherit}
               <div style="background: {{a.bg}}; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
                 <span style="width: 44px; height: 44px; border-radius: 14px; background: #FFFFFF; color: {{a.color}}; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{a.d}}"></path></svg></span>
                 <b style="font-size: 15px">{{a.title}}</b>
-                <span style="font-size: 12px; color: #35494B">{{a.where}}</span>
+                <span style="font-size: 12px; color: #34424C">{{a.where}}</span>
                 <div style="height: 7px; border-radius: 4px; background: rgba(255,255,255,.8); overflow: hidden"><div style="width: {{a.prog}}; height: 7px; background: {{a.color}}"></div></div>
-                <span style="font-size: 11px; color: #35494B">{{a.status}}</span>
+                <span style="font-size: 11px; color: #34424C">{{a.status}}</span>
               </div>
             </sc-for>
           </div>
@@ -394,52 +394,52 @@ button{font-family:inherit}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px">
         <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
           <h2 style="margin: 0; font-size: 18px">حالات الاكتشاف المبكر حسب المرض</h2>
-          <span style="font-size: 12px; color: #4C6466">{{scope.name}} · حالات اكتُشفت في مراحلها الأولى وأُحيلت للعلاج</span>
+          <span style="font-size: 12px; color: #4A5E6D">{{scope.name}} · حالات اكتُشفت في مراحلها الأولى وأُحيلت للعلاج</span>
           <sc-for list="{{earlyBy}}" as="e" hint-placeholder-count="6">
             <div style="display: grid; grid-template-columns: 120px minmax(0, 1fr) 60px; align-items: center; gap: 10px">
               <span style="font-size: 13px">{{e.name}}</span>
-              <div style="height: 14px; background: #EEF5F4; border-radius: 7px; overflow: hidden"><div style="width: {{e.w}}; height: 14px; background: #2F7F80; border-radius: 7px"></div></div>
+              <div style="height: 14px; background: #EEF6FB; border-radius: 7px; overflow: hidden"><div style="width: {{e.w}}; height: 14px; background: #1574AD; border-radius: 7px"></div></div>
               <b style="font-size: 13px">{{e.v}}</b>
             </div>
           </sc-for>
         </section>
         <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
           <h2 style="margin: 0; font-size: 18px">رحلة المستفيد مع رفيدة</h2>
-          <span style="font-size: 12px; color: #4C6466">من أول تواصل إلى الاكتشاف المبكر</span>
+          <span style="font-size: 12px; color: #4A5E6D">من أول تواصل إلى الاكتشاف المبكر</span>
           <sc-for list="{{funnel}}" as="f" hint-placeholder-count="6">
             <div style="display: grid; grid-template-columns: 140px minmax(0, 1fr) 80px; align-items: center; gap: 10px">
               <span style="font-size: 13px">{{f.name}}</span>
-              <div style="height: 24px; background: #EEF5F4; border-radius: 7px; overflow: hidden"><div style="width: {{f.w}}; height: 24px; background: linear-gradient(90deg, #5AA7A7, #2F7F80); border-radius: 7px"></div></div>
+              <div style="height: 24px; background: #EEF6FB; border-radius: 7px; overflow: hidden"><div style="width: {{f.w}}; height: 24px; background: linear-gradient(90deg, #3BA6E0, #1574AD); border-radius: 7px"></div></div>
               <b style="font-size: 13px">{{f.v}}</b>
             </div>
           </sc-for>
         </section>
         <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
           <h2 style="margin: 0; font-size: 18px">نسبة الاستفادة حسب الفئة</h2>
-          <span style="font-size: 12px; color: #4C6466">من تواصلت معهم رفيدة وحجزوا فحصًا</span>
+          <span style="font-size: 12px; color: #4A5E6D">من تواصلت معهم رفيدة وحجزوا فحصًا</span>
           <sc-for list="{{segments}}" as="sg" hint-placeholder-count="6">
             <div style="display: flex; flex-direction: column; gap: 4px">
               <div style="display: flex; justify-content: space-between; font-size: 13px"><span>{{sg.name}}</span><b>{{sg.v}}%</b></div>
-              <div style="height: 10px; background: #EEF5F4; border-radius: 5px; overflow: hidden"><div style="width: {{sg.w}}; height: 10px; background: #5AA7A7; border-radius: 5px"></div></div>
+              <div style="height: 10px; background: #EEF6FB; border-radius: 5px; overflow: hidden"><div style="width: {{sg.w}}; height: 10px; background: #3BA6E0; border-radius: 5px"></div></div>
             </div>
           </sc-for>
         </section>
         <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
           <h2 style="margin: 0; font-size: 18px">قنوات التواصل</h2>
-          <span style="font-size: 12px; color: #4C6466">كيف يفضّل الناس الحديث مع رفيدة</span>
+          <span style="font-size: 12px; color: #4A5E6D">كيف يفضّل الناس الحديث مع رفيدة</span>
           <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
             <sc-for list="{{channels}}" as="ch" hint-placeholder-count="6">
-              <div style="background: #F2F8F7; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><b style="font-size: 22px; color: #2F7F80">{{ch.v}}%</b><span style="font-size: 12px; color: #35494B">{{ch.name}}</span></div>
+              <div style="background: #F2F6F8; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><b style="font-size: 22px; color: #1574AD">{{ch.v}}%</b><span style="font-size: 12px; color: #34424C">{{ch.name}}</span></div>
             </sc-for>
           </div>
         </section>
         <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
           <h2 style="margin: 0; font-size: 18px">النقص الصحي الأكثر شيوعًا</h2>
-          <span style="font-size: 12px; color: #4C6466">{{scope.name}} · عدد الأحياء اللي يتصدر فيها كل نقص</span>
+          <span style="font-size: 12px; color: #4A5E6D">{{scope.name}} · عدد الأحياء اللي يتصدر فيها كل نقص</span>
           <sc-for list="{{gapsList}}" as="g" hint-placeholder-count="6">
             <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 40px; align-items: center; gap: 10px">
               <span style="font-size: 13px">{{g.name}}</span>
-              <div style="height: 12px; background: #EEF5F4; border-radius: 6px; overflow: hidden"><div style="width: {{g.w}}; height: 12px; background: #D9822B; border-radius: 6px"></div></div>
+              <div style="height: 12px; background: #EEF6FB; border-radius: 6px; overflow: hidden"><div style="width: {{g.w}}; height: 12px; background: #D9822B; border-radius: 6px"></div></div>
               <b style="font-size: 13px">{{g.v}}</b>
             </div>
           </sc-for>
@@ -449,7 +449,7 @@ button{font-family:inherit}
           <sc-for list="{{regionRank}}" as="rr" hint-placeholder-count="13">
             <div style="display: grid; grid-template-columns: 110px minmax(0, 1fr) 46px; align-items: center; gap: 8px">
               <span style="font-size: 12px">{{rr.name}}</span>
-              <div style="height: 10px; background: #EEF5F4; border-radius: 5px; overflow: hidden"><div style="width: {{rr.w}}; height: 10px; background: {{rr.fill}}; border-radius: 5px; border: 1px solid #C7DAD7; box-sizing: border-box"></div></div>
+              <div style="height: 10px; background: #EEF6FB; border-radius: 5px; overflow: hidden"><div style="width: {{rr.w}}; height: 10px; background: {{rr.fill}}; border-radius: 5px; border: 1px solid #C6D4DB; box-sizing: border-box"></div></div>
               <b style="font-size: 12px">{{rr.pct}}%</b>
             </div>
           </sc-for>
@@ -463,8 +463,8 @@ button{font-family:inherit}
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px">
           <sc-for list="{{ag.kpis}}" as="k" hint-placeholder-count="4">
             <div style="background: rgba(255,255,255,.9); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 4px">
-              <span style="font-size: 13px; color: #4C6466">{{k.label}}</span>
-              <b style="font-size: 30px; color: #173F42; font-variant-numeric: tabular-nums">{{k.value}}</b>
+              <span style="font-size: 13px; color: #4A5E6D">{{k.label}}</span>
+              <b style="font-size: 30px; color: #0E2E45; font-variant-numeric: tabular-nums">{{k.value}}</b>
               <span style="font-size: 12px; font-weight: 700; color: {{k.ink}}">{{k.sub}}</span>
             </div>
           </sc-for>
@@ -472,25 +472,25 @@ button{font-family:inherit}
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px">
           <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
             <h2 style="margin: 0; font-size: 18px">رحلة كل 1000 ساكن</h2>
-            <span style="font-size: 12px; color: #4C6466">من أول مكالمة إلى فحص راجعه الطبيب</span>
+            <span style="font-size: 12px; color: #4A5E6D">من أول مكالمة إلى فحص راجعه الطبيب</span>
             <sc-for list="{{ag.funnel}}" as="f" hint-placeholder-count="4">
               <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 60px; align-items: center; gap: 10px">
                 <span style="font-size: 13px">{{f.name}}</span>
-                <div style="height: 24px; background: #EEF5F4; border-radius: 7px; overflow: hidden"><div style="width: {{f.w}}; height: 24px; background: linear-gradient(90deg, #96D7C6, #2F7F80); border-radius: 7px"></div></div>
+                <div style="height: 24px; background: #EEF6FB; border-radius: 7px; overflow: hidden"><div style="width: {{f.w}}; height: 24px; background: linear-gradient(90deg, #59C2F9, #1574AD); border-radius: 7px"></div></div>
                 <b style="font-size: 13px">{{f.v}}</b>
               </div>
             </sc-for>
-            <span style="font-size: 12px; color: #4C6466">{{ag.undiag}}</span>
+            <span style="font-size: 12px; color: #4A5E6D">{{ag.undiag}}</span>
           </section>
           <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
             <h2 style="margin: 0; font-size: 18px">مكالمات رفيدة آخر 14 يوم</h2>
-            <span style="font-size: 12px; color: #4C6466">مكالمات · ردّوا · حجزوا</span>
+            <span style="font-size: 12px; color: #4A5E6D">مكالمات · ردّوا · حجزوا</span>
             <svg viewBox="0 0 600 120" preserveAspectRatio="none" style="width: 100%; height: 130px">
-              <polyline points="{{ag.spark.calls}}" fill="none" stroke="#C7DAD7" stroke-width="3"></polyline>
+              <polyline points="{{ag.spark.calls}}" fill="none" stroke="#C6D4DB" stroke-width="3"></polyline>
               <polyline points="{{ag.spark.ans}}" fill="none" stroke="#6C8CBF" stroke-width="3"></polyline>
-              <polyline points="{{ag.spark.booked}}" fill="none" stroke="#2F7F80" stroke-width="4"></polyline>
+              <polyline points="{{ag.spark.booked}}" fill="none" stroke="#1574AD" stroke-width="4"></polyline>
             </svg>
-            <span style="font-size: 12px; color: #4C6466">{{ag.spark.note}}</span>
+            <span style="font-size: 12px; color: #4A5E6D">{{ag.spark.note}}</span>
           </section>
         </div>
         <h2 style="margin: 4px 0 0; font-size: 18px">الوكلاء الأربعة</h2>
@@ -498,12 +498,12 @@ button{font-family:inherit}
           <sc-for list="{{ag.agents}}" as="a" hint-placeholder-count="4">
             <section style="background: rgba(255,255,255,.9); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
               <div style="display: flex; align-items: center; gap: 10px">
-                <span style="width: 40px; height: 40px; border-radius: 12px; background: {{a.bg}}; color: #173F42; display: flex; align-items: center; justify-content: center; font-weight: 700">{{a.initial}}</span>
-                <div style="display: flex; flex-direction: column; flex: 1"><b style="font-size: 15px">{{a.name}}</b><span style="font-size: 12px; color: #4C6466">{{a.role}}</span></div>
+                <span style="width: 40px; height: 40px; border-radius: 12px; background: {{a.bg}}; color: #0E2E45; display: flex; align-items: center; justify-content: center; font-weight: 700">{{a.initial}}</span>
+                <div style="display: flex; flex-direction: column; flex: 1"><b style="font-size: 15px">{{a.name}}</b><span style="font-size: 12px; color: #4A5E6D">{{a.role}}</span></div>
                 <span style="font-size: 11px; font-weight: 700; background: #F2F5DC; color: #5E6A12; padding: 3px 9px; border-radius: 10px">يعمل</span>
               </div>
               <sc-for list="{{a.metrics}}" as="m" hint-placeholder-count="4">
-                <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px; border-top: 1px dashed #D5E6EE; padding-top: 6px"><span style="color: #4C6466">{{m.k}}</span><b>{{m.v}}</b></div>
+                <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px; border-top: 1px dashed #D5E6EE; padding-top: 6px"><span style="color: #4A5E6D">{{m.k}}</span><b>{{m.v}}</b></div>
               </sc-for>
             </section>
           </sc-for>
@@ -511,39 +511,39 @@ button{font-family:inherit}
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px">
           <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
             <h2 style="margin: 0; font-size: 18px">كل وكيل له دور</h2>
-            <span style="font-size: 12px; color: #4C6466">فحوصات مكتملة لكل 1000 ساكن عند إيقاف وكيل واحد</span>
+            <span style="font-size: 12px; color: #4A5E6D">فحوصات مكتملة لكل 1000 ساكن عند إيقاف وكيل واحد</span>
             <sc-for list="{{ag.ablation}}" as="b" hint-placeholder-count="6">
               <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr) 50px; align-items: center; gap: 10px">
                 <span style="font-size: 13px">{{b.name}}</span>
-                <div style="height: 14px; background: #EEF5F4; border-radius: 7px; overflow: hidden"><div style="width: {{b.w}}; height: 14px; background: {{b.color}}; border-radius: 7px"></div></div>
+                <div style="height: 14px; background: #EEF6FB; border-radius: 7px; overflow: hidden"><div style="width: {{b.w}}; height: 14px; background: {{b.color}}; border-radius: 7px"></div></div>
                 <b style="font-size: 13px">{{b.v}}</b>
               </div>
             </sc-for>
           </section>
           <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
             <h2 style="margin: 0; font-size: 18px">فهم رفيدة حسب لغة الساكن</h2>
-            <span style="font-size: 12px; color: #4C6466">على عبارات جديدة لم يُضبط عليها النظام</span>
+            <span style="font-size: 12px; color: #4A5E6D">على عبارات جديدة لم يُضبط عليها النظام</span>
             <sc-for list="{{ag.langs}}" as="l" hint-placeholder-count="7">
               <div style="display: grid; grid-template-columns: 110px minmax(0, 1fr) 50px; align-items: center; gap: 10px">
                 <span style="font-size: 13px">{{l.name}}</span>
-                <div style="height: 14px; background: #EEF5F4; border-radius: 7px; overflow: hidden"><div style="width: {{l.w}}; height: 14px; background: #5AA7A7; border-radius: 7px"></div></div>
+                <div style="height: 14px; background: #EEF6FB; border-radius: 7px; overflow: hidden"><div style="width: {{l.w}}; height: 14px; background: #3BA6E0; border-radius: 7px"></div></div>
                 <b style="font-size: 13px">{{l.v}}</b>
               </div>
             </sc-for>
           </section>
         </div>
-        <span style="font-size: 12px; color: #4C6466">{{ag.note}}</span>
+        <span style="font-size: 12px; color: #4A5E6D">{{ag.note}}</span>
       </div>
     </sc-if>
 
     <sc-if value="{{is.actions}}" hint-placeholder-val="{{ false }}">
       <section style="background: rgba(255,255,255,.9); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
         <h2 style="margin: 0; font-size: 18px">أحياء تحتاج تدخلًا · {{scope.name}}</h2>
-        <span style="font-size: 12px; color: #4C6466">رفيدة رتبت الأحياء حسب الأولوية، واقترحت لكل حي تدخلًا للعائق الأبرز وآخر للنقص الصحي الأكثر شيوعًا</span>
+        <span style="font-size: 12px; color: #4A5E6D">رفيدة رتبت الأحياء حسب الأولوية، واقترحت لكل حي تدخلًا للعائق الأبرز وآخر للنقص الصحي الأكثر شيوعًا</span>
         <div style="overflow-x: auto">
           <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px">
             <thead>
-              <tr style="background: #2F7F80; color: #FFFFFF">
+              <tr style="background: #1574AD; color: #FFFFFF">
                 <th style="text-align: right; padding: 10px 12px; font-weight: 600">الحي</th>
                 <th style="text-align: right; padding: 10px 12px; font-weight: 600">الإكمال</th>
                 <th style="text-align: right; padding: 10px 12px; font-weight: 600">العائق الأبرز</th>
@@ -554,15 +554,15 @@ button{font-family:inherit}
             </thead>
             <tbody>
               <sc-for list="{{actionRows}}" as="ar" hint-placeholder-count="10">
-                <tr style="border-bottom: 1px solid #E1EFEC">
-                  <td style="padding: 10px 12px"><b>{{ar.name}}</b><br><span style="font-size: 11px; color: #4C6466">{{ar.city}}</span></td>
+                <tr style="border-bottom: 1px solid #E0EBF0">
+                  <td style="padding: 10px 12px"><b>{{ar.name}}</b><br><span style="font-size: 11px; color: #4A5E6D">{{ar.city}}</span></td>
                   <td style="padding: 10px 12px"><span style="font-weight: 700; padding: 3px 10px; border-radius: 10px; background: {{ar.fill}}; color: {{ar.ink}}">{{ar.pct}}%</span></td>
                   <td style="padding: 10px 12px">{{ar.barrier}}</td>
                   <td style="padding: 10px 12px">{{ar.gap}}</td>
-                  <td style="padding: 10px 12px; line-height: 1.6">{{ar.act1}}<br><span style="color: #4C6466">{{ar.act2}}</span></td>
+                  <td style="padding: 10px 12px; line-height: 1.6">{{ar.act1}}<br><span style="color: #4A5E6D">{{ar.act2}}</span></td>
                   <td style="padding: 10px 12px">
-                    <sc-if value="{{ar.pending}}" hint-placeholder-val="{{ true }}"><button onClick="{{ar.approve}}" style="min-height: 38px; padding: 0 14px; border-radius: 10px; border: none; background: #2F7F80; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">اعتماد</button></sc-if>
-                    <sc-if value="{{ar.done}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; color: #2F7F80">معتمد</span></sc-if>
+                    <sc-if value="{{ar.pending}}" hint-placeholder-val="{{ true }}"><button onClick="{{ar.approve}}" style="min-height: 38px; padding: 0 14px; border-radius: 10px; border: none; background: #1574AD; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">اعتماد</button></sc-if>
+                    <sc-if value="{{ar.done}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; color: #1574AD">معتمد</span></sc-if>
                   </td>
                 </tr>
               </sc-for>
@@ -575,22 +575,22 @@ button{font-family:inherit}
     <!-- ================= التقارير ================= -->
     <sc-if value="{{is.reports}}" hint-placeholder-val="{{ false }}">
       <div style="display: flex; flex-direction: column; gap: 18px">
-        <section style="background: linear-gradient(150deg, #2F7F80 0%, #3F8B8B 100%); color: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
-          <div style="display: flex; align-items: center; gap: 10px"><span style="width: 40px; height: 40px; border-radius: 20px; background: radial-gradient(circle at 36% 30%, #FFFFFF 0%, #C4EADF 40%, #5AA7A7 80%)"></span><b style="font-size: 18px">ملخص رفيدة الأسبوعي · {{scope.name}}</b></div>
+        <section style="background: linear-gradient(150deg, #1574AD 0%, #1E86C4 100%); color: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; align-items: center; gap: 10px"><span style="width: 40px; height: 40px; border-radius: 20px; background: radial-gradient(circle at 36% 30%, #FFFFFF 0%, #C2E6FB 40%, #3BA6E0 80%)"></span><b style="font-size: 18px">ملخص رفيدة الأسبوعي · {{scope.name}}</b></div>
           <sc-for list="{{summary}}" as="sm" hint-placeholder-count="4">
-            <div style="display: flex; gap: 8px; font-size: 14px; line-height: 1.8"><span style="color: #9FE0C3">●</span><span>{{sm}}</span></div>
+            <div style="display: flex; gap: 8px; font-size: 14px; line-height: 1.8"><span style="color: #A8DDFB">●</span><span>{{sm}}</span></div>
           </sc-for>
         </section>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
           <sc-for list="{{reports}}" as="rp" hint-placeholder-count="6">
             <div style="background: rgba(255,255,255,.9); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
-              <span style="width: 40px; height: 40px; border-radius: 12px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"></path></svg></span>
+              <span style="width: 40px; height: 40px; border-radius: 12px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"></path></svg></span>
               <b style="font-size: 15px">{{rp.title}}</b>
-              <span style="font-size: 12px; color: #4C6466; line-height: 1.6">{{rp.desc}}</span>
-              <span style="font-size: 11px; color: #5A7375">{{rp.when}}</span>
+              <span style="font-size: 12px; color: #4A5E6D; line-height: 1.6">{{rp.desc}}</span>
+              <span style="font-size: 11px; color: #56707F">{{rp.when}}</span>
               <div style="display: flex; gap: 6px; margin-top: 4px">
-                <button style="flex: 1; min-height: 38px; border-radius: 10px; border: none; background: #2F7F80; color: #FFFFFF; font-size: 13px; font-weight: 600; cursor: pointer">تصدير PDF</button>
-                <button style="flex: 1; min-height: 38px; border-radius: 10px; border: 1px solid #CFE2DF; background: #FFFFFF; color: #2F7F80; font-size: 13px; font-weight: 600; cursor: pointer">Excel</button>
+                <button style="flex: 1; min-height: 38px; border-radius: 10px; border: none; background: #1574AD; color: #FFFFFF; font-size: 13px; font-weight: 600; cursor: pointer">تصدير PDF</button>
+                <button style="flex: 1; min-height: 38px; border-radius: 10px; border: 1px solid #CEDCE3; background: #FFFFFF; color: #1574AD; font-size: 13px; font-weight: 600; cursor: pointer">Excel</button>
               </div>
             </div>
           </sc-for>
@@ -601,43 +601,43 @@ button{font-family:inherit}
     <sc-if value="{{is.settings}}" hint-placeholder-val="{{ false }}">
       <div style="display: flex; flex-direction: column; gap: 16px">
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
-          <div style="display: flex; flex-direction: column; gap: 2px"><h2 style="margin: 0; font-size: 22px">الإعدادات</h2><span style="font-size: 13px; color: #4C6466">تحكّم في تنبيهات المنصة وسلوك رفيدة والخصوصية والفريق</span></div>
+          <div style="display: flex; flex-direction: column; gap: 2px"><h2 style="margin: 0; font-size: 22px">الإعدادات</h2><span style="font-size: 13px; color: #4A5E6D">تحكّم في تنبيهات المنصة وسلوك رفيدة والخصوصية والفريق</span></div>
           <div style="display: flex; align-items: center; gap: 10px">
-            <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}"><span role="status" style="font-size: 13px; font-weight: 700; color: #2F7F80; background: #E6F4F1; padding: 8px 12px; border-radius: 12px">✓ تم حفظ الإعدادات</span></sc-if>
-            <button onClick="{{resetSettings}}" style="min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #CFE2DF; background: #FFFFFF; color: #2F7F80; font-size: 14px; font-weight: 600; cursor: pointer">استعادة الافتراضي</button>
+            <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}"><span role="status" style="font-size: 13px; font-weight: 700; color: #1574AD; background: #E5F3FC; padding: 8px 12px; border-radius: 12px">✓ تم حفظ الإعدادات</span></sc-if>
+            <button onClick="{{resetSettings}}" style="min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #CEDCE3; background: #FFFFFF; color: #1574AD; font-size: 14px; font-weight: 600; cursor: pointer">استعادة الافتراضي</button>
             <button onClick="{{saveSettings}}" disabled="{{clean}}" style="min-height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: {{saveBg}}; color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: {{saveCursor}}">حفظ التغييرات</button>
           </div>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; align-items: start">
-        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(11,110,79,.05)">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">التنبيهات والحدود</h2><span style="font-size: 12.5px; color: #4C6466">متى تنبّهك المنصة عن حي أو مدينة</span></div></div>
+        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(7,83,114,.05)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">التنبيهات والحدود</h2><span style="font-size: 12.5px; color: #4A5E6D">متى تنبّهك المنصة عن حي أو مدينة</span></div></div>
           <sc-for list="{{steppers}}" as="st" hint-placeholder-count="3">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E3F0EE">
-                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{st.label}}</b><span style="font-size: 12.5px; color: #4C6466; line-height: 1.6">{{st.desc}}</span></div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E2ECF1">
+                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{st.label}}</b><span style="font-size: 12.5px; color: #4A5E6D; line-height: 1.6">{{st.desc}}</span></div>
                 <div role="group" aria-label="{{st.label}}" style="display: flex; align-items: center; gap: 6px; flex: 0 0 auto">
-                  <button onClick="{{st.dec}}" aria-label="{{st.decLabel}}" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #CFE2DF; background: #FFFFFF; color: #2F7F80; font-size: 20px; cursor: pointer">−</button>
+                  <button onClick="{{st.dec}}" aria-label="{{st.decLabel}}" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #CEDCE3; background: #FFFFFF; color: #1574AD; font-size: 20px; cursor: pointer">−</button>
                   <output aria-live="polite" style="min-width: 64px; text-align: center; font-size: 16px; font-weight: 700">{{st.value}}</output>
-                  <button onClick="{{st.inc}}" aria-label="{{st.incLabel}}" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #CFE2DF; background: #FFFFFF; color: #2F7F80; font-size: 20px; cursor: pointer">+</button>
+                  <button onClick="{{st.inc}}" aria-label="{{st.incLabel}}" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #CEDCE3; background: #FFFFFF; color: #1574AD; font-size: 20px; cursor: pointer">+</button>
                 </div>
               </div>
             </sc-for><sc-for list="{{alertToggles}}" as="at" hint-placeholder-count="3">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E3F0EE">
-                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{at.label}}</b><span style="font-size: 12.5px; color: #4C6466; line-height: 1.6">{{at.desc}}</span></div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E2ECF1">
+                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{at.label}}</b><span style="font-size: 12.5px; color: #4A5E6D; line-height: 1.6">{{at.desc}}</span></div>
                 <button role="switch" aria-checked="{{at.on}}" aria-label="{{at.label}}" onClick="{{at.toggle}}" disabled="{{at.locked}}" style="flex: 0 0 auto; width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; background: {{at.track}}; display: flex; justify-content: {{at.justify}}; cursor: {{at.cursor}}"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,.25)"></span></button>
               </div>
             </sc-for>
         </section>
 
-        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(11,110,79,.05)">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4zM4 22a8 8 0 0 1 16 0"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">رفيدة والتدخلات</h2><span style="font-size: 12.5px; color: #4C6466">كيف يقترح الوكيل التدخلات ويتواصل مع الناس</span></div></div>
+        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(7,83,114,.05)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4zM4 22a8 8 0 0 1 16 0"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">رفيدة والتدخلات</h2><span style="font-size: 12.5px; color: #4A5E6D">كيف يقترح الوكيل التدخلات ويتواصل مع الناس</span></div></div>
           <sc-for list="{{agentToggles}}" as="ag" hint-placeholder-count="3">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E3F0EE">
-                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{ag.label}}</b><span style="font-size: 12.5px; color: #4C6466; line-height: 1.6">{{ag.desc}}</span></div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E2ECF1">
+                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{ag.label}}</b><span style="font-size: 12.5px; color: #4A5E6D; line-height: 1.6">{{ag.desc}}</span></div>
                 <button role="switch" aria-checked="{{ag.on}}" aria-label="{{ag.label}}" onClick="{{ag.toggle}}" disabled="{{ag.locked}}" style="flex: 0 0 auto; width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; background: {{ag.track}}; display: flex; justify-content: {{ag.justify}}; cursor: {{ag.cursor}}"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,.25)"></span></button>
               </div>
             </sc-for><sc-for list="{{chipRows}}" as="cr2" hint-placeholder-count="2">
-              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 0; border-top: 1px solid #E3F0EE">
-                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{cr2.label}}</b><span style="font-size: 12.5px; color: #4C6466">{{cr2.desc}}</span></div>
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 0; border-top: 1px solid #E2ECF1">
+                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{cr2.label}}</b><span style="font-size: 12.5px; color: #4A5E6D">{{cr2.desc}}</span></div>
                 <div role="radiogroup" aria-label="{{cr2.label}}" style="display: flex; gap: 6px; flex-wrap: wrap">
                   <sc-for list="{{cr2.opts}}" as="op" hint-placeholder-count="3">
                     <button role="radio" aria-checked="{{op.on}}" onClick="{{op.pick}}" style="min-height: 40px; padding: 0 14px; border-radius: 12px; border: 1.5px solid {{op.border}}; background: {{op.bg}}; color: {{op.ink}}; font-size: 13px; font-weight: 600; cursor: pointer">{{op.label}}</button>
@@ -647,47 +647,47 @@ button{font-family:inherit}
             </sc-for>
         </section>
 
-        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(11,110,79,.05)">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الحملات الموسمية</h2><span style="font-size: 12.5px; color: #4C6466">رسائل توعوية مرتبطة بالمواسم، بدون تخويف</span></div></div>
+        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(7,83,114,.05)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الحملات الموسمية</h2><span style="font-size: 12.5px; color: #4A5E6D">رسائل توعوية مرتبطة بالمواسم، بدون تخويف</span></div></div>
           <sc-for list="{{seasonToggles}}" as="se" hint-placeholder-count="3">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E3F0EE">
-                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{se.label}}</b><span style="font-size: 12.5px; color: #4C6466; line-height: 1.6">{{se.desc}}</span></div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E2ECF1">
+                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{se.label}}</b><span style="font-size: 12.5px; color: #4A5E6D; line-height: 1.6">{{se.desc}}</span></div>
                 <button role="switch" aria-checked="{{se.on}}" aria-label="{{se.label}}" onClick="{{se.toggle}}" disabled="{{se.locked}}" style="flex: 0 0 auto; width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; background: {{se.track}}; display: flex; justify-content: {{se.justify}}; cursor: {{se.cursor}}"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,.25)"></span></button>
               </div>
             </sc-for>
         </section>
 
-        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(11,110,79,.05)">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الخصوصية والبيانات</h2><span style="font-size: 12.5px; color: #4C6466">حماية هوية المستفيدين</span></div></div>
+        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(7,83,114,.05)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الخصوصية والبيانات</h2><span style="font-size: 12.5px; color: #4A5E6D">حماية هوية المستفيدين</span></div></div>
           <sc-for list="{{privacyToggles}}" as="pv" hint-placeholder-count="3">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E3F0EE">
-                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{pv.label}}</b><span style="font-size: 12.5px; color: #4C6466; line-height: 1.6">{{pv.desc}}</span></div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid #E2ECF1">
+                <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{pv.label}}</b><span style="font-size: 12.5px; color: #4A5E6D; line-height: 1.6">{{pv.desc}}</span></div>
                 <button role="switch" aria-checked="{{pv.on}}" aria-label="{{pv.label}}" onClick="{{pv.toggle}}" disabled="{{pv.locked}}" style="flex: 0 0 auto; width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; background: {{pv.track}}; display: flex; justify-content: {{pv.justify}}; cursor: {{pv.cursor}}"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,.25)"></span></button>
               </div>
             </sc-for>
         </section>
 
-        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(11,110,79,.05)">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الفريق والصلاحيات</h2><span style="font-size: 12.5px; color: #4C6466">من يقدر يشوف ويعتمد التدخلات</span></div></div>
+        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(7,83,114,.05)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الفريق والصلاحيات</h2><span style="font-size: 12.5px; color: #4A5E6D">من يقدر يشوف ويعتمد التدخلات</span></div></div>
           <div role="table" aria-label="أعضاء الفريق" style="display: flex; flex-direction: column">
               <sc-for list="{{team}}" as="tm" hint-placeholder-count="4">
-                <div role="row" style="display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #E3F0EE; font-size: 13.5px">
-                  <span role="cell" style="display: flex; align-items: center; gap: 8px"><span style="width: 34px; height: 34px; border-radius: 17px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center; font-weight: 700">{{tm.ini}}</span><b>{{tm.name}}</b></span>
+                <div role="row" style="display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #E2ECF1; font-size: 13.5px">
+                  <span role="cell" style="display: flex; align-items: center; gap: 8px"><span style="width: 34px; height: 34px; border-radius: 17px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center; font-weight: 700">{{tm.ini}}</span><b>{{tm.name}}</b></span>
                   <span role="cell">{{tm.role}}</span>
-                  <span role="cell" style="color: #4C6466">{{tm.scope}}</span>
+                  <span role="cell" style="color: #4A5E6D">{{tm.scope}}</span>
                   <span role="cell" style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 10px; background: {{tm.bg}}; color: {{tm.ink}}">{{tm.status}}</span>
                 </div>
               </sc-for>
-              <button style="align-self: flex-start; margin-top: 8px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1.5px dashed #5AA7A7; background: transparent; color: #2F7F80; font-size: 14px; font-weight: 700; cursor: pointer">+ دعوة عضو</button>
+              <button style="align-self: flex-start; margin-top: 8px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1.5px dashed #3BA6E0; background: transparent; color: #1574AD; font-size: 14px; font-weight: 700; cursor: pointer">+ دعوة عضو</button>
             </div>
         </section>
 
-        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(11,110,79,.05)">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E6F4F1; color: #2F7F80; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الربط مع الأنظمة</h2><span style="font-size: 12.5px; color: #4C6466">حالة التكامل (بيانات تجريبية)</span></div></div>
+        <section style="background: rgba(255,255,255,.92); border: 1px solid #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 6px 20px rgba(7,83,114,.05)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><span style="width: 40px; height: 40px; border-radius: 12px; background: #E5F3FC; color: #1574AD; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg></span><div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 17px">الربط مع الأنظمة</h2><span style="font-size: 12.5px; color: #4A5E6D">حالة التكامل (بيانات تجريبية)</span></div></div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px">
               <sc-for list="{{integrations}}" as="ig" hint-placeholder-count="4">
-                <div style="border: 1px solid #E3F0EE; border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px">
-                  <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{ig.name}}</b><span style="font-size: 12px; color: #4C6466">{{ig.desc}}</span></div>
+                <div style="border: 1px solid #E2ECF1; border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                  <div style="display: flex; flex-direction: column; gap: 2px"><b style="font-size: 14px">{{ig.name}}</b><span style="font-size: 12px; color: #4A5E6D">{{ig.desc}}</span></div>
                   <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: {{ig.bg}}; color: {{ig.ink}}; white-space: nowrap">{{ig.status}}</span>
                 </div>
               </sc-for>
@@ -787,7 +787,7 @@ class Component extends DCLogic {
     const { RN, cities, hoods } = this.data();
     const fmt = (n) => Math.round(n).toLocaleString('en-US');
     const short = (n) => n >= 1000000 ? (n / 1000000).toFixed(1) + ' مليون' : n >= 10000 ? Math.round(n / 1000) + ' ألف' : fmt(n);
-    const COL = (p) => p < 45 ? ['#F2C4B8', '#5E1A0E'] : p < 55 ? ['#F1E7A6', '#4F3303'] : p < 65 ? ['#CDEDE5', '#08331F'] : p < 75 ? ['#96D7C6', '#06281A'] : ['#2F7F80', '#FFFFFF'];
+    const COL = (p) => p < 45 ? ['#F2C4B8', '#5E1A0E'] : p < 55 ? ['#F1E7A6', '#4F3303'] : p < 65 ? ['#CCE4EE', '#08331F'] : p < 75 ? ['#59C2F9', '#06281A'] : ['#1574AD', '#FFFFFF'];
     const agg = (list) => {
       let e = 0, sc = 0, ad = 0, ea = 0, b = 0, eng = 0; const bars = {}, gaps = {};
       list.forEach((h) => { e += h.elig; sc += h.screened; ad += h.added; ea += h.early; b += h.elig * h.before; eng += h.elig * h.engaged;
@@ -812,7 +812,7 @@ class Component extends DCLogic {
     if (s.region) crumbs.push({ label: 'منطقة ' + RN[s.region], go: goRegion(s.region) });
     if (cityObj) crumbs.push({ label: cityObj.name, go: goCity(cityObj.name, cityObj.region) });
     if (hoodObj) crumbs.push({ label: 'حي ' + hoodObj.name, go: () => {} });
-    crumbs.forEach((c, i) => { const last = i === crumbs.length - 1; c.sep = !last; c.color = last ? '#173F42' : '#2F7F80'; c.weight = last ? 700 : 500; });
+    crumbs.forEach((c, i) => { const last = i === crumbs.length - 1; c.sep = !last; c.color = last ? '#0E2E45' : '#1574AD'; c.weight = last ? 700 : 500; });
 
     const back = level === 'hood' ? () => this.setState({ hood: null }) : level === 'city' ? () => this.setState({ city: null, hood: null }) : goKingdom;
 
@@ -838,7 +838,7 @@ class Component extends DCLogic {
         pick: goCity(c.name, c.region), enter: () => this.setState({ hover: { kind: 'city', id: c.name } }) }; }) : [];
 
     // خريطة المدينة بطابع خرائط الشوارع
-    const BARCOL = { 'بُعد المركز': '#E8A33D', 'تعارض المواعيد مع الدوام': '#6C8CBF', 'المواصلات': '#8E7CC3', 'رعاية الأطفال': '#E07B91', 'الخوف من الفحص': '#5FB3A4', 'قلة الوعي': '#C9A227', 'تفضيل طبيبة': '#D46A4C', 'صعوبة الحجز': '#7FA0B8', 'حاجز اللغة': '#3F6FA6' };
+    const BARCOL = { 'بُعد المركز': '#E8A33D', 'تعارض المواعيد مع الدوام': '#6C8CBF', 'المواصلات': '#8E7CC3', 'رعاية الأطفال': '#E07B91', 'الخوف من الفحص': '#5C98B6', 'قلة الوعي': '#C9A227', 'تفضيل طبيبة': '#D46A4C', 'صعوبة الحجز': '#7FA0B8', 'حاجز اللغة': '#3F6FA6' };
     const hexPos = {};
     let cells = [], cityT = 'translate(0px, 0px) scale(1)', parks = [], roads = { ring: '', av1: '', av2: '' }, water = { show: false, d: '' }, selCell = '', cityLabels = [], healthPins = [], pois = [], scaleText = '1 كم';
     if (cityObj) {
@@ -876,18 +876,18 @@ class Component extends DCLogic {
         const xs = poly.map((p) => p[0]), ys = poly.map((p) => p[1]); const w = Math.max(...xs) - Math.min(...xs), hh = Math.max(...ys) - Math.min(...ys);
         const inside = (pt) => { let c = false; for (let a = 0, b = poly.length - 1; a < poly.length; b = a++) { const xi = poly[a][0], yi = poly[a][1], xj = poly[b][0], yj = poly[b][1]; if (((yi > pt[1]) !== (yj > pt[1])) && (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi)) c = !c; } return c; };
         const needMobile = h.barrier === 'بُعد المركز' || h.barrier === 'المواصلات' || h.barrier === 'حاجز اللغة' || !!s.approved[h.city + '|' + h.name + '|b'];
-        const items = [['مركز صحي ' + h.name, '#2F7F80', 'M12 5v14M5 12h14', 0.2, 0.22], ['جامع الحي', '#0E7466', 'M12 3l7 6v12H5V9z', -0.24, -0.16], ['مدرسة', '#3B6FB6', 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5', 0.24, -0.24], ['صيدلية · قياس ضغط مجاني', '#C2412D', 'M12 5v14M5 12h14', -0.22, 0.26], ['حديقة الحي', '#3E8E3E', 'M12 22V12M12 12c-4 0-7-3-7-7 4 0 7 3 7 7z', 0.02, -0.34]];
+        const items = [['مركز صحي ' + h.name, '#1574AD', 'M12 5v14M5 12h14', 0.2, 0.22], ['جامع الحي', '#0A5278', 'M12 3l7 6v12H5V9z', -0.24, -0.16], ['مدرسة', '#3B6FB6', 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5', 0.24, -0.24], ['صيدلية · قياس ضغط مجاني', '#C2412D', 'M12 5v14M5 12h14', -0.22, 0.26], ['حديقة الحي', '#3E8E3E', 'M12 22V12M12 12c-4 0-7-3-7-7 4 0 7 3 7 7z', 0.02, -0.34]];
         if (needMobile) items.push(['موقع مقترح لعيادة متنقلة', '#B26A12', 'M3 7h11v9H3zM14 10h4l3 3v3h-7', -0.04, 0.08]);
         pois = items.map(([label, color, d, ox, oy]) => { let pt = [c0[0] + ox * w, c0[1] + oy * hh]; if (!inside(pt)) pt = [c0[0] + ox * w * 0.45, c0[1] + oy * hh * 0.45]; const p = Pp(pt[0], pt[1]); return { label, color, d, left: pc(p[0]), top: pc(p[1]) }; });
       }
     }
     const layerChips = [['pct', 'نسب الإكمال'], ['barrier', 'العائق الأبرز'], ['none', 'الخريطة فقط']].map(([key, label]) => ({ label, selected: (s.layer || 'pct') === key, pick: () => this.setState({ layer: key }),
-      bg: (s.layer || 'pct') === key ? '#2F7F80' : '#FFFFFF', ink: (s.layer || 'pct') === key ? '#FFFFFF' : '#3C4043' }));
+      bg: (s.layer || 'pct') === key ? '#1574AD' : '#FFFFFF', ink: (s.layer || 'pct') === key ? '#FFFFFF' : '#3C4043' }));
     const zoomIn = () => this.setState({ zoom: Math.min(2.5, (s.zoom || 1) + 0.35) });
     const zoomOut = () => this.setState({ zoom: Math.max(0.8, (s.zoom || 1) - 0.35) });
     const barrierLegend = cityObj && s.layer === 'barrier';
     const legend = barrierLegend ? Object.entries(BARCOL).filter(([n]) => cityObj.hoods.some((h) => h.barrier === n)).map(([t, c]) => ({ c, t }))
-      : [['#F2C4B8', '<45%'], ['#F1E7A6', '45–54'], ['#CDEDE5', '55–64'], ['#96D7C6', '65–74'], ['#2F7F80', '75%+']].map(([c, t]) => ({ c, t }));
+      : [['#F2C4B8', '<45%'], ['#F1E7A6', '45–54'], ['#CCE4EE', '55–64'], ['#59C2F9', '65–74'], ['#1574AD', '75%+']].map(([c, t]) => ({ c, t }));
 
     // side list
     let scopeList = [], listTitle = '';
@@ -927,7 +927,7 @@ class Component extends DCLogic {
       hoodRecs = [
         { title: (BACT[h.barrier] || ['تدخل'])[0], why: 'لأن «' + h.barrier + '» هو أكثر سبب ذكره ' + fmt(late) + ' متأخرًا في الحي.', impact: 'متوقع: +' + gain1 + ' نقطة إكمال', d: (BACT[h.barrier] || ['', 'M12 5v14M5 12h14'])[1], bg: '#FBF5D6', color: '#6B5A08', done: !!s.approved[k1], pending: !s.approved[k1], approve: approve(k1) },
         { title: GACT[h.gap] || 'توعية صحية', why: 'لأن «' + h.gap + '» هو النقص الأكثر شيوعًا هنا (' + h.gapPct + '% ممن فحصوا).', impact: 'متوقع: +' + gain2 + ' نقاط ووقاية أبكر', d: 'M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z', bg: '#FDE7E2', color: '#8A2A1C', done: !!s.approved[k2], pending: !s.approved[k2], approve: approve(k2) },
-        { title: 'تحدي «حيّ صحّي» للحي', why: 'هدف جماعي 80% ومكافأة مجتمعية عند تحقيقه، مع تذكير رفيدة للعائلات.', impact: 'متوقع: +3 نقاط', d: 'M12 2l2.9 6.9L22 9.6l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.6L2 9.6l7.1-.7z', bg: '#E6F4F1', color: '#2F7F80', done: !!s.approved[h.city + h.name + 'c'], pending: !s.approved[h.city + h.name + 'c'], approve: approve(h.city + h.name + 'c') }
+        { title: 'تحدي «حيّ صحّي» للحي', why: 'هدف جماعي 80% ومكافأة مجتمعية عند تحقيقه، مع تذكير رفيدة للعائلات.', impact: 'متوقع: +3 نقاط', d: 'M12 2l2.9 6.9L22 9.6l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.6L2 9.6l7.1-.7z', bg: '#E5F3FC', color: '#1574AD', done: !!s.approved[h.city + h.name + 'c'], pending: !s.approved[h.city + h.name + 'c'], approve: approve(h.city + h.name + 'c') }
       ];
     }
 
@@ -977,16 +977,16 @@ class Component extends DCLogic {
     const hood = hoodObj ? { barrier: hoodObj.barrier, gap: hoodObj.gap, gapPct: hoodObj.gapPct } : { barrier: '', gap: '', gapPct: 0 };
 
     const kpis = [
-      { label: 'نسبة إكمال الفحوصات', value: A.pct + '%', sub: '↑ +' + (A.pct - A.before) + ' نقطة منذ إطلاق عون', subColor: '#2F7F80', d: 'M3 17l6-6 4 4 8-8M15 7h6v6' },
-      { label: 'فحوصات إضافية بفضل عون', value: short(A.added * rangeK), sub: 'أشخاص فحصوا بعد تواصل رفيدة', subColor: '#2F7F80', d: 'M12 5v14M5 12h14' },
+      { label: 'نسبة إكمال الفحوصات', value: A.pct + '%', sub: '↑ +' + (A.pct - A.before) + ' نقطة منذ إطلاق عون', subColor: '#1574AD', d: 'M3 17l6-6 4 4 8-8M15 7h6v6' },
+      { label: 'فحوصات إضافية بفضل عون', value: short(A.added * rangeK), sub: 'أشخاص فحصوا بعد تواصل رفيدة', subColor: '#1574AD', d: 'M12 5v14M5 12h14' },
       { label: 'حالات اكتشاف مبكر', value: fmt(A.early * rangeK), sub: 'أُحيلت للعلاج في مرحلة مبكرة', subColor: '#8A2A1C', d: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3' },
-      { label: 'نسبة الاستفادة', value: A.engaged + '%', sub: 'ممن تواصلت معهم رفيدة حجزوا', subColor: '#4C6466', d: 'M20 6L9 17l-5-5' },
+      { label: 'نسبة الاستفادة', value: A.engaged + '%', sub: 'ممن تواصلت معهم رفيدة حجزوا', subColor: '#4A5E6D', d: 'M20 6L9 17l-5-5' },
       { label: 'المستحقون في النطاق', value: short(A.elig), sub: short(A.late) + ' ما زالوا متأخرين', subColor: '#6B5A08', d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8' },
-      { label: 'تدخلات نشطة', value: String(Math.max(1, Math.round(scopeHoods.length * 0.35)) + Object.keys(s.approved).length), sub: Object.keys(s.approved).length + ' اعتمدتها اليوم', subColor: '#4C6466', d: 'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z' }
+      { label: 'تدخلات نشطة', value: String(Math.max(1, Math.round(scopeHoods.length * 0.35)) + Object.keys(s.approved).length), sub: Object.keys(s.approved).length + ' اعتمدتها اليوم', subColor: '#4A5E6D', d: 'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z' }
     ];
 
     // donut
-    const PAL = ['#2F7F80', '#5AA7A7', '#8FD3B4', '#D9822B', '#6C8CBF', '#B9CBC8'];
+    const PAL = ['#1574AD', '#3BA6E0', '#8FD3B4', '#D9822B', '#6C8CBF', '#B8C5CC'];
     const bEntries = Object.entries(A.bars).sort((x, y) => y[1] - x[1]);
     const top = bEntries.slice(0, 5); const rest = bEntries.slice(5).reduce((a, b) => a + b[1], 0);
     if (rest > 0) top.push(['أخرى', rest]);
@@ -1012,20 +1012,20 @@ class Component extends DCLogic {
     // feed
     const pickH = (i) => scopeHoods[(i * 7 + 3) % scopeHoods.length];
     const T = [
-      [(h) => 'رفيدة حجزت ' + (6 + h.elig % 20) + ' مواعيد جاهزة في حي ' + h.name + '، ' + h.city, '#E6F4F1', '#2F7F80', 'M3 4h18v17H3zM16 2v4M8 2v4M3 10h18'],
+      [(h) => 'رفيدة حجزت ' + (6 + h.elig % 20) + ' مواعيد جاهزة في حي ' + h.name + '، ' + h.city, '#E5F3FC', '#1574AD', 'M3 4h18v17H3zM16 2v4M8 2v4M3 10h18'],
       [(h) => 'اكتشاف مبكر: حالة ' + (h.gap.indexOf('ضغط') >= 0 ? 'ارتفاع ضغط' : 'سكري') + ' جديدة أُحيلت للطبيب من حي ' + h.name, '#FDE7E2', '#8A2A1C', 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3'],
       [(h) => 'أم من حي ' + h.name + ' أكدت موعد فحص الثدي مع طبيبة', '#FCE7F0', '#8E2457', 'M20 6L9 17l-5-5'],
-      [(h) => 'رفيدة تكلمت باللهجة المحلية مع ' + (12 + h.elig % 30) + ' من كبار السن في ' + h.city, '#E6F4F1', '#2F7F80', 'M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0'],
+      [(h) => 'رفيدة تكلمت باللهجة المحلية مع ' + (12 + h.elig % 30) + ' من كبار السن في ' + h.city, '#E5F3FC', '#1574AD', 'M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0'],
       [(h) => 'عيادة متنقلة وصلت حي ' + h.name + ' وبدأت استقبال المواعيد', '#FBF5D6', '#6B5A08', 'M3 7h11v9H3zM14 10h4l3 3v3h-7'],
       [(h) => 'مرافق نقل أوصل مستفيدًا كبيرًا في السن لمركز ' + h.city, '#E6EEF7', '#3D5F94', 'M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8'],
-      [(h) => 'رفيدة تواصلت بالأوردو مع ' + (20 + h.elig % 40) + ' عاملًا قرب حي ' + h.name, '#E6F4F1', '#2F7F80', 'M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10']
+      [(h) => 'رفيدة تواصلت بالأوردو مع ' + (20 + h.elig % 40) + ' عاملًا قرب حي ' + h.name, '#E5F3FC', '#1574AD', 'M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10']
     ];
     const TIMES = ['الآن', 'قبل دقيقة', 'قبل 3 دقائق', 'قبل 6 دقائق', 'قبل 9 دقائق'];
     const feed = [0, 1, 2, 3, 4].map((j) => { const n = s.tick - j; const t = T[((n % T.length) + T.length) % T.length]; const h = pickH(n + 20);
       return { text: t[0](h), bg: t[1], color: t[2], d: t[3], time: TIMES[j], cls: j === 0 ? 'aoun-feed' : '' }; });
 
     const active = [
-      { title: 'عيادة متنقلة', where: 'حي النسيم، الرياض · باقي 3 أيام', prog: '72%', status: '1,180 فحص حتى الآن', bg: '#E5F4F0', color: '#2F7F80', d: 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4' },
+      { title: 'عيادة متنقلة', where: 'حي النسيم، الرياض · باقي 3 أيام', prog: '72%', status: '1,180 فحص حتى الآن', bg: '#E4F0F5', color: '#1574AD', d: 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4' },
       { title: 'دعم المواصلات', where: 'كبار السن · السويدي والعليا', prog: '54%', status: '640 مشوارًا هذا الشهر', bg: '#FFF1DC', color: '#B26A12', d: 'M5 17h14M6 17l1.5-6h9L18 17M8 21a1 1 0 1 0 0-2M16 21a1 1 0 1 0 0-2' },
       { title: 'مواعيد مرنة', where: 'مساءً ونهاية الأسبوع · الملقا', prog: '61%', status: '+11 نقطة في الحي', bg: '#F4E9F7', color: '#7A3E8F', d: 'M3 4h18v17H3zM16 2v4M8 2v4M3 10h18' },
       { title: 'تواصل بلغات العمالة', where: 'البطحاء والسلي · أوردو وبنغالي', prog: '45%', status: '3,920 عاملًا تواصلنا معهم', bg: '#E6EEF7', color: '#3D5F94', d: 'M4 5h7M7.5 5v2c0 4-2 7-5 8M13 19l4-10 4 10M14.5 16h5' }
@@ -1071,7 +1071,7 @@ class Component extends DCLogic {
     const cfg = s.cfg || DEF; const saved0 = s.savedCfg || DEF;
     const setC = (k, v) => this.setState({ cfg: { ...cfg, [k]: v }, saved: false });
     const sw = (k, label, desc, locked) => ({ label, desc, on: !!cfg[k], locked: !!locked, toggle: locked ? () => {} : () => setC(k, !cfg[k]),
-      track: cfg[k] ? (locked ? '#7FB8A3' : '#2F7F80') : '#8F9894', justify: cfg[k] ? 'flex-start' : 'flex-end', cursor: locked ? 'not-allowed' : 'pointer' });
+      track: cfg[k] ? (locked ? '#7FB8A3' : '#1574AD') : '#8F9894', justify: cfg[k] ? 'flex-start' : 'flex-end', cursor: locked ? 'not-allowed' : 'pointer' });
     const stp = (k, label, desc, unit, step, lo, hi) => ({ label, desc, value: cfg[k] + unit, decLabel: 'إنقاص ' + label, incLabel: 'زيادة ' + label,
       dec: () => setC(k, Math.max(lo, cfg[k] - step)), inc: () => setC(k, Math.min(hi, cfg[k] + step)) });
     const steppers = [stp('minPct', 'حد الإكمال المنخفض', 'نبّهني إذا نزلت نسبة إكمال الفحص في حي عن هذا الحد', '%', 5, 20, 90),
@@ -1079,7 +1079,7 @@ class Component extends DCLogic {
     const alertToggles = [sw('alertDaily', 'ملخص يومي بالبريد', 'أهم الأحياء المحتاجة وتقدّم التدخلات'), sw('alertDrop', 'تنبيه فوري للتراجع', 'إشعار داخل المنصة عند أي تراجع مفاجئ'), sw('alertSms', 'رسالة نصية للحالات العاجلة', 'لمدير المنطقة فقط')];
     const agentToggles = [sw('autoSuggest', 'اقتراح التدخلات تلقائيًا', 'رفيدة تحلل أسباب العزوف وتقترح حلولًا لكل حي'), sw('humanApprove', 'اعتماد بشري قبل التنفيذ', 'لا يُنفّذ أي تدخل بدون موافقة مسؤول', true),
       sw('quiet', 'ساعات هدوء', 'لا تذكيرات قبل 8 صباحًا ولا بعد 10 مساءً'), sw('prayer', 'احترام أوقات الصلاة', 'تأجيل التذكير وقت الأذان والصلاة'), sw('family', 'إشراك المرافق العائلي', 'بموافقة المستفيد فقط')];
-    const opt = (k, list) => list.map(([v, label]) => ({ label, on: cfg[k] === v, pick: () => setC(k, v), bg: cfg[k] === v ? '#2F7F80' : '#FFFFFF', ink: cfg[k] === v ? '#FFFFFF' : '#2F7F80', border: cfg[k] === v ? '#2F7F80' : '#CFE2DF' }));
+    const opt = (k, list) => list.map(([v, label]) => ({ label, on: cfg[k] === v, pick: () => setC(k, v), bg: cfg[k] === v ? '#1574AD' : '#FFFFFF', ink: cfg[k] === v ? '#FFFFFF' : '#1574AD', border: cfg[k] === v ? '#1574AD' : '#CEDCE3' }));
     const chipRows = [{ label: 'نبرة رفيدة', desc: 'أسلوب الرسائل للمستفيدين', opts: opt('tone', [['calm', 'مطمئنة'], ['brief', 'مختصرة'], ['warm', 'ودّية']]) },
       { label: 'القناة الافتراضية', desc: 'لو ما اختار المستفيد قناة', opts: opt('channel', [['app', 'التطبيق'], ['sms', 'رسالة نصية'], ['voice', 'اتصال صوتي']]) }];
     steppers.push(stp('maxRem', 'حد التذكيرات', 'أقصى عدد تذكيرات للشخص في الشهر، عشان ما نزعجه', '', 1, 1, 8));
@@ -1089,17 +1089,17 @@ class Component extends DCLogic {
     steppers.push(stp('k', 'أقل حجم مجموعة يُعرض', 'لا تُعرض أي مجموعة أقل من هذا العدد', ' شخص', 10, 20, 200));
     chipRows.push({ label: 'مدة الاحتفاظ بالبيانات', desc: 'بعدها تُحذف تفاصيل المحادثات تلقائيًا', opts: opt('retention', [['6', '6 أشهر'], ['12', 'سنة'], ['24', 'سنتان']]) });
     const team = [['د. سارة العتيبي', 'مديرة المنصة', 'كل المناطق', 'نشط'], ['م. فهد القحطاني', 'محلل بيانات', 'منطقة الرياض', 'نشط'], ['أ. نوف الشهري', 'مشرفة مراكز', 'منطقة مكة المكرمة', 'نشط'], ['أ. ماجد الدوسري', 'منسق تدخلات', 'المنطقة الشرقية', 'بانتظار التفعيل']]
-      .map(([name, role, scope, status]) => ({ name, role, scope, status, ini: name.replace(/^(د|م|أ)\. /, '').charAt(0), bg: status === 'نشط' ? '#E6F4F1' : '#FBF5D6', ink: status === 'نشط' ? '#2F7F80' : '#6B5A08' }));
+      .map(([name, role, scope, status]) => ({ name, role, scope, status, ini: name.replace(/^(د|م|أ)\. /, '').charAt(0), bg: status === 'نشط' ? '#E5F3FC' : '#FBF5D6', ink: status === 'نشط' ? '#1574AD' : '#6B5A08' }));
     const integrations = [['صحتي', 'التطبيق الذي تعمل داخله رفيدة', 'متصل'], ['نفاذ', 'توثيق حسابات المستفيدين', 'متصل'], ['موعد', 'حجز المواعيد في المراكز', 'متصل'], ['بوابة الرسائل', 'التذكيرات النصية', 'قيد الإعداد']]
-      .map(([name, desc, status]) => ({ name, desc, status, bg: status === 'متصل' ? '#E6F4F1' : '#FBF5D6', ink: status === 'متصل' ? '#2F7F80' : '#6B5A08' }));
+      .map(([name, desc, status]) => ({ name, desc, status, bg: status === 'متصل' ? '#E5F3FC' : '#FBF5D6', ink: status === 'متصل' ? '#1574AD' : '#6B5A08' }));
     const clean = JSON.stringify(cfg) === JSON.stringify(saved0);
     const settingsVals = { steppers, alertToggles, agentToggles, chipRows, seasonToggles, privacyToggles, team, integrations, saved: s.saved, clean,
-      saveBg: clean ? '#9DB5AC' : '#2F7F80', saveCursor: clean ? 'not-allowed' : 'pointer', notSettings: s.tab !== 'settings',
+      saveBg: clean ? '#9DB5AC' : '#1574AD', saveCursor: clean ? 'not-allowed' : 'pointer', notSettings: s.tab !== 'settings',
       saveSettings: () => this.setState({ savedCfg: cfg, saved: true }), resetSettings: () => this.setState({ cfg: DEF, saved: false }) };
 
     const tabDefs = [['home', 'الرئيسية', 'M3 11l9-7 9 7M5 10v10h14V10'], ['stats', 'الإحصائيات', 'M4 20V10M10 20V4M16 20v-7M22 20H2'], ['actions', 'التدخلات', 'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z'], ['agents', 'أداء الوكلاء', 'M12 8a4 4 0 1 0 0-.01M4 21c0-4 4-7 8-7s8 3 8 7M19 4l1.5 1.5L23 3'], ['settings', 'الإعدادات', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3.1 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3.1V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 20.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], ['reports', 'التقارير', 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5']];
     const tabs = tabDefs.filter((x) => x[0] !== 'settings').concat(tabDefs.filter((x) => x[0] === 'settings')).map(([key, label, d]) => ({ label, d, pick: () => this.setState({ tab: key }), bg: s.tab === key ? 'rgba(255,255,255,.18)' : 'transparent', weight: s.tab === key ? 700 : 500, current: s.tab === key ? 'page' : 'false' }));
-    const ranges = [['month', 'شهر'], ['quarter', 'ربع'], ['year', 'سنة']].map(([key, label]) => ({ label, selected: s.range === key, pick: () => this.setState({ range: key }), bg: s.range === key ? '#2F7F80' : 'transparent', color: s.range === key ? '#FFFFFF' : '#2F7F80' }));
+    const ranges = [['month', 'شهر'], ['quarter', 'ربع'], ['year', 'سنة']].map(([key, label]) => ({ label, selected: s.range === key, pick: () => this.setState({ range: key }), bg: s.range === key ? '#1574AD' : 'transparent', color: s.range === key ? '#FFFFFF' : '#1574AD' }));
 
     return {
       tabs, ranges, crumbs, kpis, scope, hood, hoodRecs, scopeList, listTitle, donut, chart, feed, active,
@@ -1127,7 +1127,7 @@ class Component extends DCLogic {
       v.kpis = [];
       const full = C.aoun_full, sms = C.sms_baseline;
       const per = full.completed, booked = per / (1 - full.noshow), ans = booked / full.booking, cont = per * full.contacts;
-      const AB = [["aoun_full", "عون كامل (3 وكلاء)", "#2F7F80"], ["no_followup", "بدون وكيل المتابعة", "#5AA7A7"], ["no_equity_guard", "بدون حصة العدالة", "#5AA7A7"], ["no_barrier_understanding", "بدون فهم السبب", "#5AA7A7"], ["random_planner", "بدون التخطيط الذكي", "#5AA7A7"], ["sms_baseline", "الوضع الحالي: رسائل SMS", "#C7DAD7"]];
+      const AB = [["aoun_full", "عون كامل (3 وكلاء)", "#1574AD"], ["no_followup", "بدون وكيل المتابعة", "#3BA6E0"], ["no_equity_guard", "بدون حصة العدالة", "#3BA6E0"], ["no_barrier_understanding", "بدون فهم السبب", "#3BA6E0"], ["random_planner", "بدون التخطيط الذكي", "#3BA6E0"], ["sms_baseline", "الوضع الحالي: رسائل SMS", "#C6D4DB"]];
       const mx = Math.max(...AB.map(([k]) => C[k].completed));
       const LN = { ar: "العربية", ur: "الأوردو", hi: "الهندية", bn: "البنغالية", tl: "الفلبينية", id: "الإندونيسية", en: "الإنجليزية" };
       let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
@@ -1135,16 +1135,16 @@ class Component extends DCLogic {
       const top = Math.max(...days.map((d) => d.calls)), line = (k) => days.map((d, i) => `${(i / 13) * 600},${120 - (d[k] / top) * 110}`).join(" ");
       v.ag = {
         kpis: [
-          { label: "فحوصات مكتملة لكل 1000 ساكن", value: fmt(per, 1), sub: `${fmt(per / sms.completed, 1)}× مقارنة برسائل SMS (${fmt(sms.completed, 1)})`, ink: "#2F7F80" },
-          { label: "نسبة الحجز من المكالمات المجابة", value: pct(full.booking), sub: `مقابل ${pct(sms.booking)} حاليًا`, ink: "#2F7F80" },
-          { label: "الغياب عن الموعد", value: pct(full.noshow), sub: `↓ من ${pct(sms.noshow)} · المعدل السعودي 23%`, ink: "#2F7F80" },
+          { label: "فحوصات مكتملة لكل 1000 ساكن", value: fmt(per, 1), sub: `${fmt(per / sms.completed, 1)}× مقارنة برسائل SMS (${fmt(sms.completed, 1)})`, ink: "#1574AD" },
+          { label: "نسبة الحجز من المكالمات المجابة", value: pct(full.booking), sub: `مقابل ${pct(sms.booking)} حاليًا`, ink: "#1574AD" },
+          { label: "الغياب عن الموعد", value: pct(full.noshow), sub: `↓ من ${pct(sms.noshow)} · المعدل السعودي 23%`, ink: "#1574AD" },
           { label: "مخالفات قواعد الأمان", value: fmt(F.violations), sub: `طوارئ حُوّلت لـ 997: ${fmt(F.emerg)} من ${fmt(F.emergSaid)}`, ink: "#5E6A12" },
         ],
         funnel: [["تواصلت معهم رفيدة", cont], ["ردّوا", ans], ["حجزوا", booked], ["فحصوا وراجعه الطبيب", per]].map(([name, x]) => ({ name, v: fmt(x), w: Math.max(6, (x / cont) * 100) + "%" })),
         undiag: `سكري غير مشخّص اكتُشف: ${fmt(full.undiag)} مقابل ${fmt(sms.undiag)} بالطريقة الحالية.`,
         spark: { calls: line("calls"), ans: line("ans"), booked: line("booked"), note: `اليوم: ${days[13].calls} مكالمة · ${days[13].ans} ردّوا · ${days[13].booked} حجزوا. الجمعة أقل لأن رفيدة ما تتصل وقت الصلاة.` },
         agents: [
-          { initial: "خ", bg: "#E3F4EF", name: "وكيل التخطيط والتحليل", role: "يقرر مين نتصل عليه ومتى، ويقترح للوزارة تدخّلًا لكل حي", metrics: [{ k: "دقة ترتيب الأولوية (AUC)", v: fmt(D.models.priorityAUC, 2) }, { k: "فجوة الإكمال سعودي/غير سعودي", v: fmt(full.gap, 1) + " نقطة" }, { k: "تدخلات مقترحة / اعتمدها موظف", v: fmt(MI.proposals) + " / " + fmt(MI.approved, 1) }, { k: "تدخل بدون اعتماد بشري", v: "0" }] },
+          { initial: "خ", bg: "#E2EFF5", name: "وكيل التخطيط والتحليل", role: "يقرر مين نتصل عليه ومتى، ويقترح للوزارة تدخّلًا لكل حي", metrics: [{ k: "دقة ترتيب الأولوية (AUC)", v: fmt(D.models.priorityAUC, 2) }, { k: "فجوة الإكمال سعودي/غير سعودي", v: fmt(full.gap, 1) + " نقطة" }, { k: "تدخلات مقترحة / اعتمدها موظف", v: fmt(MI.proposals) + " / " + fmt(MI.approved, 1) }, { k: "تدخل بدون اعتماد بشري", v: "0" }] },
           { initial: "ر", bg: "#DCE6A6", name: "الوكيل الصوتي · رفيدة/رفيد", role: "يتصل ويفهم السبب ويحجز الموعد الجاهز", metrics: [{ k: "دقة معرفة اللغة", v: pct(U.lang) }, { k: "دقة فهم السبب", v: pct(U.barrier) }, { k: "الوحيد اللي يكلّم الناس · الطوارئ المكتشفة", v: `${U.emergencyCases}/${U.emergencyCases}` }, { k: "نسبة الحجز", v: pct(full.booking) }] },
           { initial: "م", bg: "#F1E7A6", name: "وكيل المتابعة", role: "يذكّر ويعيد الحجز لين يراجع الطبيب النتيجة", metrics: [{ k: "مواعيد أُعيد حجزها", v: fmt(F.rebooked) }, { k: "الغياب", v: pct(full.noshow) }, { k: "حُوّلت لموظف صحي", v: fmt(F.escalated, 1) }, { k: "توقع الحضور (AUC)", v: fmt(D.models.attendAUC, 2) }] },
         ],

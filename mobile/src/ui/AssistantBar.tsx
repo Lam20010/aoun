@@ -69,7 +69,7 @@ export function AssistantBar() {
 
 const s = StyleSheet.create({
   bar: { backgroundColor: C.darkBar, borderRadius: 30, paddingVertical: 10, paddingHorizontal: 12, marginHorizontal: 14, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
-  avatar: { width: 46, height: 46, borderRadius: 23, overflow: 'hidden', backgroundColor: '#2F6468' },
+  avatar: { width: 46, height: 46, borderRadius: 23, overflow: 'hidden', backgroundColor: '#2D516A' },
   mic: { borderWidth: 1.5, borderColor: 'rgba(255,255,255,.35)' },
   dot: { position: 'absolute', top: 2, right: 2, width: 10, height: 10, borderRadius: 3 },
   input: { flex: 1, height: 44, borderRadius: 22, paddingHorizontal: 14, color: C.white, backgroundColor: 'rgba(255,255,255,.12)', fontSize: 16 },
