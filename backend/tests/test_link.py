@@ -123,3 +123,25 @@ def test_person_can_turn_off_calls_and_the_outbound_call_is_refused(c):
     assert row["contact_permission"] == 0
     c.patch("/patient/calls", json={"on": True}, headers=h)
     assert c.get("/patient/me", headers=h).json()["calls_ok"] is True
+
+
+def test_ministry_insights_reasons_per_district_with_small_cells_hidden(c):
+    m = ministry(c)
+    ins = c.get("/ministry/api/insights", headers=m).json()
+    assert len(ins["districts"]) == 8 and ins["reasons"]
+    nas = next(d for d in ins["districts"] if d["key"] == "Al-Naseem")
+    assert nas["top"][0]["code"] == "transport" and nas["suggestion"]["kind"] == "transport"
+    assert ins["worked"] and all(0 <= w["best_pct"] <= 100 for w in ins["worked"])
+    def cells(x):
+        if isinstance(x, dict):
+            for v in x.values():
+                yield from cells(v)
+        elif isinstance(x, list):
+            for v in x:
+                yield from cells(v)
+        elif isinstance(x, int) and not isinstance(x, bool):
+            yield x
+    for d in ins["districts"]:
+        for k in ("contacted", "booked", "results", "early"):
+            assert d[k] is None or d[k] == 0 or d[k] >= 5
+    assert c.get("/ministry/api/insights").status_code == 401

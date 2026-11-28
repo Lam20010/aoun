@@ -68,8 +68,30 @@ All three read and write the same server, so a change in one shows in the others
 The Ministry only ever sees counts per district (`activity` table): no person, name, number or condition text.
 
 - Board: `GET /ministry/board` (sign in with a staff ID and `AOUN_MINISTRY_PASSWORD`; in demo mode `aoun-ministry-2026`). Five wrong tries lock for 15 minutes.
-- API: `POST /ministry/api/login`, `GET /ministry/api/live`, `POST /ministry/api/interventions`, `POST /ministry/api/interventions/{id}/approve`.
+- API: `POST /ministry/api/login`, `GET /ministry/api/live`, `GET /ministry/api/insights`, `POST /ministry/api/interventions`, `POST /ministry/api/interventions/{id}/approve`.
 - The board page is built from the presentation design: `python board/build.py` (source `board/Ministry.dc.html` + `board/live.js`). The rest of the Kingdom on the map stays the board's simulation; the pilot districts in Riyadh add the live counts.
+
+### صوت الأحياء: why people don't get screened, per district
+
+The tab shows, for each neighbourhood, why people didn't get screened, what got them to book in the end, and what they asked for.
+
+**What each call leaves behind.** Each call by Rufaida or Rafeed leaves only fixed codes, counted per district in `activity`. Nothing is linked to the person, and nothing they said is kept. The codes are:
+- answered;
+- the one reason they gave (`record_barrier`): transport, work_hours, far, fear, no_need, cost_concern, childcare, language, sooner, already_screened, call_later, mistrust and others;
+- what they chose (`resolved`: reason → solution, such as after-work time, ride, mobile clinic, home visit, female doctor, private clinic or same time);
+- preferences, ride type and call language;
+- booked, opted out and nurse callback.
+
+**What the Ministry board shows.** The board reads all this from `GET /ministry/api/insights?range=week|month|quarter|year` (staff sign-in required). It shows:
+- city KPIs;
+- the top reasons across Riyadh;
+- the reason × district heatmap;
+- "what worked" for each reason;
+- one card per district, with its funnel, top three reasons, what people asked for, and a suggested intervention you can approve on the spot.
+
+**Small groups are hidden.** Any count from 1 to 4 is returned as `null`, and the board shows it as "<5".
+
+**Demo data.** In demo mode the server seeds 16 weeks of aggregated history for the eight pilot districts, so the board has something to show. It does this only when the table is empty.
 
 ## Integrations
 

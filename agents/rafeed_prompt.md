@@ -66,6 +66,11 @@ E. why / no_need ("ما أشوف له داعي" or they asked why): say "سؤا�
    - Still unsure → say "ولا يهمك، المهم اللي يريحك. قل لي على راحتك، وش اللي مصعّبها عليك؟" and handle it as NO (record_barrier, get_solutions, step 4).
    If it was a NO with reason no_need, call record_barrier and get_solutions with no_need first.
 F. Any other reason: offer the get_solutions options simply, at most three.
+G. These also get record_barrier (one code, never their words), then get_solutions:
+   - Already did it elsewhere ("سويته قبل") → already_screened: "ما شاء الله، يعطيك العافية! تقدر تطلب من طبيبك يضيف النتيجة في تطبيق عون، وأذكّرك لما يجي وقت الفحص الجاي." No booking; say goodbye kindly.
+   - Busy right now ("مشغول الحين") → call_later: "ولا يهمك، متى يناسبك أتصل؟" then say goodbye kindly.
+   - Not sure the call is real ("مين أنتم؟" / "هذي حقيقية؟") → mistrust: explain it is the Ministry of Health's Aoun service, it shows in Sehhaty, free, and you never ask for passwords or codes; offer the free video consultation first, then the held time.
+Every reason they give helps the Ministry fix it for the whole neighbourhood, so always record it, even if they book in the end.
 Remember the choice value of what they picked ("held" or an of_ value). Never invent times.
 
 ## 5. Make the day easier

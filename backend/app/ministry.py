@@ -172,12 +172,13 @@ FEED_AR = {
     "early": "اكتشاف مبكر في حي {d}، وأُحيل للطبيب", "referral": "إحالات جديدة من حي {d}: {n}",
     "walk": "دقائق مشي سجّلها سكان حي {d}: {n}", "helped": "جيران ساعدوهم في لعبة «حيّ عون» بحي {d}: {n}",
     "intervention": "اعتُمد لحي {d}: {x}", "contacted": "رفيدة تواصلت مع سكان في حي {d}: {n}",
+    "resolved": "رفيدة حلّت سبب «{x}» في حي {d} وانحجز الموعد", "opted_out": "طلبات عدم الاتصال في حي {d}: {n}",
 }
 
 
 def feed(db, limit: int = 12) -> list[dict]:
     """Recent activity grouped per district and kind, newest first."""
-    rows = db.all("SELECT * FROM activity ORDER BY created_at DESC LIMIT 200")
+    rows = [r for r in db.all("SELECT * FROM activity ORDER BY created_at DESC LIMIT 300") if r["kind"] in FEED_AR]
     out, seen = [], {}
     for r in rows:
         key = (r["district"], r["kind"], r["detail"] if r["kind"] in ("barrier", "intervention") else None)
@@ -191,7 +192,9 @@ def feed(db, limit: int = 12) -> list[dict]:
             break
     for it in out:
         ar = catalog.DISTRICTS.get(it["district"], (it["district"],))[0]
-        x = link.BARRIER_AR.get(it["detail"] or "", "") if it["kind"] == "barrier" else (link.IV.get(it["detail"] or "", ("",))[0] if it["kind"] == "intervention" else "")
+        det = it["detail"] or ""
+        x = (link.BARRIER_AR.get(det, "") if it["kind"] == "barrier" else link.IV.get(det, ("",))[0] if it["kind"] == "intervention"
+             else link.BARRIER_AR.get(det.split(":")[0], "أخرى") if it["kind"] == "resolved" else "")
         it["text_ar"] = FEED_AR[it["kind"]].format(n=it["n"], d=ar, x=x)
     return out
 
@@ -235,3 +238,103 @@ def approve(iv_id: str, request: Request, staff=Depends(current_staff)):
                       (_now().isoformat(), staff, n, iv_id))
             link.record(c, iv["district"], "intervention", iv["kind"])
     return {"interventions": interventions(db)}
+
+
+# ---------- what the calls tell us, per district (/ministry/api/insights) ----------
+
+SMALL = 5  # cells from 1 to 4 are shown as "fewer than 5", so no small group can be singled out
+
+
+def _cell(n: int):
+    return n if n == 0 or n >= SMALL else None
+
+
+@router.get("/api/insights")
+def insights(request: Request, range: str = "year", staff=Depends(current_staff)):
+    """Why people in each district don't get screened, what got them booked in the end, and what they ask for.
+    Only counts per district from fixed codes; cells under 5 are hidden."""
+    db = request.app.state.db
+    since = (_now() - timedelta(days=RANGE_DAYS.get(range, 365))).isoformat()
+    rows = db.all("""SELECT district, kind, detail, SUM(n) AS n FROM activity WHERE created_at > ?
+                     GROUP BY district, kind, detail""", since)
+    D = {k: {"key": k, "ar": v[0], "en": v[1], "contacted": 0, "answered": 0, "booked": 0, "results": 0, "early": 0,
+             "referrals": 0, "opted_out": 0, "barriers": {}, "resolved": {}, "prefs": {}, "rides": {}, "langs": {}}
+         for k, v in catalog.DISTRICTS.items()}
+    plain = {"contacted": "contacted", "answered": "answered", "booked": "booked", "result": "results", "early": "early",
+             "referral": "referrals", "opted_out": "opted_out"}
+    for r in rows:
+        d = D.get(r["district"])
+        if d is None:
+            continue
+        k, det, n = r["kind"], r["detail"], r["n"]
+        if k in plain:
+            d[plain[k]] += n
+        elif k == "barrier" and det:
+            d["barriers"][det] = d["barriers"].get(det, 0) + n
+        elif k == "resolved" and det and ":" in det:
+            b, sol = det.split(":", 1)
+            d["resolved"].setdefault(b, {})
+            d["resolved"][b][sol] = d["resolved"][b].get(sol, 0) + n
+        elif k == "pref" and det:
+            d["prefs"][det] = d["prefs"].get(det, 0) + n
+        elif k == "ride" and det:
+            d["rides"][det] = d["rides"].get(det, 0) + n
+        elif k == "lang" and det:
+            d["langs"][det] = d["langs"].get(det, 0) + n
+
+    city = {"contacted": 0, "answered": 0, "booked": 0, "results": 0, "early": 0, "referrals": 0, "opted_out": 0}
+    city_bar: dict[str, int] = {}
+    worked: dict[str, dict[str, int]] = {}
+    out = []
+    ivs = interventions(db)
+    for d in D.values():
+        for k in city:
+            city[k] += d[k]
+        for b, n in d["barriers"].items():
+            city_bar[b] = city_bar.get(b, 0) + n
+        for b, sols in d["resolved"].items():
+            for sol, n in sols.items():
+                worked.setdefault(b, {})
+                worked[b][sol] = worked[b].get(sol, 0) + n
+        nb = sum(d["barriers"].values())
+        top = sorted(d["barriers"].items(), key=lambda x: -x[1])
+        solved = sum(n for b, sols in d["resolved"].items() if b != "none" for n in sols.values())
+        suggestion = None
+        for code, _ in top:
+            kind = link.FOR_BARRIER.get(code)
+            if kind:
+                mine = [iv for iv in ivs if iv["district"] == d["key"] and iv["kind"] == kind]
+                iv = next((x for x in mine if x["status"] == "approved"), mine[0] if mine else None)
+                suggestion = {"kind": kind, "title_ar": link.IV[kind][0], "detail_ar": link.IV[kind][2], "because": code,
+                              "because_ar": link.BARRIER_AR.get(code, code), "intervention_id": iv["id"] if iv else None,
+                              "status": iv["status"] if iv else "new"}
+                break
+        out.append({
+            "key": d["key"], "ar": d["ar"], "en": d["en"],
+            **{k: _cell(d[k]) for k in city},
+            "with_reason": _cell(nb), "solved": _cell(solved),
+            "barriers": {b: _cell(n) for b, n in d["barriers"].items()},
+            "top": [{"code": b, "ar": link.BARRIER_AR.get(b, b), "en": link.BARRIER_EN.get(b, b), "n": _cell(n),
+                     "pct": round(n * 100 / nb) if nb else 0} for b, n in top[:4]],
+            "resolved": {b: {s_: _cell(n) for s_, n in sols.items()} for b, sols in d["resolved"].items()},
+            "prefs": {p: _cell(n) for p, n in d["prefs"].items()},
+            "rides": {p: _cell(n) for p, n in d["rides"].items()},
+            "langs": {p: _cell(n) for p, n in d["langs"].items()},
+            "suggestion": suggestion,
+        })
+    reasons = [{"code": b, "ar": link.BARRIER_AR.get(b, b), "en": link.BARRIER_EN.get(b, b), "n": _cell(n)}
+               for b, n in sorted(city_bar.items(), key=lambda x: -x[1])]
+    worked_list = []
+    for b, sols in sorted(worked.items(), key=lambda x: -sum(x[1].values())):
+        if b == "none":
+            continue
+        tot = sum(sols.values())
+        best = max(sols.items(), key=lambda x: x[1])
+        worked_list.append({"code": b, "ar": link.BARRIER_AR.get(b, b), "total": _cell(tot),
+                            "solutions": [{"code": s_, "ar": link.SOLUTION_AR.get(s_, s_), "en": link.SOLUTION_EN.get(s_, s_),
+                                           "pct": round(n * 100 / tot)} for s_, n in sorted(sols.items(), key=lambda x: -x[1])],
+                            "best_ar": link.SOLUTION_AR.get(best[0], best[0]), "best_pct": round(best[1] * 100 / tot)})
+    return {"range": range, "small_cell": SMALL, "city": {k: _cell(v) for k, v in city.items()},
+            "city_with_reason": _cell(sum(city_bar.values())), "reasons": reasons, "worked": worked_list,
+            "districts": out, "labels": {"prefs": link.PREF_AR, "langs": link.LANG_AR, "solutions": link.SOLUTION_AR},
+            "updated_at": _now().isoformat()}

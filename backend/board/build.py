@@ -56,6 +56,97 @@ LIVE_PANEL = """
                 </sc-if>
 """
 
+CALLS = r"""
+    <!-- ================= صوت الأحياء ================= -->
+    <sc-if value="{{is.calls}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <section style="background: linear-gradient(150deg, #2F7F80 0%, #3F8B8B 100%); color: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <b style="font-size: 20px">صوت الأحياء · لماذا لا يفحص الناس؟</b>
+          <span style="font-size: 13px; line-height: 1.8; color: #E3F4EF">كل مكالمة من رفيدة ورفيد تُسجَّل كرمز سبب واحد وعدد للحي فقط: ما يُحفظ كلام الشخص ولا اسمه ولا رقمه. هنا تشوف السبب الأكثر في كل حي، والحل اللي خلّى الناس يحجزون فعلًا، وتعتمد التدخل بضغطة.</span>
+          <sc-if value="{{ins.loading}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px">جاري التحميل…</span></sc-if>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px">
+            <sc-for list="{{ins.kpis}}" as="ik" hint-placeholder-count="6">
+              <div style="background: rgba(255,255,255,.14); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px">
+                <b style="font-size: 22px">{{ik.n}}</b><span style="font-size: 12px; color: #D6EFE8">{{ik.k}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+          <section style="background: rgba(255,255,255,.92); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <b style="font-size: 16px; color: #173F42">أكثر الأسباب في الرياض</b>
+            <span style="font-size: 12px; color: #4C6466">من {{ins.withReason}} شخص ذكر سببًا في المكالمة</span>
+            <sc-for list="{{ins.reasons}}" as="ir" hint-placeholder-count="6">
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <div style="display: flex; justify-content: space-between; font-size: 13px"><span>{{ir.ar}}</span><b style="color: #2F7F80">{{ir.n}}</b></div>
+                <div style="height: 8px; border-radius: 4px; background: #E6F1EF; overflow: hidden"><div style="height: 100%; margin-left: auto; width: {{ir.w}}; background: {{ir.color}}; border-radius: 4px"></div></div>
+              </div>
+            </sc-for>
+          </section>
+          <section style="background: rgba(255,255,255,.92); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <b style="font-size: 16px; color: #173F42">ماذا نجح؟</b>
+            <span style="font-size: 12px; color: #4C6466">لكل سبب: الحل اللي حجز به أكثر الناس في النهاية</span>
+            <sc-for list="{{ins.worked}}" as="iw" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #F4FAF8; border-radius: 12px">
+                <span style="flex: 1; font-size: 13px"><b>{{iw.ar}}</b><br><span style="color: #4C6466; font-size: 12px">{{iw.best}}</span></span>
+                <b style="font-size: 18px; color: #2F7F80">{{iw.pct}}</b>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+
+        <section style="background: rgba(255,255,255,.92); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+          <b style="font-size: 16px; color: #173F42">خريطة الأسباب حسب الحي</b>
+          <span style="font-size: 12px; color: #4C6466">النسبة من الناس اللي ذكروا سببًا في كل حي. «&lt;5» تعني مجموعة صغيرة مخفية للخصوصية.</span>
+          <div style="overflow-x: auto">
+            <div style="display: grid; grid-template-columns: 110px repeat({{ins.ncols}}, minmax(84px, 1fr)); gap: 4px; font-size: 12px; min-width: 720px">
+              <span style="padding: 6px 8px; color: #4C6466; font-weight: 600">الحي</span>
+              <sc-for list="{{ins.cols}}" as="ic" hint-placeholder-count="6"><span style="padding: 6px 4px; color: #4C6466; font-weight: 600; text-align: center; line-height: 1.4">{{ic.ar}}</span></sc-for>
+              <sc-for list="{{ins.heatCells}}" as="cl" hint-placeholder-count="48">
+                <span style="padding: 8px 6px; text-align: {{cl.align}}; border-radius: 8px; background: {{cl.bg}}; color: {{cl.ink}}; font-weight: {{cl.weight}}; white-space: nowrap">{{cl.t}}</span>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px">
+          <sc-for list="{{ins.cards}}" as="ix" hint-placeholder-count="8">
+            <section style="background: rgba(255,255,255,.95); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: baseline; justify-content: space-between"><b style="font-size: 17px; color: #173F42">حي {{ix.ar}}</b><span style="font-size: 12px; color: #4C6466">{{ix.en}}</span></div>
+              <div style="display: flex; gap: 4px; font-size: 11px; color: #4C6466">
+                <sc-for list="{{ix.funnel}}" as="fn" hint-placeholder-count="4">
+                  <div style="flex: 1; background: #F0F7F5; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; align-items: center"><b style="font-size: 15px; color: #2F7F80">{{fn.n}}</b><span>{{fn.k}}</span></div>
+                </sc-for>
+              </div>
+              <span style="font-size: 12px; color: #4C6466">ليش ما حجزوا من أول مرة:</span>
+              <sc-for list="{{ix.top}}" as="tp" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px">
+                  <span style="width: 120px">{{tp.ar}}</span>
+                  <div style="flex: 1; height: 8px; border-radius: 4px; background: #EEF3F2; overflow: hidden"><div style="height: 100%; margin-left: auto; width: {{tp.w}}; background: {{tp.color}}"></div></div>
+                  <b style="width: 40px; text-align: left; color: #173F42">{{tp.pct}}</b>
+                </div>
+              </sc-for>
+              <sc-if value="{{ix.hasAsks}}" hint-placeholder-val="{{ true }}">
+                <span style="font-size: 12px; color: #4C6466">وش طلبوا:</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ix.asks}}" as="ak" hint-placeholder-count="4"><span style="font-size: 12px; background: #EEF2FA; color: #3D5F94; border-radius: 10px; padding: 4px 10px">{{ak}}</span></sc-for></div>
+              </sc-if>
+              <sc-if value="{{ix.hasSug}}" hint-placeholder-val="{{ true }}">
+                <div style="background: #FFF8E6; border: 1px solid #F3E2B0; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px">
+                  <b style="font-size: 13px; color: #6B5A08">المقترح: {{ix.sugTitle}}</b>
+                  <span style="font-size: 12px; color: #6B5A08; line-height: 1.6">{{ix.sugWhy}}</span>
+                  <sc-if value="{{ix.sugPending}}" hint-placeholder-val="{{ true }}"><button onClick="{{ix.approve}}" style="align-self: flex-start; min-height: 36px; padding: 0 14px; border-radius: 10px; border: none; background: #2F7F80; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">{{ix.sugBtn}}</button></sc-if>
+                  <sc-if value="{{ix.sugDone}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; color: #2F7F80">معتمد · يظهر للسكان الآن</span></sc-if>
+                </div>
+              </sc-if>
+            </section>
+          </sc-for>
+        </div>
+        <span style="font-size: 12px; color: #5A7375; text-align: center">{{ins.note}}</span>
+      </div>
+    </sc-if>
+"""
+
 
 def build():
     src = (HERE / "Ministry.dc.html").read_text(encoding="utf-8")
@@ -73,6 +164,13 @@ def build():
     anchor = '<b style="font-size: 15px">اقتراحات رفيدة لهذا الحي</b>'
     assert anchor in src
     src = src.replace(anchor, LIVE_PANEL + "                " + anchor)
+
+    rep = "    <!-- ================= التقارير ================= -->"
+    assert rep in src
+    src = src.replace(rep, CALLS + rep)
+    tab0 = "['stats', 'الإحصائيات', 'M4 20V10M10 20V4M16 20v-7M22 20H2'], "
+    assert tab0 in src
+    src = src.replace(tab0, tab0 + "['calls', 'صوت الأحياء', 'M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM19 10v1a7 7 0 0 1-14 0v-1M12 18v3'], ")
 
     helmet = re.search(r"<helmet>(.*?)</helmet>", src, re.S).group(1)
     logic = re.search(r'<script type="text/x-dc"[^>]*>(.*?)</script>', src, re.S).group(1)

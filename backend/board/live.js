@@ -50,6 +50,9 @@ class AounMinistry extends Component {
     if (!tok()) return this.state.needLogin || this.setState({ needLogin: true });
     api("/live?range=" + (this.state.range || "year")).then((live) => { this._d = null; this.setState({ live, needLogin: false }); })
       .catch((e) => { if (e.message === "401") this.setState({ needLogin: true, live: null }); });
+    this._n = (this._n || 0) + 1;
+    if (this.state.tab === "calls" || !this.state.ins || this._n % 5 === 0)
+      api("/insights?range=" + (this.state.range || "year")).then((ins) => this.setState({ ins })).catch(() => {});
   }
   login() {
     const id = (document.getElementById("min-id") || {}).value || "", pw = (document.getElementById("min-pw") || {}).value || "";
@@ -62,11 +65,11 @@ class AounMinistry extends Component {
         setTok(j.token); this.setState({ loggingIn: false, needLogin: false, staff: j.staff_id }); this.poll();
       }).catch(() => this.setState({ loggingIn: false, loginErr: "تعذّر الاتصال بالخادم" }));
   }
-  logout() { setTok(""); this.setState({ needLogin: true, live: null }); }
+  logout() { setTok(""); this.setState({ needLogin: true, live: null, ins: null }); }
   approveLive(id) {
     if (this.state.busy[id]) return;
     this.setState({ busy: Object.assign({}, this.state.busy, { [id]: true }) });
-    api("/interventions/" + id + "/approve", { method: "POST" }).then(() => this.poll()).catch(() => {})
+    api("/interventions/" + id + "/approve", { method: "POST" }).then(() => { this._n = 4; this.poll(); }).catch(() => {})
       .finally(() => this.setState({ busy: Object.assign({}, this.state.busy, { [id]: false }) }));
   }
   proposeLive(district, kind) {
@@ -105,6 +108,8 @@ class AounMinistry extends Component {
     v.dataBadge = L ? "مباشر من التجربة · بقية المملكة محاكاة" : "بيانات تجريبية للعرض";
     v.dataBadgeBg = L ? "#E6F4F1" : "#FBF5D6";
     v.dataBadgeInk = L ? "#2F7F80" : "#6B5A08";
+    v.is = Object.assign({}, v.is, { calls: s.tab === "calls" });
+    v.ins = this.insightsVals();
     if (!L) { v.livePanel = { show: false }; return v; }
 
     v.liveCount = fmtN(1240 + (s.tick * 37) % 400 + L.calls_now);
@@ -169,4 +174,54 @@ class AounMinistry extends Component {
     });
     return v;
   }
+
+  /* «صوت الأحياء»: the reasons people gave on the calls, per district, and what fixed them. */
+  insightsVals() {
+    const I = this.state.ins;
+    if (!I) return { loading: true, kpis: [], reasons: [], worked: [], cols: [], heat: [], heatCells: [], ncols: 1, cards: [], withReason: "—", note: "" };
+    const n = (x) => (x === null || x === undefined ? "<5" : fmtN(x));
+    const pct = (a, b) => (a && b ? Math.round(a * 100 / b) + "%" : "—");
+    const c = I.city;
+    const kpis = [["اتصال من رفيدة ورفيد", n(c.contacted)], ["ردّوا على المكالمة", pct(c.answered, c.contacted)],
+      ["ذكروا سببًا", n(I.city_with_reason)], ["حجزوا", pct(c.booked, c.contacted)],
+      ["نتائج وصلت من الأطباء", n(c.results)], ["طلبوا عدم الاتصال", n(c.opted_out)]].map(([k, v]) => ({ k, n: v }));
+    const PAL = ["#2F7F80", "#C98A1B", "#7A3E8F", "#3D5F94", "#B5523B", "#4B5512", "#5AA7A7", "#8C6D3F", "#6B7F82", "#A0446B"];
+    const colorOf = {}; I.reasons.forEach((r, i) => { colorOf[r.code] = PAL[i % PAL.length]; });
+    const maxR = Math.max(1, ...I.reasons.map((r) => r.n || 0));
+    const reasons = I.reasons.slice(0, 8).map((r) => ({ ar: r.ar, n: n(r.n), w: Math.round((r.n || 2) * 100 / maxR) + "%", color: colorOf[r.code] }));
+    const worked = I.worked.slice(0, 7).map((w) => ({ ar: w.ar, best: "الأنجح: " + w.best_ar + (w.solutions[1] ? " · ثم " + w.solutions[1].ar : ""), pct: w.best_pct + "%" }));
+    const cols = I.reasons.slice(0, 7);
+    const heat = I.districts.map((d) => {
+      const tot = Object.values(d.barriers).reduce((a, x) => a + (x || 0), 0);
+      return { ar: d.ar, cells: cols.map((col) => {
+        const v = d.barriers[col.code];
+        if (v === undefined || v === 0) return { t: "—", bg: "#F6F9F8", ink: "#9AAAAB" };
+        if (v === null) return { t: "<5", bg: "#F1F4F4", ink: "#7E8C8E" };
+        const p = tot ? v / tot : 0, a = Math.min(1, 0.12 + p * 2.2);
+        return { t: Math.round(p * 100) + "%", bg: "rgba(47,127,128," + a.toFixed(2) + ")", ink: a > 0.5 ? "#FFFFFF" : "#173F42" };
+      }) };
+    });
+    const RIDE = { car: "سيارة", metro: "مترو", car_wheelchair: "سيارة للكرسي المتحرك" };
+    const L = I.labels || {};
+    const cards = I.districts.map((d) => {
+      const asks = [];
+      const push = (obj, lbl, pre) => Object.entries(obj || {}).sort((a, b) => (b[1] || 0) - (a[1] || 0)).slice(0, 3)
+        .forEach(([k, v]) => asks.push((pre || "") + (lbl[k] || k) + " · " + n(v)));
+      push(d.prefs, L.prefs || {}); push(d.rides, RIDE, "مشوار "); push(Object.fromEntries(Object.entries(d.langs || {}).filter(([k]) => k !== "ar")), L.langs || {}, "لغة ");
+      const sg = d.suggestion, busy = sg && sg.intervention_id && this.state.busy[sg.intervention_id];
+      return { ar: d.ar, en: d.en,
+        funnel: [["تواصلنا", n(d.contacted)], ["ردّوا", n(d.answered)], ["حجزوا", n(d.booked)], ["حُلّ عائقهم", n(d.solved)]].map(([k, v]) => ({ k, n: v })),
+        top: d.top.slice(0, 3).map((t) => ({ ar: t.ar, pct: t.pct + "%", w: t.pct + "%", color: colorOf[t.code] || "#2F7F80" })),
+        asks: asks.slice(0, 6), hasAsks: asks.length > 0,
+        hasSug: !!sg, sugTitle: sg ? sg.title_ar : "", sugWhy: sg ? "لأن أكثر سبب في الحي: «" + sg.because_ar + "». " + sg.detail_ar : "",
+        sugPending: !!sg && sg.status !== "approved", sugDone: !!sg && sg.status === "approved", sugBtn: busy ? "جاري الاعتماد…" : "اعتماد",
+        approve: () => sg && (sg.intervention_id ? this.approveLive(sg.intervention_id) : this.proposeLive(d.key, sg.kind)) };
+    });
+    const heatCells = [];
+    heat.forEach((r) => { heatCells.push({ t: r.ar, bg: "transparent", ink: "#173F42", align: "right", weight: 700 });
+      r.cells.forEach((c) => heatCells.push(Object.assign({ align: "center", weight: 600 }, c))); });
+    return { loading: false, kpis, reasons, worked, cols, heat, heatCells, ncols: cols.length, cards, withReason: n(I.city_with_reason),
+      note: "أعداد مجمّعة لكل حي من رموز ثابتة فقط، وأي خانة أقل من " + I.small_cell + " أشخاص تظهر «<5». آخر تحديث " + ago(I.updated_at) + "." };
+  }
+
 }

@@ -65,6 +65,9 @@ class Reason(str, Enum):
     sooner = "sooner"                    # wants an earlier appointment, even if paid
     language = "language"
     childcare = "childcare"              # no one to look after children or dependants
+    already_screened = "already_screened"  # had it done recently somewhere else
+    call_later = "call_later"            # busy now, call another time
+    mistrust = "mistrust"                # not sure the call or the check is genuine
     other = "other"
 
 
@@ -305,6 +308,13 @@ SOLUTIONS = {
     Reason.sooner: ("The earliest free time at a Ministry center, and the earliest at a private clinic (paid; say the "
                     "price and what insurance covers).", lambda s, d: s["kind"] == "center"),
     Reason.language: ("Keep the appointment: an interpreter in their language will be at the center.", None),
+    Reason.already_screened: ("Thank them. No new appointment is needed now; they can ask their doctor to add the "
+                              "result in the app. Offer to remind them when the next check is due.", None),
+    Reason.call_later: ("Ask which time suits them and say Rufaida will call back then. Keep the held appointment "
+                        "if they want it.", None),
+    Reason.mistrust: ("Explain simply: this is the Ministry of Health's early screening, free, booked in Sehhaty, and "
+                      "results go only to them and their doctor. Never ask for passwords or codes. Offer a free video "
+                      "consultation with a doctor first, then the next open times.", lambda s, d: s["kind"] == "center"),
     Reason.other: ("The next open times.", lambda s, d: s["kind"] == "center"),
 }
 ONE_PER_TAG = {Reason.far: "place_kind", Reason.work_hours: "time_band"}
@@ -316,6 +326,11 @@ ONE_PER_TAG = {Reason.far: "place_kind", Reason.work_hours: "time_band"}
 def get_appointment(body: Empty, request: Request):
     s = _session(request, body.conversation_id)
     db = request.app.state.db
+    with db.tx() as c:  # the person picked up and is talking (counted once per call)
+        if not c.execute("SELECT 1 FROM events WHERE case_id = ? AND type = 'call_answered' AND detail = ?",
+                         (s["case_id"], s["id"])).fetchone():
+            _event(c, s["case_id"], "call_answered", detail=s["id"])
+            link.record_case(c, s["case_id"], "answered")
     h = db.one("""SELECT h.status, sl.* FROM holds h JOIN slots sl ON sl.id = h.slot_id
                   WHERE h.call_id = ?""", s["id"])
     if h is None or h["status"] != "held":
@@ -379,12 +394,34 @@ def confirm_booking(body: ConfirmIn, request: Request):
         c.execute("UPDATE residents SET language = ? WHERE id = (SELECT resident_id FROM cases WHERE id = ?)",
                   (lang, s["case_id"]))
         c.execute("UPDATE call_sessions SET language = ? WHERE id = ?", (lang, s["id"]))
+        # What worked: the reason they gave in this call, and what they chose in the end.
+        bar = c.execute("SELECT reason FROM barriers WHERE call_id = ?", (s["id"],)).fetchone()
+        link.record_case(c, s["case_id"], "resolved", f"{bar['reason'] if bar else 'none'}:{_solution_kind(slot, plan)}")
+        link.record_case(c, s["case_id"], "lang", lang)
     send_booking_text(request, s["case_id"], slot, lang)
     person = _person(db, s["case_id"])
     ref = db.one("SELECT sehhaty_ref FROM bookings WHERE id = ?", bid)["sehhaty_ref"]
     return {"status": "confirmed", "booking_ref": bid, "sehhaty_ref": ref, **_slot_view(slot, person), "language": lang,
             "ride": _ride_view(plan, slot), "prefs": _prefs(plan),
             "message": "Say it is confirmed and the full plan is in the Aoun app, a reminder comes a day before, then say goodbye and end the call."}
+
+
+def _solution_kind(slot, plan) -> str:
+    """A fixed label for what the person finally chose (no times or places)."""
+    hour = datetime.fromisoformat(slot["start_local"]).hour
+    if slot["kind"] == "home_visit":
+        return "home_visit"
+    if slot["kind"] == "mobile_clinic":
+        return "mobile_clinic"
+    if slot["facility_id"] in catalog.PAID_FACILITIES:
+        return "private"
+    if plan["ride_mode"]:
+        return "ride"
+    if hour >= 17 or datetime.fromisoformat(slot["start_local"]).weekday() in (4, 5):
+        return "after_work"
+    if Pref.female_doctor.value in _prefs(plan) or slot["female_staff"]:
+        return "female_doctor"
+    return "same_time" if slot["kind"] == "center" else "other"
 
 
 def booking_text(slot, lang: str) -> str:
@@ -617,6 +654,7 @@ def request_transport(body: TransportIn, request: Request):
         plan = _plan(c, s["id"])
         slot = _target_slot(c, s["id"], s["case_id"])
         status = _sync_support(c, s["case_id"], plan)
+        link.record_case(c, s["case_id"], "ride", body.mode.value if not car or body.party != Party.wheelchair else "car_wheelchair")
     return {"transport_status": status or "held_until_confirmed", "ride": _ride_view(plan, slot),
             "message": "Say it is booked tentatively and goes through when they confirm. Then call set_preferences."}
 
@@ -632,8 +670,12 @@ def set_preferences(body: PrefsIn, request: Request):
     with db.tx() as c:
         p = _plan(c, s["id"])
         keep = [x for x in _prefs(p) if x in (Pref.female_doctor.value, Pref.wheelchair_center.value)]
+        before = set(_prefs(p))
         chosen = list(dict.fromkeys(keep + [x.value for x in body.prefs]))
         c.execute("UPDATE call_plans SET prefs = ? WHERE call_id = ?", (",".join(chosen), s["id"]))
+        for code in chosen:
+            if code not in before:
+                link.record(c, case["district"], "pref", code)
         if Pref.home_test.value in chosen:
             r = c.execute("""SELECT * FROM slots WHERE district = ? AND screening = ? AND kind = 'home_visit'
                              AND remaining > 0 ORDER BY start_local LIMIT 1""",
@@ -662,6 +704,7 @@ def request_nurse_callback(body: NurseCallbackIn, request: Request):
                   (new_id("tk"), s["case_id"], "nurse_callback", body.topic.value,
                    (_now_utc() + timedelta(hours=1)).isoformat(), "pending"))
         _event(c, s["case_id"], "nurse_callback_requested", detail=body.topic.value)
+        link.record_case(c, s["case_id"], "nurse", body.topic.value)
     return {"status": "scheduled", "callback": "within one hour"}
 
 
@@ -679,4 +722,5 @@ def opt_out(body: Empty, request: Request):
             c.execute("UPDATE holds SET status = 'released' WHERE id = ?", (hold["id"],))
         c.execute("UPDATE call_sessions SET outcome = 'opted_out' WHERE id = ?", (s["id"],))
         _event(c, s["case_id"], "opted_out")
+        link.record_case(c, s["case_id"], "opted_out")
     return {"status": "opted_out", "message": "Confirm kindly that they will not be called again, then say goodbye."}

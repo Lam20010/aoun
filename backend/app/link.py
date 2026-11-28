@@ -23,17 +23,20 @@ RIYADH = timezone(timedelta(hours=3))
 
 # ---------- activity ----------
 
-KINDS = {"booked", "cancelled", "barrier", "result", "early", "referral", "walk", "helped", "intervention", "contacted"}
+KINDS = {"booked", "cancelled", "barrier", "result", "early", "referral", "walk", "helped", "intervention", "contacted",
+         "answered", "pref", "ride", "resolved", "lang", "opted_out", "nurse"}
 
 BARRIER_AR = {
     "transport": "المواصلات", "far": "بُعد المركز", "work_hours": "تعارض المواعيد مع الدوام", "fear": "الخوف من الفحص",
     "no_need": "قلة الوعي", "needs_companion": "المواصلات", "embarrassment": "تفضيل طبيبة", "cost_concern": "التكلفة",
-    "language": "حاجز اللغة", "childcare": "رعاية الأطفال", "other": "أخرى", "sooner": "صعوبة الحجز",
+    "language": "حاجز اللغة", "childcare": "رعاية الأطفال", "other": "أخرى", "sooner": "يبغى موعد أقرب",
+    "already_screened": "فحص مؤخرًا في مكان ثاني", "call_later": "مشغول وقت المكالمة", "mistrust": "ما وثق في المكالمة",
 }
 BARRIER_EN = {
     "transport": "Transport", "far": "Distance", "work_hours": "Work hours", "fear": "Fear of the test", "no_need": "Low awareness",
     "needs_companion": "Transport", "embarrassment": "Prefers a woman doctor", "cost_concern": "Cost", "language": "Language",
-    "childcare": "Childcare", "other": "Other", "sooner": "Hard to book",
+    "childcare": "Childcare", "other": "Other", "sooner": "Wants it sooner",
+    "already_screened": "Screened elsewhere", "call_later": "Busy at call time", "mistrust": "Did not trust the call",
 }
 
 
@@ -74,6 +77,80 @@ FOR_BARRIER = {"transport": "transport", "needs_companion": "transport", "far": 
 DEFAULT_IV = {"Qurtubah": "mobile_clinic", "Al-Naseem": "transport", "Al-Yarmouk": "language", "Al-Malqa": "evening_hours",
               "Al-Olaya": "evening_hours", "Al-Rawdah": "challenge", "Al-Aziziyah": "mobile_clinic", "Al-Suwaidi": "transport"}
 CHALLENGE_GOAL = 30  # bookings + walks in a week
+
+
+SOLUTION_AR = {"ride": "مشوار للموعد", "after_work": "موعد بعد الدوام", "mobile_clinic": "عيادة متنقلة قريبة", "home_visit": "زيارة منزلية",
+               "female_doctor": "طبيبة", "private": "عيادة خاصة (أقرب)", "same_time": "شرح وطمأنة بنفس الموعد", "other": "أخرى"}
+SOLUTION_EN = {"ride": "A ride", "after_work": "After-work time", "mobile_clinic": "Mobile clinic nearby", "home_visit": "Home visit",
+               "female_doctor": "Woman doctor", "private": "Private clinic (sooner)", "same_time": "Explained, same time", "other": "Other"}
+PREF_AR = {"female_doctor": "طبيبة", "wheelchair_center": "مركز يدعم الكرسي المتحرك", "home_test": "فحص منزلي",
+           "companion_reminders": "مرافق يستلم التذكير", "virtual_consult": "استشارة فيديو قبلها"}
+LANG_AR = {"ar": "العربية", "en": "الإنجليزية", "ur": "الأوردو", "hi": "الهندية", "bn": "البنغالية", "fil": "الفلبينية", "id": "الإندونيسية"}
+
+# Demo history for the pilot districts (only in demo mode, only on an empty table): what months of calls
+# would look like, so the Ministry board has something real-shaped to show. Live activity adds on top.
+_PROFILE = {
+    "Qurtubah":    ({"work_hours": 30, "no_need": 16, "far": 10, "fear": 9, "call_later": 10, "sooner": 6, "other": 5}, {"ar": 96, "en": 4}),
+    "Al-Naseem":   ({"transport": 34, "childcare": 15, "cost_concern": 11, "no_need": 12, "fear": 8, "needs_companion": 8, "other": 4}, {"ar": 97, "en": 3}),
+    "Al-Yarmouk":  ({"language": 33, "work_hours": 22, "mistrust": 11, "transport": 9, "no_need": 8, "cost_concern": 7, "other": 4}, {"ar": 55, "ur": 18, "hi": 14, "bn": 13}),
+    "Al-Malqa":    ({"work_hours": 34, "sooner": 16, "already_screened": 15, "call_later": 12, "no_need": 9, "other": 4}, {"ar": 90, "en": 10}),
+    "Al-Olaya":    ({"work_hours": 40, "sooner": 19, "call_later": 15, "no_need": 9, "already_screened": 8, "other": 4}, {"ar": 78, "en": 15, "fil": 7}),
+    "Al-Rawdah":   ({"fear": 26, "no_need": 24, "embarrassment": 11, "work_hours": 10, "already_screened": 9, "needs_companion": 7, "other": 4}, {"ar": 98, "en": 2}),
+    "Al-Aziziyah": ({"far": 29, "transport": 20, "childcare": 14, "language": 11, "work_hours": 9, "cost_concern": 6, "other": 4}, {"ar": 70, "bn": 14, "fil": 9, "ur": 7}),
+    "Al-Suwaidi":  ({"transport": 25, "cost_concern": 16, "mistrust": 15, "fear": 11, "no_need": 10, "childcare": 7, "other": 4}, {"ar": 92, "ur": 8}),
+}
+_WORKS = {"transport": {"ride": 6, "mobile_clinic": 3}, "far": {"mobile_clinic": 6, "ride": 3}, "work_hours": {"after_work": 7, "private": 2},
+          "fear": {"female_doctor": 4, "same_time": 5}, "childcare": {"mobile_clinic": 5, "home_visit": 4}, "language": {"same_time": 8},
+          "embarrassment": {"female_doctor": 9}, "cost_concern": {"same_time": 9}, "sooner": {"private": 6, "after_work": 3},
+          "mistrust": {"same_time": 8}, "no_need": {"same_time": 9}, "needs_companion": {"ride": 5, "female_doctor": 3},
+          "call_later": {"same_time": 6, "after_work": 3}, "other": {"same_time": 7}}
+
+
+def seed_activity_demo(db) -> None:
+    import random
+    if db.one("SELECT COUNT(*) AS n FROM activity")["n"]:
+        return
+    rnd = random.Random(42)
+    now = _now()
+    def pick(weights: dict) -> str:
+        return rnd.choices(list(weights), weights=list(weights.values()))[0]
+    rows = []
+    for d, (bars, langs) in _PROFILE.items():
+        for week in range(16):
+            at = (now - timedelta(days=7 * week + rnd.randint(0, 6), hours=rnd.randint(0, 10))).isoformat()
+            agg: dict[tuple, int] = {}
+            def add(kind, detail=None, n=1):
+                agg[(kind, detail)] = agg.get((kind, detail), 0) + n
+            contacted = rnd.randint(28, 52)
+            add("contacted", n=contacted)
+            for _ in range(contacted):
+                if rnd.random() > 0.78:
+                    continue
+                add("answered")
+                add("lang", pick(langs))
+                reason = pick(bars) if rnd.random() < 0.62 else None
+                if reason:
+                    add("barrier", reason)
+                if rnd.random() < 0.03:
+                    add("opted_out"); continue
+                if reason in ("already_screened",) or (reason and rnd.random() < 0.28) or (not reason and rnd.random() < 0.25):
+                    continue
+                add("booked")
+                sol = pick(_WORKS.get(reason or "other", {"same_time": 1})) if reason else "same_time"
+                add("resolved", f"{reason or 'none'}:{sol}")
+                if sol == "ride":
+                    add("ride", "metro" if rnd.random() < 0.3 else "car")
+                for code, p in (("female_doctor", 0.35), ("wheelchair_center", 0.05), ("home_test", 0.06), ("companion_reminders", 0.12), ("virtual_consult", 0.08)):
+                    if rnd.random() < p:
+                        add("pref", code)
+                if rnd.random() < 0.72:
+                    add("result")
+                    if rnd.random() < 0.07:
+                        add("early", "diabetes"); add("referral", "specialist")
+            for (kind, detail), n in agg.items():
+                rows.append((new_id("act"), d, kind, detail, n, at))
+    with db.tx() as c:
+        c.executemany("INSERT INTO activity VALUES (?,?,?,?,?,?)", rows)
 
 
 def seed_interventions(db) -> None:

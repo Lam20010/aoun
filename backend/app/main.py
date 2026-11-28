@@ -26,6 +26,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.db = Database(settings.db_path)
     seed_demo(app.state.db, app.state.vault)  # also seeds open times, doctors and past records
     link.seed_interventions(app.state.db)
+    if settings.demo_mode:
+        link.seed_activity_demo(app.state.db)
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):

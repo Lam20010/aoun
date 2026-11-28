@@ -607,6 +607,95 @@ button{font-family:inherit}
       </section>
     </sc-if>
 
+
+    <!-- ================= صوت الأحياء ================= -->
+    <sc-if value="{{is.calls}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <section style="background: linear-gradient(150deg, #2F7F80 0%, #3F8B8B 100%); color: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <b style="font-size: 20px">صوت الأحياء · لماذا لا يفحص الناس؟</b>
+          <span style="font-size: 13px; line-height: 1.8; color: #E3F4EF">كل مكالمة من رفيدة ورفيد تُسجَّل كرمز سبب واحد وعدد للحي فقط: ما يُحفظ كلام الشخص ولا اسمه ولا رقمه. هنا تشوف السبب الأكثر في كل حي، والحل اللي خلّى الناس يحجزون فعلًا، وتعتمد التدخل بضغطة.</span>
+          <sc-if value="{{ins.loading}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px">جاري التحميل…</span></sc-if>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px">
+            <sc-for list="{{ins.kpis}}" as="ik" hint-placeholder-count="6">
+              <div style="background: rgba(255,255,255,.14); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px">
+                <b style="font-size: 22px">{{ik.n}}</b><span style="font-size: 12px; color: #D6EFE8">{{ik.k}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px">
+          <section style="background: rgba(255,255,255,.92); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <b style="font-size: 16px; color: #173F42">أكثر الأسباب في الرياض</b>
+            <span style="font-size: 12px; color: #4C6466">من {{ins.withReason}} شخص ذكر سببًا في المكالمة</span>
+            <sc-for list="{{ins.reasons}}" as="ir" hint-placeholder-count="6">
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <div style="display: flex; justify-content: space-between; font-size: 13px"><span>{{ir.ar}}</span><b style="color: #2F7F80">{{ir.n}}</b></div>
+                <div style="height: 8px; border-radius: 4px; background: #E6F1EF; overflow: hidden"><div style="height: 100%; margin-left: auto; width: {{ir.w}}; background: {{ir.color}}; border-radius: 4px"></div></div>
+              </div>
+            </sc-for>
+          </section>
+          <section style="background: rgba(255,255,255,.92); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <b style="font-size: 16px; color: #173F42">ماذا نجح؟</b>
+            <span style="font-size: 12px; color: #4C6466">لكل سبب: الحل اللي حجز به أكثر الناس في النهاية</span>
+            <sc-for list="{{ins.worked}}" as="iw" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #F4FAF8; border-radius: 12px">
+                <span style="flex: 1; font-size: 13px"><b>{{iw.ar}}</b><br><span style="color: #4C6466; font-size: 12px">{{iw.best}}</span></span>
+                <b style="font-size: 18px; color: #2F7F80">{{iw.pct}}</b>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+
+        <section style="background: rgba(255,255,255,.92); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+          <b style="font-size: 16px; color: #173F42">خريطة الأسباب حسب الحي</b>
+          <span style="font-size: 12px; color: #4C6466">النسبة من الناس اللي ذكروا سببًا في كل حي. «&lt;5» تعني مجموعة صغيرة مخفية للخصوصية.</span>
+          <div style="overflow-x: auto">
+            <div style="display: grid; grid-template-columns: 110px repeat({{ins.ncols}}, minmax(84px, 1fr)); gap: 4px; font-size: 12px; min-width: 720px">
+              <span style="padding: 6px 8px; color: #4C6466; font-weight: 600">الحي</span>
+              <sc-for list="{{ins.cols}}" as="ic" hint-placeholder-count="6"><span style="padding: 6px 4px; color: #4C6466; font-weight: 600; text-align: center; line-height: 1.4">{{ic.ar}}</span></sc-for>
+              <sc-for list="{{ins.heatCells}}" as="cl" hint-placeholder-count="48">
+                <span style="padding: 8px 6px; text-align: {{cl.align}}; border-radius: 8px; background: {{cl.bg}}; color: {{cl.ink}}; font-weight: {{cl.weight}}; white-space: nowrap">{{cl.t}}</span>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px">
+          <sc-for list="{{ins.cards}}" as="ix" hint-placeholder-count="8">
+            <section style="background: rgba(255,255,255,.95); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: baseline; justify-content: space-between"><b style="font-size: 17px; color: #173F42">حي {{ix.ar}}</b><span style="font-size: 12px; color: #4C6466">{{ix.en}}</span></div>
+              <div style="display: flex; gap: 4px; font-size: 11px; color: #4C6466">
+                <sc-for list="{{ix.funnel}}" as="fn" hint-placeholder-count="4">
+                  <div style="flex: 1; background: #F0F7F5; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; align-items: center"><b style="font-size: 15px; color: #2F7F80">{{fn.n}}</b><span>{{fn.k}}</span></div>
+                </sc-for>
+              </div>
+              <span style="font-size: 12px; color: #4C6466">ليش ما حجزوا من أول مرة:</span>
+              <sc-for list="{{ix.top}}" as="tp" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px">
+                  <span style="width: 120px">{{tp.ar}}</span>
+                  <div style="flex: 1; height: 8px; border-radius: 4px; background: #EEF3F2; overflow: hidden"><div style="height: 100%; margin-left: auto; width: {{tp.w}}; background: {{tp.color}}"></div></div>
+                  <b style="width: 40px; text-align: left; color: #173F42">{{tp.pct}}</b>
+                </div>
+              </sc-for>
+              <sc-if value="{{ix.hasAsks}}" hint-placeholder-val="{{ true }}">
+                <span style="font-size: 12px; color: #4C6466">وش طلبوا:</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ix.asks}}" as="ak" hint-placeholder-count="4"><span style="font-size: 12px; background: #EEF2FA; color: #3D5F94; border-radius: 10px; padding: 4px 10px">{{ak}}</span></sc-for></div>
+              </sc-if>
+              <sc-if value="{{ix.hasSug}}" hint-placeholder-val="{{ true }}">
+                <div style="background: #FFF8E6; border: 1px solid #F3E2B0; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px">
+                  <b style="font-size: 13px; color: #6B5A08">المقترح: {{ix.sugTitle}}</b>
+                  <span style="font-size: 12px; color: #6B5A08; line-height: 1.6">{{ix.sugWhy}}</span>
+                  <sc-if value="{{ix.sugPending}}" hint-placeholder-val="{{ true }}"><button onClick="{{ix.approve}}" style="align-self: flex-start; min-height: 36px; padding: 0 14px; border-radius: 10px; border: none; background: #2F7F80; color: #FFFFFF; font-weight: 600; font-size: 13px; cursor: pointer">{{ix.sugBtn}}</button></sc-if>
+                  <sc-if value="{{ix.sugDone}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; color: #2F7F80">معتمد · يظهر للسكان الآن</span></sc-if>
+                </div>
+              </sc-if>
+            </section>
+          </sc-for>
+        </div>
+        <span style="font-size: 12px; color: #5A7375; text-align: center">{{ins.note}}</span>
+      </div>
+    </sc-if>
     <!-- ================= التقارير ================= -->
     <sc-if value="{{is.reports}}" hint-placeholder-val="{{ false }}">
       <div style="display: flex; flex-direction: column; gap: 18px">
@@ -1134,7 +1223,7 @@ class Component extends DCLogic {
       saveBg: clean ? '#9DB5AC' : '#2F7F80', saveCursor: clean ? 'not-allowed' : 'pointer', notSettings: s.tab !== 'settings',
       saveSettings: () => this.setState({ savedCfg: cfg, saved: true }), resetSettings: () => this.setState({ cfg: DEF, saved: false }) };
 
-    const tabDefs = [['home', 'الرئيسية', 'M3 11l9-7 9 7M5 10v10h14V10'], ['stats', 'الإحصائيات', 'M4 20V10M10 20V4M16 20v-7M22 20H2'], ['actions', 'التدخلات', 'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z'], ['agents', 'أداء الوكلاء', 'M12 8a4 4 0 1 0 0-.01M4 21c0-4 4-7 8-7s8 3 8 7M19 4l1.5 1.5L23 3'], ['settings', 'الإعدادات', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3.1 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3.1V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 20.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], ['reports', 'التقارير', 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5']];
+    const tabDefs = [['home', 'الرئيسية', 'M3 11l9-7 9 7M5 10v10h14V10'], ['stats', 'الإحصائيات', 'M4 20V10M10 20V4M16 20v-7M22 20H2'], ['calls', 'صوت الأحياء', 'M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM19 10v1a7 7 0 0 1-14 0v-1M12 18v3'], ['actions', 'التدخلات', 'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z'], ['agents', 'أداء الوكلاء', 'M12 8a4 4 0 1 0 0-.01M4 21c0-4 4-7 8-7s8 3 8 7M19 4l1.5 1.5L23 3'], ['settings', 'الإعدادات', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3.1 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3.1V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 20.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], ['reports', 'التقارير', 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5']];
     const tabs = tabDefs.filter((x) => x[0] !== 'settings').concat(tabDefs.filter((x) => x[0] === 'settings')).map(([key, label, d]) => ({ label, d, pick: () => this.setState({ tab: key }), bg: s.tab === key ? 'rgba(255,255,255,.18)' : 'transparent', weight: s.tab === key ? 700 : 500, current: s.tab === key ? 'page' : 'false' }));
     const ranges = [['month', 'شهر'], ['quarter', 'ربع'], ['year', 'سنة']].map(([key, label]) => ({ label, selected: s.range === key, pick: () => this.setState({ range: key }), bg: s.range === key ? '#2F7F80' : 'transparent', color: s.range === key ? '#FFFFFF' : '#2F7F80' }));
 
@@ -1245,6 +1334,9 @@ class AounMinistry extends Component {
     if (!tok()) return this.state.needLogin || this.setState({ needLogin: true });
     api("/live?range=" + (this.state.range || "year")).then((live) => { this._d = null; this.setState({ live, needLogin: false }); })
       .catch((e) => { if (e.message === "401") this.setState({ needLogin: true, live: null }); });
+    this._n = (this._n || 0) + 1;
+    if (this.state.tab === "calls" || !this.state.ins || this._n % 5 === 0)
+      api("/insights?range=" + (this.state.range || "year")).then((ins) => this.setState({ ins })).catch(() => {});
   }
   login() {
     const id = (document.getElementById("min-id") || {}).value || "", pw = (document.getElementById("min-pw") || {}).value || "";
@@ -1257,11 +1349,11 @@ class AounMinistry extends Component {
         setTok(j.token); this.setState({ loggingIn: false, needLogin: false, staff: j.staff_id }); this.poll();
       }).catch(() => this.setState({ loggingIn: false, loginErr: "تعذّر الاتصال بالخادم" }));
   }
-  logout() { setTok(""); this.setState({ needLogin: true, live: null }); }
+  logout() { setTok(""); this.setState({ needLogin: true, live: null, ins: null }); }
   approveLive(id) {
     if (this.state.busy[id]) return;
     this.setState({ busy: Object.assign({}, this.state.busy, { [id]: true }) });
-    api("/interventions/" + id + "/approve", { method: "POST" }).then(() => this.poll()).catch(() => {})
+    api("/interventions/" + id + "/approve", { method: "POST" }).then(() => { this._n = 4; this.poll(); }).catch(() => {})
       .finally(() => this.setState({ busy: Object.assign({}, this.state.busy, { [id]: false }) }));
   }
   proposeLive(district, kind) {
@@ -1300,6 +1392,8 @@ class AounMinistry extends Component {
     v.dataBadge = L ? "مباشر من التجربة · بقية المملكة محاكاة" : "بيانات تجريبية للعرض";
     v.dataBadgeBg = L ? "#E6F4F1" : "#FBF5D6";
     v.dataBadgeInk = L ? "#2F7F80" : "#6B5A08";
+    v.is = Object.assign({}, v.is, { calls: s.tab === "calls" });
+    v.ins = this.insightsVals();
     if (!L) { v.livePanel = { show: false }; return v; }
 
     v.liveCount = fmtN(1240 + (s.tick * 37) % 400 + L.calls_now);
@@ -1364,6 +1458,56 @@ class AounMinistry extends Component {
     });
     return v;
   }
+
+  /* «صوت الأحياء»: the reasons people gave on the calls, per district, and what fixed them. */
+  insightsVals() {
+    const I = this.state.ins;
+    if (!I) return { loading: true, kpis: [], reasons: [], worked: [], cols: [], heat: [], heatCells: [], ncols: 1, cards: [], withReason: "—", note: "" };
+    const n = (x) => (x === null || x === undefined ? "<5" : fmtN(x));
+    const pct = (a, b) => (a && b ? Math.round(a * 100 / b) + "%" : "—");
+    const c = I.city;
+    const kpis = [["اتصال من رفيدة ورفيد", n(c.contacted)], ["ردّوا على المكالمة", pct(c.answered, c.contacted)],
+      ["ذكروا سببًا", n(I.city_with_reason)], ["حجزوا", pct(c.booked, c.contacted)],
+      ["نتائج وصلت من الأطباء", n(c.results)], ["طلبوا عدم الاتصال", n(c.opted_out)]].map(([k, v]) => ({ k, n: v }));
+    const PAL = ["#2F7F80", "#C98A1B", "#7A3E8F", "#3D5F94", "#B5523B", "#4B5512", "#5AA7A7", "#8C6D3F", "#6B7F82", "#A0446B"];
+    const colorOf = {}; I.reasons.forEach((r, i) => { colorOf[r.code] = PAL[i % PAL.length]; });
+    const maxR = Math.max(1, ...I.reasons.map((r) => r.n || 0));
+    const reasons = I.reasons.slice(0, 8).map((r) => ({ ar: r.ar, n: n(r.n), w: Math.round((r.n || 2) * 100 / maxR) + "%", color: colorOf[r.code] }));
+    const worked = I.worked.slice(0, 7).map((w) => ({ ar: w.ar, best: "الأنجح: " + w.best_ar + (w.solutions[1] ? " · ثم " + w.solutions[1].ar : ""), pct: w.best_pct + "%" }));
+    const cols = I.reasons.slice(0, 7);
+    const heat = I.districts.map((d) => {
+      const tot = Object.values(d.barriers).reduce((a, x) => a + (x || 0), 0);
+      return { ar: d.ar, cells: cols.map((col) => {
+        const v = d.barriers[col.code];
+        if (v === undefined || v === 0) return { t: "—", bg: "#F6F9F8", ink: "#9AAAAB" };
+        if (v === null) return { t: "<5", bg: "#F1F4F4", ink: "#7E8C8E" };
+        const p = tot ? v / tot : 0, a = Math.min(1, 0.12 + p * 2.2);
+        return { t: Math.round(p * 100) + "%", bg: "rgba(47,127,128," + a.toFixed(2) + ")", ink: a > 0.5 ? "#FFFFFF" : "#173F42" };
+      }) };
+    });
+    const RIDE = { car: "سيارة", metro: "مترو", car_wheelchair: "سيارة للكرسي المتحرك" };
+    const L = I.labels || {};
+    const cards = I.districts.map((d) => {
+      const asks = [];
+      const push = (obj, lbl, pre) => Object.entries(obj || {}).sort((a, b) => (b[1] || 0) - (a[1] || 0)).slice(0, 3)
+        .forEach(([k, v]) => asks.push((pre || "") + (lbl[k] || k) + " · " + n(v)));
+      push(d.prefs, L.prefs || {}); push(d.rides, RIDE, "مشوار "); push(Object.fromEntries(Object.entries(d.langs || {}).filter(([k]) => k !== "ar")), L.langs || {}, "لغة ");
+      const sg = d.suggestion, busy = sg && sg.intervention_id && this.state.busy[sg.intervention_id];
+      return { ar: d.ar, en: d.en,
+        funnel: [["تواصلنا", n(d.contacted)], ["ردّوا", n(d.answered)], ["حجزوا", n(d.booked)], ["حُلّ عائقهم", n(d.solved)]].map(([k, v]) => ({ k, n: v })),
+        top: d.top.slice(0, 3).map((t) => ({ ar: t.ar, pct: t.pct + "%", w: t.pct + "%", color: colorOf[t.code] || "#2F7F80" })),
+        asks: asks.slice(0, 6), hasAsks: asks.length > 0,
+        hasSug: !!sg, sugTitle: sg ? sg.title_ar : "", sugWhy: sg ? "لأن أكثر سبب في الحي: «" + sg.because_ar + "». " + sg.detail_ar : "",
+        sugPending: !!sg && sg.status !== "approved", sugDone: !!sg && sg.status === "approved", sugBtn: busy ? "جاري الاعتماد…" : "اعتماد",
+        approve: () => sg && (sg.intervention_id ? this.approveLive(sg.intervention_id) : this.proposeLive(d.key, sg.kind)) };
+    });
+    const heatCells = [];
+    heat.forEach((r) => { heatCells.push({ t: r.ar, bg: "transparent", ink: "#173F42", align: "right", weight: 700 });
+      r.cells.forEach((c) => heatCells.push(Object.assign({ align: "center", weight: 600 }, c))); });
+    return { loading: false, kpis, reasons, worked, cols, heat, heatCells, ncols: cols.length, cards, withReason: n(I.city_with_reason),
+      note: "أعداد مجمّعة لكل حي من رموز ثابتة فقط، وأي خانة أقل من " + I.small_cell + " أشخاص تظهر «<5». آخر تحديث " + ago(I.updated_at) + "." };
+  }
+
 }
 
 window.__dc = DCmount(document.getElementById("dc-root"), document.getElementById("dc-tpl"), AounMinistry, {});
