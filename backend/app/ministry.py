@@ -105,7 +105,8 @@ def board():
 @router.get("/board/{name}")
 def board_asset(name: str):
     allowed = {"dcrt.js": "application/javascript", "data.js": "application/javascript", "ksa-regions.json": "application/json",
-               "mark.png": "image/png", "wordmark.png": "image/png", "ministry-logo.png": "image/png"}
+               "mark.png": "image/png", "wordmark.png": "image/png", "ministry-logo.png": "image/png",
+               "lockup.png": "image/png", "mark-white.png": "image/png"}
     if name not in allowed:
         raise HTTPException(404, "not_found")
     return FileResponse(STATIC / "board" / name, media_type=allowed[name])
@@ -129,6 +130,18 @@ def login(body: LoginIn, request: Request):
         c.execute("INSERT INTO ministry_sessions VALUES (?,?,?)",
                   (hash_token(token), key, (_now() + timedelta(hours=SESSION_HOURS)).isoformat()))
     return {"token": token, "staff_id": key}
+
+
+@router.post("/api/demo-login")
+def demo_login(request: Request):
+    """Demo mode only: open the board without a password (for the hackathon demo). Off in production."""
+    if not request.app.state.settings.demo_mode:
+        raise HTTPException(404, "not_found")
+    token = secrets_token()
+    with request.app.state.db.tx() as c:
+        c.execute("INSERT INTO ministry_sessions VALUES (?,?,?)",
+                  (hash_token(token), "M01", (_now() + timedelta(hours=SESSION_HOURS)).isoformat()))
+    return {"token": token, "staff_id": "M01", "demo": True}
 
 
 RANGE_DAYS = {"month": 30, "quarter": 91, "year": 365}

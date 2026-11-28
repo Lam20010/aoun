@@ -400,7 +400,7 @@ function redraw(){
 function toast(x){const e=$('toast');e.textContent=x;e.classList.remove('hide');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.add('hide'),2600)}
 async function api(path, opts={}){
   const r = await fetch('/doctor/api'+path, {...opts, headers:{'content-type':'application/json', ...(token?{authorization:'Bearer '+token}:{}) }});
-  if (r.status===401){ token=''; ss.del('aoun_dr'); showLogin(); throw new Error('401'); }
+  if (r.status===401){ token=''; ss.del('aoun_dr'); if (!window.__demoRetry) { window.__demoRetry = 1; demoLogin().then(ok => ok ? start().catch(()=>{}) : showLogin()); } else showLogin(); throw new Error('401'); }
   const j = await r.json().catch(()=>({}));
   if (!r.ok) { toast(({genetic_results_are_not_stored:t('eGenetic'),file_too_large:t('eBig'),pdf_png_or_jpeg_only:t('eType'),not_your_patient:t('eNotYours')})[String(j.detail||'').split(':')[0]] || t('eGeneric')); throw new Error(j.detail); }
   return j;
@@ -648,7 +648,8 @@ function paneChat(d){
 }
 
 applyLang();
-token ? start().catch(()=>{}) : showLogin();
+async function demoLogin(){ try { const r = await fetch('/doctor/api/demo-login', {method:'POST'}); if (!r.ok) return false; const j = await r.json(); token = j.token; ss.set('aoun_dr', token); return true; } catch(e){ return false; } }
+(token ? Promise.resolve(true) : demoLogin()).then(ok => ok ? start().catch(()=>{}) : showLogin());
 </script>
 </body>
 </html>

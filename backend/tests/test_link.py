@@ -145,3 +145,15 @@ def test_ministry_insights_reasons_per_district_with_small_cells_hidden(c):
         for k in ("contacted", "booked", "results", "early"):
             assert d[k] is None or d[k] == 0 or d[k] >= 5
     assert c.get("/ministry/api/insights").status_code == 401
+
+
+def test_demo_mode_opens_the_board_and_portal_without_a_password_and_production_does_not(c):
+    import dataclasses
+    m = c.post("/ministry/api/demo-login").json()
+    assert c.get("/ministry/api/live", headers={"Authorization": "Bearer " + m["token"]}).status_code == 200
+    d = c.post("/doctor/api/demo-login").json()
+    assert d["doctor_id"] == "D03" and c.get("/doctor/api/me", headers={"Authorization": "Bearer " + d["token"]}).status_code == 200
+    assert c.get("/ministry/board/lockup.png").status_code == 200
+    c.app.state.settings = dataclasses.replace(c.app.state.settings, demo_mode=False)
+    assert c.post("/ministry/api/demo-login").status_code == 404
+    assert c.post("/doctor/api/demo-login").status_code == 404

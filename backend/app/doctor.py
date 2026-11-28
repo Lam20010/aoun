@@ -215,6 +215,18 @@ def login(body: LoginIn, request: Request):
     return {"token": token}
 
 
+@router.post("/doctor/api/demo-login")
+def demo_login(request: Request):
+    """Demo mode only: open the portal as the demo patients' doctor (D03) without a password. Off in production."""
+    if not request.app.state.settings.demo_mode:
+        raise HTTPException(404, "not_found")
+    token = secrets_token() + secrets_token()
+    with request.app.state.db.tx() as c:
+        c.execute("INSERT INTO doctor_sessions VALUES (?,?,?)",
+                  (hash_token(token), "D03", (_now() + timedelta(hours=SESSION_HOURS)).isoformat()))
+    return {"token": token, "doctor_id": "D03", "demo": True}
+
+
 @router.get("/doctor/api/catalog")
 def doctor_catalog(doc=Depends(current_doctor)):
     return {"screenings": [{"key": k, "ar": v["ar"], "en": v["en"],

@@ -69,6 +69,7 @@ uvicorn app.main:create_app --factory --port 8000
 
 - Doctor portal: http://localhost:8000/doctor (demo doctors D01–D21; the demo password is in `backend/README.md`).
 - Ministry board: http://localhost:8000/ministry/board (`M01` / `aoun-ministry-2026` in demo mode).
+- In demo mode (`AOUN_DEMO_MODE=1`) both the board and the doctor portal open straight away, with no sign-in (the portal as د. ريم الشهري, D03). With demo mode off, the sign-in forms come back.
 - Tests: `python -m pytest -q`.
 
 After editing the board's design or `live.js`, run `python board/build.py`.

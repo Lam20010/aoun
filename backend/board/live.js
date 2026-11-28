@@ -37,7 +37,7 @@ const fmtN = (n) => Math.round(n).toLocaleString("en-US");
 class AounMinistry extends Component {
   constructor(props) {
     super(props);
-    this.state = Object.assign({}, this.state, { live: null, needLogin: !tok(), loginErr: "", loggingIn: false, busy: {} });
+    this.state = Object.assign({}, this.state, { live: null, needLogin: false, loginErr: "", loggingIn: false, busy: {} });
   }
   componentDidMount() {
     super.componentDidMount && super.componentDidMount();
@@ -48,9 +48,16 @@ class AounMinistry extends Component {
   }
   componentWillUnmount() { super.componentWillUnmount && super.componentWillUnmount(); clearInterval(this.pt); clearInterval(this.ht); }
   poll() {
-    if (!tok()) return this.state.needLogin || this.setState({ needLogin: true });
+    if (!tok()) {
+      // Demo mode: open straight away, no password. In production the server says no and the sign-in form shows.
+      if (!this._demoTried) { this._demoTried = true;
+        return fetch("/ministry/api/demo-login", { method: "POST" }).then((r) => (r.ok ? r.json() : null))
+          .then((j) => { if (j && j.token) { setTok(j.token); this.poll(); } else this.setState({ needLogin: true }); })
+          .catch(() => this.setState({ needLogin: true })); }
+      return this.state.needLogin || this.setState({ needLogin: true });
+    }
     api("/live?range=" + (this.state.range || "year")).then((live) => { this._d = null; this.setState({ live, needLogin: false }); })
-      .catch((e) => { if (e.message === "401") this.setState({ needLogin: true, live: null }); });
+      .catch((e) => { if (e.message === "401") { this._demoTried = false; this.setState({ live: null }); } });
     this._n = (this._n || 0) + 1;
     if (this.state.tab === "calls" || !this.state.ins || this._n % 5 === 0)
       api("/insights?range=" + (this.state.range || "year")).then((ins) => this.setState({ ins })).catch(() => {});
