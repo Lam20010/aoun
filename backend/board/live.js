@@ -43,9 +43,10 @@ class AounMinistry extends Component {
     super.componentDidMount && super.componentDidMount();
     this.poll();
     this.pt = setInterval(() => this.poll(), 6000);
+    this.ht = setInterval(() => { if (!this.state.heroT || Date.now() - this.state.heroT > 9000) this.setState({ hero: (this.state.hero || 0) + 1 }); }, 8000);
     document.addEventListener("keydown", (e) => { if (e.key === "Enter" && this.state.needLogin) this.login(); });
   }
-  componentWillUnmount() { super.componentWillUnmount && super.componentWillUnmount(); clearInterval(this.pt); }
+  componentWillUnmount() { super.componentWillUnmount && super.componentWillUnmount(); clearInterval(this.pt); clearInterval(this.ht); }
   poll() {
     if (!tok()) return this.state.needLogin || this.setState({ needLogin: true });
     api("/live?range=" + (this.state.range || "year")).then((live) => { this._d = null; this.setState({ live, needLogin: false }); })
@@ -108,7 +109,26 @@ class AounMinistry extends Component {
     v.dataBadge = L ? "مباشر من التجربة · بقية المملكة محاكاة" : "بيانات تجريبية للعرض";
     v.dataBadgeBg = L ? "#E5F3FC" : "#FFF6E0";
     v.dataBadgeInk = L ? "#1574AD" : "#7A4E00";
-    v.is = Object.assign({}, v.is, { calls: s.tab === "calls" });
+    v.is = Object.assign({}, v.is, { calls: s.tab === "calls", agents: s.tab === "agents" });
+    // Top bar tabs: the selected one is a filled blue block with a light bar under it.
+    v.navTabs = (v.tabs || []).map((tb) => { const on = tb.current === "page";
+      return Object.assign({}, tb, { bg: on ? "#1574AD" : "transparent", ink: on ? "#FFFFFF" : "#0E2E45", bar: on ? "#59C2F9" : "transparent", weight: on ? 700 : 500 }); });
+    // Hero: three slides from live numbers, arrows work, it also moves on by itself.
+    const I = s.ins, topR = I && I.reasons && I.reasons[0];
+    const slides = [
+      { kicker: "صوت الأحياء", title: topR ? "أكثر سبب يمنع سكان الرياض من الفحص المبكر: «" + topR.ar + "»" : "اعرف ليش الناس ما يفحصون في كل حي",
+        text: "كل مكالمة من رفيدة ورفيد تترك رمز سبب واحد لحيّها، بدون اسم أو رقم. شوف الأسباب حي حي وش اللي نجح معها.", cta: "افتح صوت الأحياء", tab: "calls" },
+      { kicker: "تدخلات بضغطة", title: "اعتمد عيادة متنقلة أو دعم مواصلات، وتصير مواعيد فعلية في تطبيق عون",
+        text: "كل تدخل تعتمده يوصل للتطبيق ولرفيدة فورًا، ويبلغ الأطباء في الحي.", cta: "شوف التدخلات", tab: "actions" },
+      { kicker: "مباشر", title: "رفيدة ورفيد يتصلون الآن بلهجة سعودية وبسبع لغات",
+        text: "يسألون عن السبب، يحلّونه في نفس المكالمة، ويحجزون في صحتي.", cta: "أداء الوكلاء", tab: "agents" },
+    ];
+    const hi = ((s.hero || 0) % slides.length + slides.length) % slides.length, sl = slides[hi];
+    v.hero = Object.assign({ show: v.is.home && !s.needLogin }, sl, {
+      next: () => this.setState({ hero: hi + 1, heroT: Date.now() }), prev: () => this.setState({ hero: hi - 1 + slides.length, heroT: Date.now() }),
+      go: () => this.setState({ tab: sl.tab }),
+      dots: slides.map((_, j) => ({ w: j === hi ? "26px" : "8px", c: j === hi ? "#59C2F9" : "rgba(255,255,255,.35)" })) });
+    v.a11y = { on: s.big ? "true" : "false", zoom: s.big ? 1.15 : 1, toggle: () => this.setState({ big: !s.big }) };
     v.ins = this.insightsVals();
     if (!L) { v.livePanel = { show: false }; return v; }
 

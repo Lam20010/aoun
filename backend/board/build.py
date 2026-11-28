@@ -148,6 +148,69 @@ CALLS = r"""
 """
 
 
+NAV = """
+  <!-- Top bar, in the style of a Saudi government portal, with Aoun's own logo and colours -->
+  <style>
+    .aoun-bar{flex-wrap:wrap}
+    @media (max-width: 960px){
+      .aoun-nav{order:3;flex:1 1 100% !important;margin:0 -4px;min-height:58px}
+      .aoun-badge{display:none !important}
+      .aoun-hero-in{padding:28px 22px 76px !important}
+      .aoun-arrow{top:auto !important;bottom:14px !important;transform:none !important;width:44px !important;height:44px !important}
+      .aoun-top-live{display:none !important}
+    }
+    @media (max-width: 1360px){
+      .aoun-badge{display:none !important}
+    }
+  </style>
+  <header style="width: 100%; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 14px rgba(0,35,54,.06)">
+    <div style="background: #F2F6F9; border-bottom: 1px solid #E2EBF1; padding: 8px clamp(14px, 3vw, 40px); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: #0E2E45">
+      <span style="display: flex; align-items: center; gap: 8px"><img src="/ministry/board/mark.png" alt="" style="width: 20px; height: 20px">منصة عون للكشف المبكر · مسار وزارة الصحة</span>
+      <span class="aoun-top-live" style="display: flex; align-items: center; gap: 8px; color: #4A5E6D"><span class="aoun-live" style="width: 8px; height: 8px; border-radius: 4px; background: #2E9BD6"></span>رفيدة ورفيد يتصلون الآن · {{liveCount}} محادثة</span>
+    </div>
+    <div class="aoun-bar" style="background: #FFFFFF; padding: 0 clamp(14px, 3vw, 40px); display: flex; align-items: stretch; gap: clamp(12px, 2vw, 28px); min-height: 84px">
+      <div style="display: flex; align-items: center; padding: 10px 0"><img src="/ministry/board/lockup.png" alt="عون" style="height: 48px; width: auto; display: block"></div>
+      <nav class="aoun-nav" aria-label="أقسام المنصة" style="flex: 1; display: flex; align-items: stretch; gap: 4px; overflow-x: auto; min-width: 0">
+        <sc-for list="{{navTabs}}" as="tb" hint-placeholder-count="6">
+          <button onClick="{{tb.pick}}" aria-current="{{tb.current}}" style="position: relative; flex: none; border: none; margin: 8px 0; padding: 0 14px; border-radius: 6px; background: {{tb.bg}}; color: {{tb.ink}}; font-size: 15px; font-weight: {{tb.weight}}; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tb.d}}"></path></svg>{{tb.label}}
+            <span style="position: absolute; left: 12px; right: 12px; bottom: 5px; height: 4px; border-radius: 2px; background: {{tb.bar}}"></span>
+          </button>
+        </sc-for>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 8px; margin-inline-start: auto">
+        <span class="aoun-badge" style="font-size: 12px; font-weight: 600; background: {{dataBadgeBg}}; color: {{dataBadgeInk}}; padding: 7px 10px; border-radius: 8px; white-space: nowrap">{{dataBadge}}</span>
+        <button onClick="{{logout}}" aria-label="خروج" style="display: flex; align-items: center; gap: 6px; border: 1px solid #DBE6EC; background: #FFFFFF; color: #0E2E45; border-radius: 8px; padding: 8px 12px; font-size: 14px; cursor: pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero: three live slides with working arrows -->
+  <sc-if value="{{hero.show}}" hint-placeholder-val="{{ true }}">
+    <section style="width: 100%; position: relative; overflow: hidden; background: linear-gradient(110deg, #002336 0%, #0B3A55 45%, #1574AD 100%); color: #FFFFFF; min-height: 300px; display: flex; align-items: center">
+      <img src="/ministry/board/mark-white.png" alt="" style="position: absolute; left: 6%; top: 50%; transform: translateY(-50%); height: 120%; opacity: .09; pointer-events: none">
+      <button class="aoun-arrow" onClick="{{hero.next}}" aria-label="التالي" style="position: absolute; z-index: 2; left: clamp(10px, 4vw, 60px); top: 50%; transform: translateY(-50%); width: 56px; height: 64px; border: none; border-radius: 6px; background: rgba(89,194,249,.28); color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+      <button class="aoun-arrow" onClick="{{hero.prev}}" aria-label="السابق" style="position: absolute; z-index: 2; right: clamp(10px, 4vw, 60px); top: 50%; transform: translateY(-50%); width: 56px; height: 64px; border: none; border-radius: 6px; background: rgba(89,194,249,.28); color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+      <div class="aoun-in aoun-hero-in" style="position: relative; width: 100%; box-sizing: border-box; padding: 40px clamp(80px, 12vw, 180px); display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+        <span style="font-size: 13px; font-weight: 600; color: #59C2F9; letter-spacing: .2px">{{hero.kicker}}</span>
+        <b style="font-size: clamp(24px, 3.2vw, 40px); line-height: 1.35; max-width: 820px">{{hero.title}}</b>
+        <span style="font-size: 16px; line-height: 1.8; color: #D6EEFC; max-width: 720px">{{hero.text}}</span>
+        <button onClick="{{hero.go}}" style="margin-top: 6px; border: none; background: #FFFFFF; color: #002336; font-size: 16px; font-weight: 700; padding: 12px 22px; border-radius: 6px; cursor: pointer">{{hero.cta}}</button>
+        <div style="display: flex; gap: 6px; margin-top: 8px"><sc-for list="{{hero.dots}}" as="hd" hint-placeholder-count="3"><span style="width: {{hd.w}}; height: 6px; border-radius: 3px; background: {{hd.c}}"></span></sc-for></div>
+      </div>
+    </section>
+  </sc-if>
+"""
+
+FLOAT = """
+  <!-- Accessibility: one tap makes everything larger -->
+  <button onClick="{{a11y.toggle}}" aria-pressed="{{a11y.on}}" aria-label="تكبير الخط" style="position: fixed; left: 18px; bottom: 18px; z-index: 30; width: 60px; height: 60px; border-radius: 30px; border: 4px solid #FFFFFF; background: #1574AD; color: #FFFFFF; cursor: pointer; box-shadow: 0 8px 24px rgba(0,35,54,.3); display: flex; align-items: center; justify-content: center">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="7" r="1.4"></circle><path d="M7 10l5 1 5-1M12 11v4l-3 4M12 15l3 4"></path></svg>
+  </button>
+"""
+
+
 def build():
     src = (HERE / "Ministry.dc.html").read_text(encoding="utf-8")
     for k, v in BLOBS.items():
@@ -159,15 +222,21 @@ def build():
     # Data badge reflects whether live data is flowing, plus a sign-out button.
     badge = '<span style="font-size: 12px; font-weight: 600; background: #FFF6E0; color: #7A4E00; padding: 8px 12px; border-radius: 12px">بيانات تجريبية للعرض</span>'
     assert badge in src
-    src = src.replace(badge, '<span style="font-size: 12px; font-weight: 600; background: {{dataBadgeBg}}; color: {{dataBadgeInk}}; padding: 8px 12px; border-radius: 12px">{{dataBadge}}</span>'
-                      '<button onClick="{{logout}}" style="font-size: 12px; font-weight: 600; background: #FFFFFF; color: #1574AD; border: 1px solid #DBE6EC; padding: 7px 12px; border-radius: 12px; cursor: pointer">خروج</button>')
-    pair = re.search(r'<img src="/ministry/board/mark.png"[^>]*>\s*<img src="/ministry/board/wordmark.png"[^>]*>', src)
-    assert pair
-    src = src.replace(pair.group(0), '<img src="/ministry/board/lockup.png" alt="عون" style="height: 40px; width: auto; display: block">')
+    src = src.replace(badge, '')  # the data badge and sign-out now live in the top bar
     anchor = '<b style="font-size: 15px">اقتراحات رفيدة لهذا الحي</b>'
     assert anchor in src
     src = src.replace(anchor, LIVE_PANEL + "                " + anchor)
 
+    # Layout: a government-portal style top bar and hero instead of the side menu.
+    a = src.index("  <aside ")
+    b = src.index("</aside>", a) + len("</aside>")
+    src = src[:a] + NAV + src[b:]
+    first = "box-sizing: border-box; display: flex; flex-wrap: wrap; font-family:"
+    assert first in src
+    src = src.replace(first, "box-sizing: border-box; display: flex; flex-direction: column; align-items: center; zoom: {{a11y.zoom}}; font-family:", 1)
+    src = src.replace('<main style="flex: 999 1 600px; min-width: 0;', '<main style="width: 100%; max-width: 1440px; min-width: 0;', 1)
+    src = src.replace("  </main>\n</div>", "  </main>\n" + FLOAT + "</div>", 1)
+    assert FLOAT in src
     rep = "    <!-- ================= التقارير ================= -->"
     assert rep in src
     src = src.replace(rep, CALLS + rep)
