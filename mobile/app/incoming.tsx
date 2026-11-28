@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -14,29 +14,26 @@ import { useAgentSession } from '../src/voice/AgentSession';
 const LOGO = require('../assets/aoun-icon.png');
 
 export default function Incoming() {
-  const { t, locale } = useT();
+  const { t, rtl } = useT();
   const insets = useSafeAreaInsets();
   const session = useAgentSession();
-  const [now, setNow] = useState(new Date());
-  useEffect(() => { const i = setInterval(() => setNow(new Date()), 15000); return () => clearInterval(i); }, []);
   useEffect(() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); }, []);
-
-  const date = now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
-  const time = now.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s?[صمAPMapm.]+$/, '');
 
   const accept = () => {
     void session.start('booking-call');
     router.replace('/call');
   };
-  const decline = () => router.replace('/home');
+  const decline = () => (router.canGoBack() ? router.back() : router.replace('/home'));
 
   return (
-    <LinearGradient colors={GRAD.lock} style={[s.root, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 30 }]}>
-      <Icon d={ICON.lock} color="rgba(255,255,255,.9)" size={18} />
-      <Txt size={17} weight="600" color="rgba(255,255,255,.92)" center>{date}</Txt>
-      <Txt size={86} weight="300" color={C.white} center style={{ lineHeight: 96 }}>{time}</Txt>
-
-      <View style={{ height: 28 }} />
+    <LinearGradient colors={GRAD.lock} style={[s.root, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 30 }]}>
+      {/* An in-app call screen (not a lock screen): the person opened it from the app. */}
+      <Row style={{ width: '100%' }}>
+        <Pressable onPress={decline} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={8}>
+          <Circle size={42} bg="rgba(255,255,255,.14)"><Icon d={rtl ? ICON.chevronRight : ICON.chevronLeft} color={C.white} /></Circle>
+        </Pressable>
+      </Row>
+      <View style={{ height: 36 }} />
       <Row style={{ justifyContent: 'center' }} gap={6}>
         <Image source={LOGO} style={{ width: 20, height: 20, borderRadius: 5 }} />
         <Txt size={15} color="rgba(255,255,255,.85)">{t('incoming')}</Txt>
