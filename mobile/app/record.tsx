@@ -11,7 +11,6 @@ import { api } from '../src/api';
 import type { Rec, Records } from '../src/types';
 
 type F = 'all' | 'aoun' | 'hospital' | 'clinic' | 'lab';
-type Log = { doctor_ar: string; doctor_en: string; action: string; at: string }[];
 
 /**
  * Every report and result the person has, from hospitals, clinics, labs and Aoun, kept with them.
@@ -20,12 +19,10 @@ type Log = { doctor_ar: string; doctor_en: string; action: string; at: string }[
 export default function RecordScreen() {
   const { t, lang, locale, pick } = useT();
   const [rec, setRec] = useState<Records | null>(null);
-  const [log, setLog] = useState<Log>([]);
   const [f, setF] = useState<F>('all');
 
   useFocusEffect(useCallback(() => {
     api.records().then(setRec).catch(() => setRec({ records: [], files: [], notes: [], referrals: [] }));
-    api.accessLog().then((r) => setLog(r.entries)).catch(() => {});
   }, []));
 
   const keep = (r: Rec) => f === 'all' || (f === 'aoun' ? r.source === 'aoun' : r.facility.kind === f || (f === 'clinic' && r.facility.kind === 'phc' && r.source !== 'aoun'));
@@ -98,16 +95,6 @@ export default function RecordScreen() {
         </Card>
       )}
 
-      <Card style={{ gap: 8 }}>
-        <Row gap={8}><Icon d={ICON.lock} color={C.teal} /><Txt size={17} weight="800">{t('accessLog')}</Txt></Row>
-        {!log.length && <Txt size={14} color={C.muted}>{t('accessLogEmpty')}</Txt>}
-        {log.slice(0, 12).map((e, i) => (
-          <View key={i}>
-            <Txt size={14}>{(lang === 'ar' ? e.doctor_ar : e.doctor_en) + ' ' + t((e.action as Key) ?? 'viewed_record')}</Txt>
-            <Txt size={12} color={C.muted}>{when(e.at, locale, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</Txt>
-          </View>
-        ))}
-      </Card>
     </Screen>
   );
 }
